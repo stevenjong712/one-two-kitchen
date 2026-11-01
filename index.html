@@ -221,8 +221,9 @@ table.t{width:100%;border-collapse:collapse;font-size:13px}
 .subtabs button.on{color:var(--brand-ink);border-color:var(--brand)}
 /* labels */
 .lbls{display:flex;flex-wrap:wrap;gap:14px;padding:18px}
-.lbl{position:relative;background:#fff;color:#111;border:1px solid #cfc6b8;border-radius:2.5mm;padding:calc(1.8mm*var(--s) + .3mm);display:flex;flex-direction:column;gap:calc(.6mm*var(--s));overflow:hidden;font-family:Helvetica,Arial,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.08);cursor:pointer;text-align:left;flex:none}
+.lbl{position:relative;background:#fff;color:#111;border:1px solid #cfc6b8;border-radius:2.5mm;padding:calc(1.4mm*var(--s) + 1.5mm);display:flex;flex-direction:column;gap:calc(.6mm*var(--s));overflow:hidden;font-family:Helvetica,Arial,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.08);cursor:pointer;text-align:left;flex:none}
 .lbl.skip{opacity:.3}
+.lbl::before{content:"";position:absolute;inset:.8mm;border:.4mm solid #111;border-radius:1.2mm;pointer-events:none}
 .lbl .lh{display:flex;justify-content:space-between;gap:4px;font-size:calc(8.5px*var(--s));border-bottom:.3mm solid #111;padding-bottom:calc(.6mm*var(--s));white-space:nowrap}
 .lbl .lh b{text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
 .lbl .ln{display:flex;justify-content:space-between;align-items:center;gap:calc(1.2mm*var(--s));font-weight:800;font-size:calc(17px*var(--s));line-height:1.05}
@@ -939,14 +940,14 @@ function buildPdf(){
   const [w,h]=lsize();const items=labelItems().filter(x=>!UI.lSkip[UI.lDate+'|'+x.k]);if(!items.length)return null;
   const {jsPDF}=window.jspdf;const or=w>=h?'landscape':'portrait';
   const doc=new jsPDF({orientation:or,unit:'mm',format:[w,h]});
-  const s=Math.min(w/58,h/40),m=1.8*s+0.3,PT=0.3528,W=w-2*m,ox=clampN(UI.lOx,-10,10,0),oy=clampN(UI.lOy,-10,10,0);
+  const s=Math.min(w/58,h/40),m=1.4*s+1.5,PT=0.3528,W=w-2*m,ox=clampN(UI.lOx,-10,10,0),oy=clampN(UI.lOy,-10,10,0);
   const X=v=>v+ox,Y=v=>v+oy,fs=f=>doc.setFontSize(f),tw=t=>doc.getTextWidth(t),bold=b=>doc.setFont('helvetica',b?'bold':'normal');
   const clip=(t,max)=>{t=String(t);if(tw(t)<=max)return t;while(t.length>1&&tw(t+'...')>max)t=t.slice(0,-1);return t+'...'};
   const cp=clampN(UI.lCopies,1,5,1);const brand=String(S.cfg.name||'').toUpperCase(),dl=dateLbl(UI.lDate);
   let first=true;
   items.forEach(x=>{for(let c=0;c<cp;c++){
     if(!first)doc.addPage([w,h],or);first=false;
-    doc.setTextColor(0);doc.setDrawColor(0);doc.setLineWidth(0.25);
+    doc.setTextColor(0);doc.setDrawColor(0);doc.setLineWidth(0.4);doc.roundedRect(X(0.8),Y(0.8),w-1.6,h-1.6,1.2,1.2,'S');doc.setLineWidth(0.25);
     let y=m;
     /* header */
     const hf=6*s,hh=hf*PT;bold(1);fs(hf);doc.text(clip(brand,W*0.62),X(m),Y(y+hh));bold(0);doc.text(dl,X(w-m),Y(y+hh),{align:'right'});
