@@ -234,6 +234,10 @@ table.t{width:100%;border-collapse:collapse;font-size:13px}
 .lbl .lg{flex:none;background:#111;color:#fff;font-weight:800;font-size:max(calc(12.6px*var(--s)),9.6px);padding:.4mm calc(1mm*var(--s));border-radius:.6mm;text-transform:uppercase;white-space:nowrap}
 .lbl .lm{flex:1;min-height:0;font-size:max(calc(8.3px*var(--s)),7.5px);line-height:1.12;text-transform:uppercase;overflow:hidden}
 .lbl .lq{flex:none;border:.5mm solid #111;border-radius:.7mm;padding:calc(.9mm*var(--s));font-weight:800;text-transform:uppercase;font-size:max(calc(10.1px*var(--s)),8.8px);line-height:1.13;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4}
+.lbl .lm+*{margin-top:auto}
+.lbl .lnt{flex:none;display:flex;align-items:flex-start;gap:calc(1mm*var(--s));border-top:.35mm dashed #111;border-bottom:.35mm dashed #111;padding:calc(.6mm*var(--s)) 0;font-weight:800;text-transform:uppercase;font-size:max(calc(9.3px*var(--s)),8.4px);line-height:1.12}
+.lbl .lnt b{flex:none;background:#111;color:#fff;border-radius:.5mm;padding:.2mm calc(.8mm*var(--s));font-size:max(calc(8px*var(--s)),7.4px);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lbl .lnt span{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
 .lbl .lf{flex:none;border-top:.3mm solid #111;padding-top:.4mm;font-size:max(calc(7.7px*var(--s)),7.2px)}
 .howto{display:grid;gap:4px;font-size:13px;color:var(--muted);margin:0;padding-left:18px}
 .howto b{color:var(--ink)}
@@ -501,6 +505,7 @@ function render(){
   if(S.mode==='offline')h+=`<div class="banner warn">${I('alert')}Koneksi ke server terputus. Perubahan baru mungkin belum tersimpan; aplikasi tersambung lagi otomatis.</div>`;
   v.innerHTML=h+(VIEWS[UI.tab]||VIEWS.dashboard)();
   if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}
+  if(UI.tab==='label')fitMenus(v);
 }
 const VIEWS={};
 const empty=(t,s,btn)=>`<div class="empty"><b>${t}</b><span>${s}</span>${btn||''}</div>`;
@@ -694,10 +699,13 @@ function labelItems(){
   return a;
 }
 const reqText=x=>[x.allergy&&x.allergy!=='-'?x.allergy:'',x.note].filter(Boolean).join(' · ').replace(/\s+/g,' ').replace(/\s+,/g,',').trim();
-function labelInner(x){const r=reqText(x);const code=packCode(x.pack);return`<span class="lh"><b>${esc(S.cfg.name)}</b><span>${dateLbl(UI.lDate)}</span></span>
+const algText=x=>String(x.allergy&&x.allergy!=='-'?x.allergy:'').replace(/\s+/g,' ').replace(/\s+,/g,',').trim();
+const noteText=x=>String(x.note||'').replace(/\s+/g,' ').trim();
+function labelInner(x){const r=algText(x),nt=noteText(x);const code=packCode(x.pack);return`<span class="lh"><b>${esc(S.cfg.name)}</b><span>${dateLbl(UI.lDate)}</span></span>
     <span class="ln"><span class="lnn">${esc(x.name)}</span>${code?`<span class="lp" title="${esc(x.pack)}">${esc(code)}</span>`:''}</span>
     <span class="ls"><b class="lsc">${esc(x.school||'-')}</b>${x.grade?`<span class="lg">${esc(x.grade)}</span>`:''}</span>
     ${UI.lMenu&&x.menu?`<span class="lm">${esc(x.menu)}</span>`:'<span class="lm"></span>'}
+    ${nt?`<span class="lnt"><b>CATATAN</b><span>${esc(nt)}</span></span>`:''}
     ${r?`<span class="lq"><b>! REQ/ALERGI:</b> ${esc(r)}</span>`:`<span class="lf">REQ/ALERGI: -</span>`}`}
 const dateLbl=d=>{const x=parseD(d);return x.getDate()+' '+MON[x.getMonth()]+' '+x.getFullYear()};
 VIEWS.label=()=>{
@@ -968,7 +976,7 @@ function buildPdf(){
     else doc.text(sch,X(m),Y(y+gh/2+sf*PT*0.36));
     y+=sh+1*s;
     /* request / alergi (selalu terbaca) */
-    const r=reqText(x).toUpperCase();let reqTop;
+    const r=algText(x).toUpperCase();let reqTop;
     if(r){
       const p=0.9*s+0.2,iw=W-2*p,full='! REQ/ALERGI: '+r;let rf=Math.max(7.6*s,6.6),ls,lh,maxL;
       const avail=h-m-y-0.6*s;
@@ -980,6 +988,15 @@ function buildPdf(){
     }else{
       const ff=Math.max(5.8*s,5.4);reqTop=h-m-ff*PT-0.9*s;doc.line(X(m),Y(reqTop),X(w-m),Y(reqTop));bold(0);fs(ff);doc.text('REQ/ALERGI: -',X(m),Y(h-m-0.2*s));
     }
+    /* catatan khusus jadwal: garis sendiri */
+    const nt=noteText(x).toUpperCase();
+    if(nt){const tf=Math.max(5.8*s,5.4),cf=Math.max(7*s,6.4),lh=cf*PT*1.13,g=0.8*s;bold(1);fs(tf);const tag='CATATAN',tW=tw(tag)+1.6*s;
+      fs(cf);let ls=doc.splitTextToSize(nt,W-tW-1.2*s);if(ls.length>2){ls=ls.slice(0,2);let la=ls[1];while(la.length>1&&tw(la+'...')>W-tW-1.2*s)la=la.slice(0,-1);ls[1]=la+'...'}
+      const bh=ls.length*lh+1.2*s,top=reqTop-g-bh;
+      doc.setLineDashPattern([0.8,0.6],0);doc.setLineWidth(0.35);doc.line(X(m),Y(top),X(w-m),Y(top));doc.line(X(m),Y(top+bh),X(w-m),Y(top+bh));doc.setLineDashPattern([],0);doc.setLineWidth(0.25);
+      const th=tf*PT+1*s;doc.setFillColor(0);doc.roundedRect(X(m),Y(top+0.6*s),tW,th,0.4,0.4,'F');doc.setTextColor(255);fs(tf);doc.text(tag,X(m+0.8*s),Y(top+0.6*s+th/2+tf*PT*0.36));doc.setTextColor(0);
+      fs(cf);ls.forEach((l,j)=>doc.text(l,X(m+tW+1.2*s),Y(top+0.6*s+cf*PT*0.85+j*lh)));
+      reqTop=top;}
     /* menu di sisa ruang */
     if(UI.lMenu&&x.menu){const mf=Math.max(6.2*s,5.6),lh=mf*PT*1.12;bold(0);fs(mf);const maxL=Math.floor((reqTop-0.6*s-y)/lh);
       if(maxL>0){let ls=doc.splitTextToSize(x.menu.toUpperCase(),W);if(ls.length>maxL){ls=ls.slice(0,maxL);let la=ls[maxL-1];while(la.length>1&&tw(la+'...')>W)la=la.slice(0,-1);ls[maxL-1]=la+'...'}ls.forEach((l,j)=>doc.text(l,X(m),Y(y+mf*PT*0.85+j*lh)))}}
@@ -992,12 +1009,14 @@ function saveFile(name,data,msg){
   const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast(msg||'File diunduh','ok');
 }
 /* direct print: labels rendered as HTML pages sized exactly to the sticker */
+function fitMenus(root){(root||document).querySelectorAll('.lbl .lm').forEach(el=>{el.style.webkitLineClamp='';el.style.visibility='';if(!el.textContent.trim())return;const lh=parseFloat(getComputedStyle(el).lineHeight)||10;const n=Math.floor((el.clientHeight+0.5)/lh);if(n<1){el.style.visibility='hidden';return}el.style.display='-webkit-box';el.style.webkitBoxOrient='vertical';el.style.webkitLineClamp=String(n);el.style.flex='none';el.style.height=(n*lh)+'px'})}
 function printLabels(){
   const [w,h]=lsize();const items=labelItems().filter(x=>!UI.lSkip[UI.lDate+'|'+x.k]);if(!items.length)return;
   const s=Math.min(w/58,h/40),cp=clampN(UI.lCopies,1,5,1),ox=clampN(UI.lOx,-10,10,0),oy=clampN(UI.lOy,-10,10,0);
   let html='';items.forEach(x=>{for(let c=0;c<cp;c++)html+=`<div class="lbl" style="width:${w}mm;height:${h}mm;--s:${s.toFixed(3)};${ox||oy?`transform:translate(${ox}mm,${oy}mm);`:''}">${labelInner(x)}</div>`});
   $('#printArea').innerHTML=html;
   $('#pageStyle').textContent=`@page{size:${w}mm ${h}mm;margin:0}@media print{html,body{width:${w}mm;margin:0!important;padding:0!important}}`;
+  const pa=$('#printArea');pa.style.cssText='display:block;position:fixed;left:-9999px;top:0';fitMenus(pa);pa.style.cssText='';
   setTimeout(()=>window.print(),60);
 }
 window.addEventListener('afterprint',()=>{$('#printArea').innerHTML=''});
