@@ -423,6 +423,8 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chipw,:root:not([data-theme="light"]) .top .iconbtn,:root:not([data-theme="light"]) .hero .eb,:root:not([data-theme="light"]) .hero .btn.alt,:root:not([data-theme="light"]) .side .tab.on{background:var(--surface)}}
 :root[data-theme="dark"] .chipw,:root[data-theme="dark"] .top .iconbtn,:root[data-theme="dark"] .hero .eb,:root[data-theme="dark"] .hero .btn.alt,:root[data-theme="dark"] .side .tab.on{background:var(--surface)}
 
+.btn.exp{background:var(--pink-soft);border-color:var(--pink);color:var(--bad)}
+.btn.exp:hover{border-color:var(--bad)}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -551,6 +553,7 @@ const ICONS={
  printer:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>',
  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',
+ minus:'<path d="M5 12h14"/>',
  check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
  x:'<path d="M6 6l12 12M18 6L6 18"/>',
  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
@@ -896,11 +899,11 @@ VIEWS.keuangan=()=>{
       ${ps.map(p=>{const k=S.kids[p.kidId];const v=payVal(p);return`<tr><td style="white-space:nowrap">${shortD(p.date)}</td><td><b>${esc(k?k.name:'(anak dihapus)')}</b></td><td>${PAYT[p.type]||esc(p.type)}</td><td>${esc(p.method||'-')}</td><td class="muted">${esc(p.note||'')}</td><td class="r"><b class="${v<0?'neg':'pos'}">${v<0?'-':'+'}${rp(Math.abs(v))}</b></td><td><div class="acts"><button class="btn sm" data-act="payEdit" data-p="${p.id}" aria-label="Ubah">${I('edit',14)}</button><button class="btn sm" data-act="payDel" data-p="${p.id}" aria-label="Hapus">${I('trash',14)}</button></div></td></tr>`}).join('')}</tbody></table></div>`:empty('Belum ada pembayaran di '+mlabel,'Catat DP atau pelunasan dengan tombol Catat Pembayaran.');
   }
   return`<div class="vh"><div><h1>Laporan Keuangan & Pelunasan</h1><p>Saldo = total DP − porsi terpakai − porsi terjadwal. Porsi berstatus Batal tidak memotong saldo.</p></div>
-    <div class="row"><input type="month" class="inp" id="kMonth" data-bind="kMonth" value="${mo}" style="width:auto" aria-label="Bulan"><button class="btn" data-act="csv">${I('download',16)}Export CSV</button><button class="btn pri" data-act="payNew">${I('plus',16)}Catat pembayaran</button></div></div>
+    <div class="row"><input type="month" class="inp" id="kMonth" data-bind="kMonth" value="${mo}" style="width:auto" aria-label="Bulan"><button class="btn" data-act="csv">${I('download',16)}Export CSV</button><button class="btn exp" data-act="expNew">${I('minus',16)}Catat pengeluaran</button><button class="btn pri" data-act="payNew">${I('plus',16)}Catat pembayaran</button></div></div>
   <div class="grid g3" style="margin-bottom:14px">
     <div class="card kpi"><span class="ki ok">${I('money',22)}</span><div><small>Uang masuk · ${MON[m-1]}</small><b class="num">${rp(ms.cash-ms.refund)}</b><span class="s">${ms.refund?'Refund '+rp(ms.refund):'DP & pelunasan'}</span></div></div>
     <div class="card kpi"><span class="ki brand">${I('box',22)}</span><div><small>Nilai porsi · ${MON[m-1]}</small><b class="num">${rp(ms.charge)}</b><span class="s">${ms.porsi} porsi (tidak termasuk batal)</span></div></div>
-    <div class="card kpi"><span class="ki bad">${I('trash',22)}</span><div><small>Pengeluaran · ${MON[m-1]}</small><b class="num">${rp(ms.out)}</b><span class="s"><a href="javascript:void 0" data-act="kTab" data-v="exps" style="color:inherit">Lihat rincian</a></span></div></div>
+    <div class="card kpi"><span class="ki bad">${I('trash',22)}</span><div><small>Pengeluaran · ${MON[m-1]}</small><b class="num">${rp(ms.out)}</b><span class="s"><a href="javascript:void 0" data-act="kTab" data-v="exps" style="color:inherit">Lihat rincian</a> · <a href="javascript:void 0" data-act="expNew" style="color:var(--bad);font-weight:700">+ Catat</a></span></div></div>
     <div class="card kpi"><span class="ki ${ms.charge+ms.inc-ms.out>=0?'ok':'bad'}">${I('dash',22)}</span><div><small>Laba kotor · ${MON[m-1]}</small><b class="num ${ms.charge+ms.inc-ms.out<0?'neg':''}">${rp(ms.charge+ms.inc-ms.out)}</b><span class="s">Nilai porsi${ms.inc?' + pemasukan lain':''} − pengeluaran</span></div></div>
     <div class="card kpi"><span class="ki info">${I('wallet',22)}</span><div><small>Deposit tersimpan</small><b class="num">${rp(dep)}</b><span class="s">Sisa saldo semua anak</span></div></div>
     <div class="card kpi"><span class="ki bad">${I('alert',22)}</span><div><small>Total kurang bayar</small><b class="num">${rp(owe)}</b><span class="s">Perlu ditagih</span></div></div>
@@ -1262,7 +1265,7 @@ function expForm(id){
     left:id?`<button type="button" class="btn ghost" style="color:var(--bad)" data-act="expDel" data-x="${id}">${I('trash',16)}Hapus</button>`:'',
     body:()=>`<div class="fg"><label class="f">Tanggal<input class="inp" type="date" name="date" value="${x.date}"></label>
       <label class="f">Tipe<select class="inp" name="type"><option value="out"${x.type!=='in'?' selected':''}>Pengeluaran</option><option value="in"${x.type==='in'?' selected':''}>Pemasukan lain</option></select></label>
-      <label class="f full">Kategori<input class="inp" name="category" list="dlCats" value="${esc(x.category||'')}"></label>
+      <div class="f full"><span>Kategori</span><div class="quick">${EXPCAT.map(c=>`<button type="button" class="btn sm${(x.category||'')===c?' pri':''}" data-act="expCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div><input class="inp" name="category" id="expCatIn" list="dlCats" value="${esc(x.category||'')}" aria-label="Kategori"></div>
       <label class="f full">Deskripsi<input class="inp" name="desc" value="${esc(x.desc||'')}" placeholder="Daging ayam 5,5 kg; bihun; sayuran" autofocus></label>
       <label class="f">Jumlah (Rp) *<input class="inp" type="number" name="amount" inputmode="numeric" min="0" step="500" value="${x.amount||''}" required></label></div>
       <datalist id="dlCats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`,
@@ -1312,7 +1315,8 @@ const ACT={
   menuDel:d=>ask('Hapus menu?','Menu dihapus dari daftar ide. Jadwal lama tetap menyimpan nama menunya.','Hapus menu',async()=>{await del('menus',d.m);toast('Menu dihapus','ok')}),
   mDay:d=>{UI.mDay=d.v;schedule()},
   kTab:d=>{UI.kTab=d.v;schedule()},
-  expNew:()=>expForm(null), expEdit:d=>expForm(d.x),
+  expNew:()=>expForm(null),
+  expCat:(d,t)=>{const i=$('#expCatIn');if(i)i.value=d.v;t.parentElement.querySelectorAll('.btn').forEach(b=>b.classList.toggle('pri',b===t))}, expEdit:d=>expForm(d.x),
   expDel:d=>{const x=S.exps[d.x];ask('Hapus transaksi?',`${esc(x.category||'')} ${rp(x.amount)} pada ${shortD(x.date)} dihapus.`,'Hapus',async()=>{await del('exps',d.x);toast('Transaksi dihapus','ok')})},
   payNew:d=>payForm(d.k), payEdit:d=>payForm(null,d.p),
   payDel:d=>{const p=S.pays[d.p];ask('Hapus pembayaran?',`${PAYT[p.type]} ${rp(p.amount)} untuk <b>${esc((S.kids[p.kidId]||{}).name||'')}</b> pada ${shortD(p.date)} dihapus dan saldo dihitung ulang.`,'Hapus',async()=>{await del('pays',d.p);toast('Pembayaran dihapus','ok')})},
