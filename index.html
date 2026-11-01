@@ -160,6 +160,11 @@ label.f{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)
 .erow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:10px 14px;align-items:center;padding:10px 18px;border-top:1px solid var(--line)}
 .grp-h + .erow{border-top:0}
 .erow .en b{font-weight:700}
+.enl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pk{display:inline-flex;align-items:center;gap:5px;border:1.5px solid;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;cursor:pointer;background:transparent;font-family:inherit;white-space:nowrap}
+.pk-pb{color:var(--info);border-color:var(--info);background:var(--info-soft)}
+.pk-lb{color:var(--brand-ink);border-color:var(--brand);background:var(--brand-soft)}
+.pk:hover{filter:brightness(.97)}.pk:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .erow .en .sub{font-size:12.5px;color:var(--muted)}
 .erow .en .alg,.erow .en .nt{font-size:12.5px}
 .erow .en .nt{color:var(--info)}
@@ -358,7 +363,7 @@ const I=(n,s=18)=>P.replace(/%s/g,s)+(ICONS[n]||'')+'</svg>';
 const DEFAULT_CFG={name:'One Two Kitchen',tagline:'Daily Kid Catering Management System',price:60000,lowPorsi:3,labelFooter:''};
 const S={kids:{},menus:{},days:{},pays:{},exps:{},cfg:{...DEFAULT_CFG},mode:'connecting',canWrite:true,fresh:false,stale:false};
 const COLS=['kids','menus','days','pays','exps'];
-const UI={tab:'dashboard',jDate:TODAY,aQ:'',aSchool:'',aPack:'',aShow:'active',mDay:'',mQ:'',kMonth:TODAY.slice(0,7),kTab:'saldo',kQ:'',kFilter:'',lDate:TODAY,lSize:'58x40',lSchool:'',lSort:'school',lMenu:true,lSkip:{}};
+const UI={jPack:'',tab:'dashboard',jDate:TODAY,aQ:'',aSchool:'',aPack:'',aShow:'active',mDay:'',mQ:'',kMonth:TODAY.slice(0,7),kTab:'saldo',kQ:'',kFilter:'',lDate:TODAY,lSize:'58x40',lSchool:'',lSort:'school',lMenu:true,lSkip:{}};
 if([0,6].includes(parseD(TODAY).getDay())){ /* weekend: jump schedule & labels to next Monday */
   const nm=addDays(mondayOf(TODAY),7); UI.jDate=nm; UI.lDate=nm;
 }
@@ -415,7 +420,10 @@ const kidsArr=()=>Object.entries(S.kids).map(([id,k])=>({id,...k}));
 const menusArr=()=>Object.entries(S.menus).map(([id,m])=>({id,...m}));
 const activeKids=()=>kidsArr().filter(k=>k.active!==false);
 const schools=()=>[...new Set(kidsArr().map(k=>k.school).filter(Boolean))].sort(cmpN);
-const packs=()=>[...new Set(['Lunch Box','Plastic Box',...kidsArr().map(k=>k.pack).filter(Boolean)])];
+const PACKS=['Plastic Box','Lunch Box'];
+const packs=()=>PACKS;
+const packSel=(name,val,id)=>`<select class="inp" name="${name}"${id?` id="${id}"`:''}>${PACKS.map(p=>`<option${p===(val||'Plastic Box')?' selected':''}>${p}</option>`).join('')}</select>`;
+const packPill=(p,attrs)=>`<button type="button" class="pk ${p==='Lunch Box'?'pk-lb':'pk-pb'}"${attrs||''}>${p==='Lunch Box'?I('food',13):I('box',13)}${esc(p||'Plastic Box')}</button>`;
 const kidDays=k=>Array.isArray(k.days)&&k.days.length?k.days:[1,2,3,4,5];
 const priceFor=(k,m)=>Number(k&&k.price)||Number(m&&m.price)||Number(S.cfg.price)||0;
 const sortKids=(a,b)=>cmpN(a.school,b.school)||cmpN(a.grade,b.grade)||cmpN(a.name,b.name);
@@ -489,7 +497,7 @@ function render(){
 }
 const VIEWS={};
 const empty=(t,s,btn)=>`<div class="empty"><b>${t}</b><span>${s}</span>${btn||''}</div>`;
-const pk=p=>p?`<span class="pill brand">${esc(p)}</span>`:'';
+const pk=p=>`<span class="pk ${p==='Lunch Box'?'pk-lb':'pk-pb'}" style="cursor:default">${esc(p||'Plastic Box')}</span>`;
 const stPill=b=>{const s=stat(b);return`<span class="pill ${s.k}">${s.l}</span>`};
 
 /* ----- Dashboard ----- */
@@ -553,17 +561,17 @@ VIEWS.jadwal=()=>{
     const all=Object.entries(d.entries).map(([k,e])=>({k,e,...info(k,e)})).sort(sortKids);
     const live=all.filter(x=>x.e.status!=='cancelled');
     const done=live.filter(x=>x.e.status==='delivered').length,canc=all.length-live.length;
-    const byPack={};live.forEach(x=>byPack[x.pack||'Lainnya']=(byPack[x.pack||'Lainnya']||0)+1);
+    const byPack={};live.forEach(x=>{const p=x.pack==='Lunch Box'?'Lunch Box':'Plastic Box';byPack[p]=(byPack[p]||0)+1});
     const total=live.reduce((s,x)=>s+(Number(x.e.price)||0),0);
-    const groups={};all.forEach(x=>(groups[x.school]=groups[x.school]||[]).push(x));
+    const groups={};all.filter(x=>!UI.jPack||(x.pack==='Lunch Box'?'Lunch Box':'Plastic Box')===UI.jPack).forEach(x=>(groups[x.school]=groups[x.school]||[]).push(x));
     const seg=(x)=>`<div class="seg" role="group" aria-label="Status">${[['scheduled','Jadwal'],['delivered','Terkirim'],['cancelled','Batal']].map(([s,l])=>`<button type="button" class="s-${s}${x.e.status===s?' on':''}" data-act="est" data-d="${date}" data-k="${x.k}" data-s="${s}" aria-pressed="${x.e.status===s}">${l}</button>`).join('')}</div>`;
     body=`<div class="dayhead"><div style="min-width:0;flex:1"><span class="lbl-cap">${esc(dowName(date))}${date===TODAY?' · hari ini':''}</span><h2>${fmtD(date)}</h2>
       <div class="menupick"><select class="inp" id="jMenu" data-chg="dayMenu" data-d="${date}" aria-label="Menu hari ini">${menuOptions(d.menuId)}</select></div>
       ${S.menus[d.menuId]&&S.menus[d.menuId].notes?`<p class="hint" style="margin-top:6px">Catatan menu: ${esc(S.menus[d.menuId].notes)}</p>`:''}</div>
       <div class="row"><button class="btn pri" data-act="allDone" data-d="${date}">${I('check',16)}Semua terkirim</button><button class="btn" data-act="assign" data-d="${date}">${I('users',16)}Atur anak</button><button class="btn" data-act="dayCopy" data-d="${date}">${I('copy',16)}Rekap WA</button><button class="btn" data-act="goLabel" data-d="${date}">${I('printer',16)}Label</button><button class="btn ghost" data-act="dayClear" data-d="${date}" title="Hapus jadwal hari ini">${I('trash',16)}</button></div></div>
-      <div class="sumbar"><span class="pill info">${live.length} porsi</span><span class="pill ok">${done} terkirim</span>${canc?`<span class="pill bad">${canc} batal</span>`:''}${Object.entries(byPack).map(([p,n])=>`<span class="pill brand">${esc(p)}: ${n}</span>`).join('')}<span class="pill">Nilai ${rp(total)}</span></div>
-      ${Object.entries(groups).sort((a,b)=>cmpN(a[0],b[0])).map(([sch,xs])=>`<div class="grp"><div class="grp-h"><span>${esc(sch)}</span><span class="muted" style="font-weight:600;font-size:12.5px">${xs.filter(x=>x.e.status!=='cancelled').length} porsi</span></div>
-        ${xs.map(x=>`<div class="erow st-${x.e.status}"><div class="en"><b>${esc(x.name)}</b> <span class="sub">· ${esc(x.grade)} · ${esc(x.pack||'-')}</span>${x.allergy&&x.allergy!=='-'?`<div class="alg">${I('alert',13)}<span>${esc(x.allergy)}</span></div>`:''}${x.e.note?`<div class="nt">Catatan: ${esc(x.e.note)}</div>`:''}</div><span class="ep">${rp(x.e.price)}</span>${seg(x)}<div class="eact"><button class="iconbtn" data-act="eEdit" data-d="${date}" data-k="${x.k}" aria-label="Ubah porsi ${esc(x.name)}">${I('edit',16)}</button><button class="iconbtn" data-act="eDel" data-d="${date}" data-k="${x.k}" aria-label="Hapus ${esc(x.name)} dari jadwal">${I('x',16)}</button></div></div>`).join('')}</div>`).join('')}`;
+      <div class="sumbar"><span class="pill info">${live.length} porsi</span><span class="pill ok">${done} terkirim</span>${canc?`<span class="pill bad">${canc} batal</span>`:''}${['Plastic Box','Lunch Box'].map(p=>`<button type="button" class="pk ${p==='Lunch Box'?'pk-lb':'pk-pb'}" data-act="jPack" data-v="${p}" aria-pressed="${UI.jPack===p}" style="${UI.jPack&&UI.jPack!==p?'opacity:.45':''}" title="Tampilkan hanya ${p}">${p}: ${byPack[p]||0}</button>`).join('')}${UI.jPack?`<button type="button" class="btn sm ghost" data-act="jPack" data-v="">Tampilkan semua</button>`:''}<span class="pill">Nilai ${rp(total)}</span></div>
+      ${Object.entries(groups).sort((a,b)=>cmpN(a[0],b[0])).map(([sch,xs])=>`<div class="grp"><div class="grp-h"><span>${esc(sch)}</span><span class="muted" style="font-weight:600;font-size:12.5px">${(()=>{const lv=xs.filter(x=>x.e.status!=='cancelled');const pb=lv.filter(x=>(x.pack||'Plastic Box')!=='Lunch Box').length,lb=lv.length-pb;return lv.length+' porsi · Plastic Box '+pb+' · Lunch Box '+lb})()}</span></div>
+        ${xs.map(x=>`<div class="erow st-${x.e.status}"><div class="en"><div class="enl"><b>${esc(x.name)}</b><span class="sub">${esc(x.grade)}</span>${packPill(x.pack,` data-act="ePack" data-d="${date}" data-k="${x.k}" title="Klik untuk ganti kemasan hari ini" aria-label="Kemasan ${esc(x.pack||'Plastic Box')}, klik untuk ganti"`)}</div>${x.allergy&&x.allergy!=='-'?`<div class="alg">${I('alert',13)}<span>${esc(x.allergy)}</span></div>`:''}${x.e.note?`<div class="nt">Catatan: ${esc(x.e.note)}</div>`:''}</div><span class="ep">${rp(x.e.price)}</span>${seg(x)}<div class="eact"><button class="iconbtn" data-act="eEdit" data-d="${date}" data-k="${x.k}" aria-label="Ubah porsi ${esc(x.name)}">${I('edit',16)}</button><button class="iconbtn" data-act="eDel" data-d="${date}" data-k="${x.k}" aria-label="Hapus ${esc(x.name)} dari jadwal">${I('x',16)}</button></div></div>`).join('')}</div>`).join('')}`;
   }
   return`<div class="vh"><div><h1>Jadwal & Pengiriman</h1><p>Minggu ${shortD(mon)} – ${shortD(addDays(mon,5))} ${parseD(mon).getFullYear()}. Saldo DP terpotong per porsi; status Batal mengembalikan saldo.</p></div>
     <div class="row"><button class="iconbtn" data-act="jWeek" data-n="-7" aria-label="Minggu sebelumnya" style="border:1px solid var(--line);background:var(--surface)">${I('left')}</button><input type="date" class="inp" id="jDate" data-bind="jDate" value="${UI.jDate}" style="width:auto" aria-label="Pilih tanggal"><button class="iconbtn" data-act="jWeek" data-n="7" aria-label="Minggu berikutnya" style="border:1px solid var(--line);background:var(--surface)">${I('right')}</button><button class="btn" data-act="jSel" data-d="${TODAY}">Hari ini</button><button class="btn pri" data-act="weekGen" data-d="${UI.jDate}">${I('wand',16)}Buat jadwal minggu</button></div></div>
@@ -751,7 +759,7 @@ function kidForm(id){
       <label class="f full">Nama anak *<input class="inp" name="name" required value="${esc(k.name||'')}" autofocus></label>
       <label class="f">Sekolah<input class="inp" name="school" list="dlSchools" value="${esc(k.school||'')}" placeholder="SPH Pluit Village"></label>
       <label class="f">Kelas / grade<input class="inp" name="grade" value="${esc(k.grade||'')}" placeholder="3A"></label>
-      <label class="f">Kemasan default<input class="inp" name="pack" list="dlPacks" value="${esc(k.pack||'')}"></label>
+      <label class="f">Kemasan default${packSel('pack',k.pack)}</label>
       <label class="f">Harga khusus / porsi<input class="inp" name="price" type="number" inputmode="numeric" min="0" step="1000" value="${k.price||''}" placeholder="Ikut harga menu"></label>
       <label class="f full">Request / alergi<input class="inp" name="allergy" value="${esc(k.allergy&&k.allergy!=='-'?k.allergy:'')}" placeholder="Contoh: Tidak suka cheese"></label>
       <label class="f">Nama orang tua<input class="inp" name="parent" value="${esc(k.parent||'')}"></label>
@@ -760,7 +768,7 @@ function kidForm(id){
       <label class="f full">Catatan internal<textarea class="inp" name="note" rows="2">${esc(k.note||'')}</textarea></label>
       <label class="chk full"><input type="checkbox" name="active"${k.active!==false?' checked':''}>Aktif berlangganan</label>
     </div>
-    <datalist id="dlSchools">${schools().map(s=>`<option value="${esc(s)}">`).join('')}</datalist><datalist id="dlPacks">${packs().map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`,
+    <datalist id="dlSchools">${schools().map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`,
     submit:async(o,fd)=>{
       if(!o.name||!o.name.trim()){toast('Nama anak wajib diisi','err');return false}
       const data={...(id?S.kids[id]:{created:Date.now()}),name:o.name.trim().toUpperCase(),school:(o.school||'').trim(),grade:(o.grade||'').trim(),pack:(o.pack||'').trim(),price:Number(o.price)||0,allergy:(o.allergy||'').trim(),parent:(o.parent||'').trim(),wa:(o.wa||'').trim(),days:fd.getAll('days').map(Number),note:(o.note||'').trim(),active:fd.has('active')};
@@ -779,7 +787,7 @@ function kidImport(){
       if(ok)toast(nw.length+' anak diimport','ok');return ok}});
 }
 function parseImport(t){
-  return String(t||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{const sep=l.includes('\t')?'\t':l.includes(';')?';':',';const c=l.split(sep).map(x=>x.trim());return{name:(c[0]||'').toUpperCase(),school:c[1]||'',grade:c[2]||'',pack:c[3]||'Lunch Box',allergy:c[4]&&c[4]!=='-'?c[4]:'',parent:c[5]||'',wa:c[6]||''}}).filter(r=>r.name&&!/^nama/i.test(r.name));
+  return String(t||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{const sep=l.includes('\t')?'\t':l.includes(';')?';':',';const c=l.split(sep).map(x=>x.trim());return{name:(c[0]||'').toUpperCase(),school:c[1]||'',grade:c[2]||'',pack:/lunch/i.test(c[3]||'')?'Lunch Box':'Plastic Box',allergy:c[4]&&c[4]!=='-'?c[4]:'',parent:c[5]||'',wa:c[6]||''}}).filter(r=>r.name&&!/^nama/i.test(r.name));
 }
 
 /* ----- menu form ----- */
@@ -854,10 +862,9 @@ function entryForm(date,k){
   const d=S.days[date];const e=d&&d.entries[k];if(!e)return;const x=info(k,e);
   openM({title:'Porsi '+x.name+' · '+shortD(date),
     body:()=>`<div class="fg"><label class="f">Harga porsi<input class="inp" type="number" name="price" min="0" step="1000" value="${e.price||0}"></label>
-    <label class="f">Kemasan<input class="inp" name="pack" list="dlPacks2" value="${esc(e.pack||x.pack)}"></label>
+    <label class="f">Kemasan${packSel('pack',e.pack||x.pack)}</label>
     <label class="f">Status<select class="inp" name="status">${[['scheduled','Dijadwalkan'],['delivered','Terkirim'],['cancelled','Batal (saldo kembali)']].map(([v,l])=>`<option value="${v}"${e.status===v?' selected':''}>${l}</option>`).join('')}</select></label>
-    <label class="f full">Catatan khusus hari ini<input class="inp" name="note" value="${esc(e.note||'')}" placeholder="Contoh: tanpa sayur, sakit, dijemput" autofocus></label></div>
-    <datalist id="dlPacks2">${packs().map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`,
+    <label class="f full">Catatan khusus hari ini<input class="inp" name="note" value="${esc(e.note||'')}" placeholder="Contoh: tanpa sayur, sakit, dijemput" autofocus></label></div>`,
     submit:async o=>{const dd=dayClone(date);if(!dd.entries[k])return true;Object.assign(dd.entries[k],{price:Number(o.price)||0,pack:o.pack||'',status:o.status,note:(o.note||'').trim()});return put('days',date,dd)}});
 }
 
@@ -1037,6 +1044,8 @@ const ACT={
   assign:d=>assignForm(d.d),
   est:async d=>{const dd=dayClone(d.d);if(!dd.entries[d.k])return;dd.entries[d.k].status=d.s;await put('days',d.d,dd)},
   eEdit:d=>entryForm(d.d,d.k),
+  jPack:d=>{UI.jPack=UI.jPack===d.v?'':d.v;schedule()},
+  ePack:async d=>{const dd=dayClone(d.d);const e=dd.entries[d.k];if(!e)return;e.pack=(e.pack||'Plastic Box')==='Lunch Box'?'Plastic Box':'Lunch Box';if(await put('days',d.d,dd))toast('Kemasan '+(e.name||'')+' hari ini: '+e.pack,'ok')},
   eDel:d=>{const x=info(d.k,S.days[d.d].entries[d.k]);ask('Hapus dari jadwal?',`<b>${esc(x.name)}</b> dihapus dari jadwal ${esc(fmtD(d.d))} dan saldonya tidak dipotong. Gunakan status <b>Batal</b> jika ingin tetap tercatat.`,'Hapus',async()=>{const dd=dayClone(d.d);delete dd.entries[d.k];if(Object.keys(dd.entries).length)await put('days',d.d,dd);else await del('days',d.d)})},
   allDone:async d=>{const dd=dayClone(d.d);let n=0;Object.values(dd.entries).forEach(e=>{if(e.status==='scheduled'){e.status='delivered';n++}});if(!n){toast('Semua porsi sudah ditandai');return}if(await put('days',d.d,dd))toast(n+' porsi ditandai terkirim','ok')},
   dayCopy:d=>copyText(dayRecap(d.d),'Rekap'),
