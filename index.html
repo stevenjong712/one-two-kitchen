@@ -422,6 +422,78 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chipw,:root:not([data-theme="light"]) .top .iconbtn,:root:not([data-theme="light"]) .hero .eb,:root:not([data-theme="light"]) .hero .btn.alt,:root:not([data-theme="light"]) .side .tab.on{background:var(--surface)}}
 :root[data-theme="dark"] .chipw,:root[data-theme="dark"] .top .iconbtn,:root[data-theme="dark"] .hero .eb,:root[data-theme="dark"] .hero .btn.alt,:root[data-theme="dark"] .side .tab.on{background:var(--surface)}
+
+/* ===== dashboard & menu layout ===== */
+.tone-vars{}
+.t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
+.t-pch{--tb:var(--peach-soft);--tf:var(--peach);--ti:var(--peach-ink)}
+.t-mnt{--tb:var(--mint-soft);--tf:var(--mint);--ti:var(--mint-ink)}
+.t-btr{--tb:var(--butter-soft);--tf:var(--butter);--ti:var(--butter-ink)}
+.t-sky{--tb:var(--sky-soft);--tf:var(--sky);--ti:var(--sky-ink)}
+.t-pnk{--tb:var(--pink-soft);--tf:var(--pink);--ti:var(--bad)}
+.hero2{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:28px;padding:30px 32px}
+.hero2 .h-left{display:grid;gap:10px;justify-items:start;min-width:0}
+.hero2 h1{margin:4px 0 0;font-size:clamp(24px,2.6vw,32px)}
+.hero2 .h-sub{margin:0;color:var(--muted);font-weight:600}
+.dish{list-style:none;margin:2px 0 6px;padding:0;display:flex;flex-wrap:wrap;gap:8px;counter-reset:d}
+.dish li{counter-increment:d;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:999px;padding:7px 14px 7px 7px;font-weight:700;font-size:14.5px;line-height:1.2}
+.dish li::before{content:counter(d);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;font-weight:800;flex:none}
+.h-right{display:grid;justify-items:center;gap:8px;padding:16px 22px;background:rgba(255,255,255,.75);border:1px solid var(--line);border-radius:22px;min-width:200px}
+.ring{position:relative;width:132px;height:132px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .rt{fill:none;stroke:var(--brand-soft);stroke-width:12}
+.ring .rf{fill:none;stroke:var(--mint);stroke-width:12;stroke-linecap:round}
+.ring .rc{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .rc b{font-family:var(--fd);font-size:36px;font-weight:800;line-height:1}
+.ring .rc span{font-size:12px;color:var(--muted);font-weight:700}
+.rl{margin:0;font-size:13px;color:var(--muted);font-weight:600}.rl b{color:var(--ink)}
+.hpk{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.sbars{display:grid;gap:12px}
+.sbar{display:grid;grid-template-columns:minmax(110px,170px) minmax(0,1fr) 36px;gap:12px;align-items:center}
+.sbar .sn{font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbar .st{height:14px;border-radius:999px;background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
+.sbar .sf{display:block;height:100%;border-radius:999px;background:var(--tf)}
+.sbar b{font-family:var(--fd);font-size:18px;text-align:right}
+.reql{display:grid;gap:10px;max-height:320px;overflow:auto;padding-right:4px}
+.rq{display:grid;gap:6px;padding:10px 12px;border-radius:14px;background:var(--sunk);border:1px solid var(--line)}
+.rqh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.rqh span{font-size:12.5px;color:var(--muted)}
+.rqt{display:flex;gap:6px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:700}
+.tg-bad{background:var(--bad-soft);color:var(--bad)}
+.tg-note{background:var(--sky-soft);color:var(--sky-ink)}
+.upd{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(104px,1fr);gap:10px;overflow-x:auto;padding:5px 5px 8px}
+.upc{display:grid;justify-items:start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--tb);border-radius:18px;padding:12px 12px 14px;cursor:pointer;color:var(--ink);font:inherit;min-width:0}
+.upc:hover{border-color:var(--tf)}
+.upc .ud{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ti)}
+.upc b{font-family:var(--fd);font-size:30px;font-weight:800;line-height:1}
+.upc .um{font-size:12px;color:var(--muted);font-weight:600}
+.upc .un{margin-top:6px;font-weight:800;font-size:13px}
+.upc .umn{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.upc.none{background:var(--surface)}.upc.none .un{color:var(--faint)}
+.upc.now{outline:2px solid var(--brand);outline-offset:2px}
+@media (max-width:820px){.hero2{grid-template-columns:minmax(0,1fr)}.h-right{grid-template-columns:auto 1fr;justify-items:start;align-items:center;min-width:0}.h-right .ring{grid-row:span 2;width:104px;height:104px}.ring .rc b{font-size:28px}.sbar{grid-template-columns:minmax(90px,120px) minmax(0,1fr) 30px}}
+/* menu */
+.wk{margin-bottom:22px}
+.wkh{display:flex;align-items:center;gap:10px;margin:0 0 12px}.wkh h2{margin:0;font-size:19px}
+.mgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--tb)}
+.mh .md{font-family:var(--fd);font-weight:800;font-size:17px;color:var(--ti)}
+.mh .mw{font-size:11.5px;font-weight:800;background:rgba(255,255,255,.8);color:var(--ti);border-radius:999px;padding:3px 9px}
+.mlist{list-style:none;margin:0;padding:14px 16px 6px;display:grid;gap:7px;flex:1;align-content:start}
+.mlist li{position:relative;padding-left:16px;font-size:13.5px;line-height:1.35;color:var(--muted)}
+.mlist li::before{content:"";position:absolute;left:2px;top:.5em;width:7px;height:7px;border-radius:50%;background:var(--line)}
+.mlist li.main{color:var(--ink);font-weight:700;font-size:14.5px}
+.mlist li.main::before{background:var(--brand)}
+.mnote{display:flex;gap:6px;align-items:flex-start;margin:6px 16px 0;padding:8px 10px;border-radius:12px;background:var(--butter-soft);color:var(--butter-ink);font-size:12.5px;font-weight:600}
+.mnote .ic{margin-top:2px}
+.mf{display:grid;gap:10px;padding:12px 16px 14px;margin-top:10px;border-top:1px dashed var(--line)}
+.mfi{display:grid;gap:2px}.mf .num{white-space:nowrap}.mf b{font-size:15px}
+.mfb{display:grid;grid-template-columns:auto 1fr;gap:6px}.mfb .btn{justify-content:center}
+@media (min-width:1280px){.mgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (min-width:1000px) and (max-width:1279px){.mgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dish li,:root:not([data-theme="light"]) .h-right{background:var(--surface)}}
+:root[data-theme="dark"] .dish li,:root[data-theme="dark"] .h-right{background:var(--surface)}
 </style>
 
 </head>
@@ -642,6 +714,9 @@ const pk=p=>`<span class="pk ${p==='Lunch Box'?'pk-lb':'pk-pb'}" style="cursor:d
 const stPill=b=>{const s=stat(b);return`<span class="pill ${s.k}">${s.l}</span>`};
 
 /* ----- Dashboard ----- */
+const dishParts=n=>String(n||'').split('+').map(x=>x.trim()).filter(Boolean);
+const DAYC={Senin:'lav',Selasa:'pch',Rabu:'mnt',Kamis:'btr',Jumat:'sky',Sabtu:'pnk'};
+const greet=()=>{const h=new Date().getHours();return h<11?'Selamat pagi':h<15?'Selamat siang':h<18?'Selamat sore':'Selamat malam'};
 VIEWS.dashboard=()=>{
   const B=bal(),ak=activeKids(),t=S.days[TODAY],tE=liveEntries(t),done=tE.filter(([,e])=>e.status==='delivered').length;
   let wk=0;const mon=mondayOf(TODAY);for(let i=0;i<7;i++)wk+=dayCount(S.days[addDays(mon,i)]);
@@ -649,39 +724,54 @@ VIEWS.dashboard=()=>{
   const owe=Object.values(B).reduce((s,b)=>s+(b.bal<0?-b.bal:0),0);
   const nextDay=Object.keys(S.days).filter(d=>d>TODAY&&dayCount(S.days[d])).sort()[0];
   const focus=t&&tE.length?TODAY:nextDay;const fd=focus?S.days[focus]:null;const fE=liveEntries(fd);
+  const fDone=fE.filter(([,e])=>e.status==='delivered').length;
+  const fx=fE.map(([k,e])=>({k,e,...info(k,e)}));
+  const pb=fx.filter(x=>x.pack!=='Lunch Box').length,lb=fx.length-pb;
+  /* hero */
   let hero;
-  if(!kidsArr().length&&!menusArr().length)hero=`<div><span class="eb">Mulai di sini</span><h1>Selamat datang di ${esc(S.cfg.name)}</h1><p>Tambahkan data anak dan ide menu, lalu buat jadwal mingguan. Saldo DP terpotong otomatis per porsi.</p></div><div class="row"><a class="btn" data-act="go" data-t="anak" href="javascript:void 0">${I('users',16)}Tambah anak</a><a class="btn alt" data-act="go" data-t="menu" href="javascript:void 0">${I('book',16)}Tambah menu</a></div>`;
-  else if(t&&tE.length)hero=`<div><span class="eb">${fmtD(TODAY)}</span><h1>${esc(menuName(t)||'Menu belum dipilih')}</h1><p>${tE.length} porsi hari ini · ${done} sudah terkirim</p></div><div class="row"><button class="btn" data-act="goDay" data-d="${TODAY}">${I('truck',16)}Buka pengiriman</button><button class="btn alt" data-act="goLabel" data-d="${TODAY}">${I('printer',16)}Cetak label</button></div>`;
-  else hero=`<div><span class="eb">${fmtD(TODAY)}</span><h1>${nextDay?'Tidak ada pengiriman hari ini':'Belum ada jadwal ke depan'}</h1><p>${nextDay?'Jadwal berikutnya: '+fmtD(nextDay)+' · '+dayCount(S.days[nextDay])+' porsi':'Buat jadwal minggu ini dari menu yang sudah ada.'}</p></div><div class="row"><button class="btn" data-act="weekGen" data-d="${nextDay||UI.jDate}">${I('wand',16)}Buat jadwal minggu</button>${nextDay?`<button class="btn alt" data-act="goDay" data-d="${nextDay}">Lihat jadwal</button>`:''}</div>`;
-  /* production panel */
-  let prod;
-  if(fd&&fE.length){
-    const byPack={},bySch={};const alg=[];
-    fE.forEach(([k,e])=>{const x=info(k,e);byPack[x.pack||'Lainnya']=(byPack[x.pack||'Lainnya']||0)+1;bySch[x.school]=(bySch[x.school]||0)+1;if(x.allergy&&x.allergy!=='-'||e.note)alg.push(x.name+' ('+x.grade+'): '+[x.allergy&&x.allergy!=='-'?x.allergy:'',e.note].filter(Boolean).join(' · '))});
-    prod=`<div class="sec-h"><h2>Produksi ${focus===TODAY?'hari ini':esc(fmtD(focus))}</h2><span class="pill">${fE.length} porsi</span></div>
-    <p class="muted" style="margin:0 0 10px">${esc(menuName(fd)||'Menu belum dipilih')}</p>
-    <div class="counts">${Object.entries(byPack).map(([p,n])=>`<div class="cnt"><small>${esc(p)}</small><b>${n}</b></div>`).join('')}</div>
-    <div style="margin-top:12px">${Object.entries(bySch).sort((a,b)=>cmpN(a[0],b[0])).map(([s,n])=>`<div class="li"><div class="t"><b>${esc(s)}</b></div><span class="num">${n} porsi</span></div>`).join('')}</div>
-    ${alg.length?`<div style="margin-top:12px" class="stack"><span class="lbl-cap">Request & alergi</span>${alg.map(a=>`<div class="alg" style="font-size:13px">${I('alert',14)}<span>${esc(a)}</span></div>`).join('')}</div>`:''}`;
-  }else prod=`<div class="sec-h"><h2>Produksi</h2></div>`+empty('Belum ada porsi terjadwal','Jadwal yang dibuat akan muncul di sini lengkap dengan jumlah per kemasan.',`<button class="btn pri" data-act="weekGen" data-d="${UI.jDate}">${I('wand',16)}Buat jadwal minggu</button>`);
-  /* upcoming bars */
+  if(!kidsArr().length&&!menusArr().length){
+    hero=`<div class="h-left"><span class="eb">Mulai di sini</span><h1>Selamat datang di ${esc(S.cfg.name)}</h1><p class="h-sub">Tambahkan data anak dan ide menu, lalu buat jadwal mingguan. Saldo DP terpotong otomatis per porsi.</p><div class="row"><a class="btn" data-act="go" data-t="anak" href="javascript:void 0">${I('users',16)}Tambah anak</a><a class="btn alt" data-act="go" data-t="menu" href="javascript:void 0">${I('book',16)}Tambah menu</a></div></div>`;
+  }else if(fd){
+    const parts=dishParts(menuName(fd));const pct=fE.length?Math.round(fDone/fE.length*100):0;const C=2*Math.PI*52;
+    hero=`<div class="h-left"><span class="eb">${focus===TODAY?'Hari ini · ':'Berikutnya · '}${esc(fmtD(focus))}</span>
+      <h1>${greet()}, tim dapur</h1>
+      <p class="h-sub">${focus===TODAY?'Menu yang dimasak hari ini':'Tidak ada pengiriman hari ini. Menu jadwal berikutnya'}</p>
+      ${parts.length?`<ol class="dish">${parts.map(p=>`<li>${esc(p)}</li>`).join('')}</ol>`:`<p class="h-sub">Menu belum dipilih.</p>`}
+      <div class="row"><button class="btn" data-act="goDay" data-d="${focus}">${I('truck',16)}Buka pengiriman</button><button class="btn alt" data-act="goLabel" data-d="${focus}">${I('printer',16)}Cetak label</button></div></div>
+      <div class="h-right"><div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="rt"/><circle cx="60" cy="60" r="52" class="rf" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-pct/100)).toFixed(1)}"/></svg><div class="rc"><b class="num">${fE.length}</b><span>porsi</span></div></div>
+      <p class="rl"><b class="num">${fDone}</b> dari ${fE.length} terkirim</p>
+      <div class="hpk"><span class="pk pk-pb" style="cursor:default">Plastic Box ${pb}</span><span class="pk pk-lb" style="cursor:default">Lunch Box ${lb}</span></div></div>`;
+  }else{
+    hero=`<div class="h-left"><span class="eb">${esc(fmtD(TODAY))}</span><h1>${greet()}, tim dapur</h1><p class="h-sub">Belum ada jadwal ke depan. Buat jadwal minggu ini dari menu yang sudah ada.</p><div class="row"><button class="btn" data-act="weekGen" data-d="${UI.jDate}">${I('wand',16)}Buat jadwal minggu</button></div></div>`;
+  }
+  /* sekolah */
+  const bySch={};fx.forEach(x=>bySch[x.school]=(bySch[x.school]||0)+1);
+  const schL=Object.entries(bySch).sort((a,b)=>b[1]-a[1]||cmpN(a[0],b[0]));const smx=Math.max(1,...schL.map(x=>x[1]));
+  const tones=['lav','pch','mnt','btr','sky','pnk'];
+  const schoolCard=`<div class="card pad"><div class="sec-h"><h2>Per sekolah${focus&&focus!==TODAY?' · '+esc(shortD(focus)):''}</h2><span class="pill">${fx.length} porsi</span></div>
+    ${schL.length?`<div class="sbars">${schL.map(([sc,n],i)=>`<div class="sbar"><span class="sn">${esc(sc)}</span><span class="st"><span class="sf t-${tones[i%6]}" style="width:${Math.max(8,n/smx*100)}%"></span></span><b class="num">${n}</b></div>`).join('')}</div>`:empty('Belum ada porsi','Buat jadwal untuk melihat pembagian per sekolah.')}</div>`;
+  /* request & catatan */
+  const req=fx.filter(x=>(x.allergy&&x.allergy!=='-')||x.e.note).sort(sortKids);
+  const reqCard=`<div class="card pad"><div class="sec-h"><h2>Request & alergi</h2><span class="pill ${req.length?'bad':''}">${req.length} anak</span></div>
+    ${req.length?`<div class="reql">${req.map(x=>`<div class="rq"><div class="rqh"><b>${esc(x.name)}</b><span>${esc(x.school)} · ${esc(x.grade)}</span></div><div class="rqt">${x.allergy&&x.allergy!=='-'?`<span class="tag tg-bad">${I('alert',12)}${esc(x.allergy)}</span>`:''}${x.e.note?`<span class="tag tg-note">Catatan: ${esc(x.e.note)}</span>`:''}</div></div>`).join('')}</div>`:empty('Tidak ada request khusus','Alergi dan catatan per porsi akan tampil di sini.')}</div>`;
+  /* upcoming days as cards */
   const up=[];let d=TODAY;while(up.length<10){const w=parseD(d).getDay();if(w!==0&&(w!==6||S.days[d]))up.push(d);d=addDays(d,1)}
-  const mx=Math.max(1,...up.map(x=>dayCount(S.days[x])));
-  const bars=up.map(x=>{const n=dayCount(S.days[x]);return`<button class="bar${x===TODAY?' today':''}" data-act="goDay" data-d="${x}" style="all:unset;cursor:pointer;display:grid;grid-template-columns:76px minmax(0,1fr) 34px;gap:10px;align-items:center;font-size:12.5px"><span><b>${DAYN[parseD(x).getDay()].slice(0,3)}</b> ${shortD(x)}</span><span class="tr" style="height:22px;border-radius:6px;background:var(--sunk);position:relative;overflow:hidden">${n?`<span class="fl" style="width:${Math.max(6,n/mx*100)}%"></span>`:''}<span class="mn">${esc(menuName(S.days[x])||(n?'':'—'))}</span></span><b class="num" style="text-align:right">${n}</b></button>`}).join('');
-  const recent=Object.entries(S.pays).map(([id,p])=>({id,...p})).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0)).slice(0,6);
-  return`<section class="hero">${hero}</section>
-  <div class="grid g4" style="margin-bottom:14px">
+  const upCard=`<div class="card pad"><div class="sec-h"><h2>Jadwal 2 minggu ke depan</h2><a class="btn sm" data-act="go" data-t="jadwal" href="javascript:void 0">Buka jadwal</a></div>
+    <div class="upd">${up.map(x=>{const dd=S.days[x],n=dayCount(dd),w=parseD(x).getDay();return`<button type="button" class="upc t-${DAYC[DAYN[w]]||'lav'}${x===TODAY?' now':''}${n?'':' none'}" data-act="goDay" data-d="${x}"><span class="ud">${DAYN[w].slice(0,3)}</span><b class="num">${parseD(x).getDate()}</b><span class="um">${MON[parseD(x).getMonth()]}</span><span class="un num">${n?n+' porsi':'—'}</span><span class="umn">${esc(dishParts(menuName(dd))[0]||'')}</span></button>`}).join('')}</div></div>`;
+  const recent=Object.entries(S.pays).map(([id,p])=>({id,...p})).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0)).slice(0,5);
+  return`<section class="hero hero2">${hero}</section>
+  <div class="grid g4" style="margin-bottom:16px">
     <div class="card kpi"><span class="ki info">${I('users',22)}</span><div><small>Anak aktif</small><b>${ak.length}</b><span class="s">${kidsArr().length-ak.length} nonaktif</span></div></div>
     <div class="card kpi"><span class="ki brand">${I('box',22)}</span><div><small>Porsi hari ini</small><b>${tE.length}</b><span class="s">${done} terkirim</span></div></div>
     <div class="card kpi"><span class="ki ok">${I('cal',22)}</span><div><small>Porsi minggu ini</small><b>${wk}</b><span class="s">Senin–Minggu</span></div></div>
-    <div class="card kpi"><span class="ki bad">${I('wallet',22)}</span><div><small>Perlu ditagih</small><b class="num">${rp(owe)}</b><span class="s">${flagged.length} anak saldo minus/menipis</span></div></div>
+    <div class="card kpi"><span class="ki bad">${I('wallet',22)}</span><div><small>Perlu ditagih</small><b class="num">${rp(owe)}</b><span class="s">${flagged.length} anak</span></div></div>
   </div>
+  <div class="grid g2" style="margin-bottom:16px">${schoolCard}${reqCard}</div>
+  <div style="margin-bottom:16px">${upCard}</div>
   <div class="grid g2">
-    <div class="card pad">${prod}</div>
     <div class="card pad"><div class="sec-h"><h2>Perlu top-up DP</h2><a class="btn sm" data-act="go" data-t="keuangan" href="javascript:void 0">Semua saldo</a></div>
-      ${flagged.length?flagged.slice(0,8).map(k=>`<div class="li"><div class="t"><b>${esc(k.name)}</b><span>${esc(k.school)} · ${esc(k.grade)} · ${stPill(k.b)}</span></div><div class="row" style="flex-wrap:nowrap"><b class="num ${k.b.bal<0?'neg':''}">${rp(k.b.bal)}</b><button class="btn sm" data-act="bill" data-k="${k.id}" title="Pesan tagihan">${I('send',14)}</button><button class="btn sm pri" data-act="payNew" data-k="${k.id}">+DP</button></div></div>`).join(''):empty('Semua saldo aman','Anak dengan saldo minus atau menipis akan muncul di sini.')}
+      ${flagged.length?flagged.slice(0,6).map(k=>`<div class="li"><div class="t"><b>${esc(k.name)}</b><span>${esc(k.school)} · ${esc(k.grade)}</span></div><div class="row" style="flex-wrap:nowrap"><b class="num ${k.b.bal<0?'neg':''}">${rp(k.b.bal)}</b><button class="btn sm" data-act="bill" data-k="${k.id}" title="Pesan tagihan" aria-label="Pesan tagihan ${esc(k.name)}">${I('send',14)}</button><button class="btn sm pri" data-act="payNew" data-k="${k.id}">+DP</button></div></div>`).join('')+(flagged.length>6?`<p class="hint" style="margin-top:10px">+${flagged.length-6} anak lainnya di Keuangan</p>`:''):empty('Semua saldo aman','Anak dengan saldo minus atau menipis akan muncul di sini.')}
     </div>
-    <div class="card pad"><div class="sec-h"><h2>Jadwal 2 minggu</h2><a class="btn sm" data-act="go" data-t="jadwal" href="javascript:void 0">Buka jadwal</a></div><div class="bars">${bars}</div></div>
     <div class="card pad"><div class="sec-h"><h2>Pembayaran terakhir</h2><button class="btn sm pri" data-act="payNew">${I('plus',14)}Catat DP</button></div>
       ${recent.length?recent.map(p=>{const k=S.kids[p.kidId];return`<div class="li"><div class="t"><b>${esc(k?k.name:'(anak dihapus)')}</b><span>${shortD(p.date)} · ${PAYT[p.type]||p.type}${p.method?' · '+esc(p.method):''}</span></div><b class="num ${payVal(p)<0?'neg':'pos'}">${payVal(p)<0?'-':'+'}${rp(Math.abs(payVal(p)))}</b></div>`}).join(''):empty('Belum ada pembayaran','Catat DP pertama untuk mulai memotong saldo per porsi.')}
     </div>
@@ -754,12 +844,19 @@ VIEWS.menu=()=>{
   const q=UI.mQ.trim().toLowerCase();if(q)ms=ms.filter(m=>(m.name+' '+(m.notes||'')).toLowerCase().includes(q));
   const ord=d=>{const i=DAYN.indexOf(d);return i<1?9:i};
   ms.sort((a,b)=>(a.week||0)-(b.week||0)||ord(a.day)-ord(b.day)||cmpN(a.name,b.name));
-  return`<div class="vh"><div><h1>Ide Menu & Penugasan Bento</h1><p>${tot} menu dalam rotasi. Saat membuat jadwal, menu hari itu yang paling lama tidak dipakai dipilih otomatis.</p></div><button class="btn pri" data-act="menuNew">${I('plus',16)}Tambah menu</button></div>
+  const weeks={};ms.forEach(m=>(weeks[m.week||0]=weeks[m.week||0]||[]).push(m));
+  const card=m=>{const x=u[m.id];const parts=dishParts(m.name);const tone=DAYC[m.day]||'lav';const mi=parts.length>1&&/^nasi$/i.test(parts[0])?1:0;
+    return`<article class="mcard"><header class="mh t-${tone}"><span class="md">${esc(m.day||'Bebas')}</span>${m.week?`<span class="mw">M${m.week}</span>`:''}</header>
+    <ul class="mlist">${parts.map((p,i)=>`<li${i===mi?' class="main"':''}>${esc(p)}</li>`).join('')}</ul>
+    ${m.notes?`<p class="mnote">${I('alert',13)}<span>${esc(m.notes)}</span></p>`:''}
+    <footer class="mf"><div class="mfi"><b class="num">${rp(m.price||S.cfg.price)}</b><span class="hint">${x?`Dipakai ${x.n}× · ${shortD(x.last)}`:'Belum dipakai'}</span></div>
+    <div class="mfb"><button class="btn sm" data-act="menuEdit" data-m="${m.id}" aria-label="Ubah menu">${I('edit',14)}</button><button class="btn sm pri" data-act="menuAssign" data-m="${m.id}">${I('cal',14)}Assign</button></div></footer></article>`};
+  const body=!ms.length?`<div class="card">${tot?empty('Tidak ada menu yang cocok','Pilih hari lain atau ubah pencarian.'):empty('Belum ada ide menu','Tambahkan menu per hari. Nomor minggu membantu rotasi menu.',`<button class="btn pri" data-act="menuNew">${I('plus',16)}Tambah menu</button>`)}</div>`
+    :Object.keys(weeks).map(Number).sort((a,b)=>(a||99)-(b||99)).map(w=>`<section class="wk"><div class="wkh"><h2>${w?'Minggu '+w:'Tanpa minggu rotasi'}</h2><span class="pill">${weeks[w].length} menu</span></div><div class="mgrid">${weeks[w].map(card).join('')}</div></section>`).join('');
+  return`<div class="vh"><div><h1>Ide Menu & Penugasan Bento</h1><p>${tot} menu dalam rotasi ${Object.keys(weeks).filter(Number).length||''} minggu. Saat membuat jadwal, menu hari itu yang paling lama tidak dipakai dipilih otomatis.</p></div><button class="btn pri" data-act="menuNew">${I('plus',16)}Tambah menu</button></div>
   <div class="tool"><div class="daychips" role="group" aria-label="Filter hari">${['','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'].map(d=>`<button type="button" class="${UI.mDay===d?'on':''}" data-act="mDay" data-v="${d}">${d||'Semua'}</button>`).join('')}</div>
-  <div class="search">${I('search',16)}<input class="inp" id="mQ" data-bind="mQ" value="${esc(UI.mQ)}" placeholder="Cari menu…" aria-label="Cari menu"></div></div>
-  ${ms.length?`<div class="menus">${ms.map(m=>{const x=u[m.id];return`<div class="card menu"><div class="row"><span class="pill info">${esc((m.day||'Bebas').toUpperCase())}</span>${m.week?`<span class="pill">Minggu ${m.week}</span>`:''}</div><h3>${esc(m.name)}</h3><p class="hint">Notes: ${esc(m.notes||'–')}</p><p class="hint">${x?`Dipakai ${x.n}× · terakhir ${shortD(x.last)}`:'Belum pernah dijadwalkan'}</p>
-    <div class="ft"><b class="num">${rp(m.price||S.cfg.price)}</b><div class="row"><button class="btn sm" data-act="menuEdit" data-m="${m.id}">${I('edit',14)}Ubah</button><button class="btn sm pri" data-act="menuAssign" data-m="${m.id}">${I('cal',14)}Assign</button></div></div></div>`}).join('')}</div>`
-  :`<div class="card">${tot?empty('Tidak ada menu yang cocok','Pilih hari lain atau ubah pencarian.'):empty('Belum ada ide menu','Tambahkan menu per hari. Nomor minggu membantu rotasi menu.',`<button class="btn pri" data-act="menuNew">${I('plus',16)}Tambah menu</button>`)}</div>`}`;
+  <div class="search">${I('search',16)}<input class="inp" id="mQ" data-bind="mQ" value="${esc(UI.mQ)}" placeholder="Cari menu atau bahan…" aria-label="Cari menu"></div></div>
+  ${body}`;
 };
 
 /* ----- Keuangan ----- */
