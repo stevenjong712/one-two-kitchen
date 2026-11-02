@@ -289,12 +289,15 @@ img{max-width:100%}
 }
 /* modal */
 #ov{position:fixed;inset:0;z-index:50;background:rgba(20,14,6,.45);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.dlg{background:var(--surface);border-radius:16px;width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.dlg{background:var(--surface);border-radius:16px;width:min(560px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+#ov{overflow:hidden;overscroll-behavior:contain}
+body.modal-open{overflow:hidden}
+.dlg-h,.dlg-f{flex:none}
 .dlg.wide{width:min(860px,100%)}
 .dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
 .dlg-h h3{margin:0;font-size:17px}
 #dlgf{display:flex;flex-direction:column;min-height:0;flex:1}
-.dlg-b{padding:18px;overflow:auto;display:grid;gap:14px;align-content:start}
+.dlg-b{padding:18px;overflow-y:auto;overflow-x:hidden;display:grid;gap:14px;align-content:start;flex:1 1 auto;min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .dlg-f{display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
 .fg{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
 .fg .full{grid-column:1/-1}
@@ -304,7 +307,7 @@ img{max-width:100%}
 .daypick{display:flex;gap:6px;flex-wrap:wrap}
 .daypick label{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer}
 .daypick input{accent-color:var(--brand)}
-.picklist{border:1px solid var(--line);border-radius:10px;max-height:340px;overflow:auto}
+.picklist{border:1px solid var(--line);border-radius:10px;max-height:340px;overflow:auto;overscroll-behavior:contain}
 .picklist .ph{position:sticky;top:0;background:var(--sunk);padding:7px 12px;font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
 .picklist label{display:flex;gap:10px;align-items:center;padding:7px 12px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}
 .picklist label:last-child{border-bottom:0}
@@ -998,7 +1001,7 @@ ${labelInner(x)}</button>`}).join('')}</div>`
 
 /* ---------- modal ---------- */
 let M=null;
-function openM(cfg){M=cfg;M.st=M.st||{};$('#ov').hidden=false;drawM(true)}
+function openM(cfg){M=cfg;M.st=M.st||{};$('#ov').hidden=false;document.body.classList.add('modal-open');drawM(true)}
 function drawM(first){
   if(!M)return;const a=document.activeElement;const fid=!first&&a&&a.id&&$('#dlg').contains(a)?a.id:null;let ss=null;try{ss=fid?a.selectionStart:null}catch(e){}
   const sc=$('#dlg-b').scrollTop;const ls=[...$('#dlg-b').querySelectorAll('.picklist')].map(e=>e.scrollTop);
@@ -1008,7 +1011,7 @@ function drawM(first){
   if(first){$('#dlg-b').scrollTop=0;setTimeout(()=>{const f=$('#dlg-b [autofocus]')||$('#dlg-b input,#dlg-b select');f&&f.focus()},30)}
   else{$('#dlg-b').scrollTop=sc;$('#dlg-b').querySelectorAll('.picklist').forEach((e,i)=>{if(ls[i]!=null)e.scrollTop=ls[i]});if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}}
 }
-function closeM(){M=null;$('#ov').hidden=true}
+function closeM(){M=null;$('#ov').hidden=true;document.body.classList.remove('modal-open')}
 $('#dlgf').addEventListener('submit',async e=>{e.preventDefault();if(!M||!M.submit)return;const fd=new FormData(e.target);const o={};for(const[k,v]of fd.entries())o[k]=v;const btn=$('#dlg-f [type=submit]');if(btn)btn.disabled=true;let r;try{r=await M.submit(o,fd)}finally{if(btn)btn.disabled=false}if(r!==false)closeM()});
 $('#ov').addEventListener('mousedown',e=>{if(e.target.id==='ov')closeM()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&M)closeM()});
