@@ -430,6 +430,12 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 
 .btn.exp{background:var(--pink-soft);border-color:var(--pink);color:var(--bad)}
 .btn.exp:hover{border-color:var(--bad)}
+.lsum{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.lsum>div{display:flex;align-items:center;gap:10px;border-radius:16px;padding:12px 16px;border:1px solid var(--line);background:var(--surface)}
+.lsum b{font-family:var(--fd);font-size:28px;font-weight:800;line-height:1}
+.lsum span{font-size:13px;font-weight:600;color:var(--muted)}
+.lsum .lsc1{background:var(--brand);border-color:var(--brand);color:#fff}.lsum .lsc1 span{color:rgba(255,255,255,.9)}
+.lsum .lsc2{background:var(--tb)}.lsum .lsc2 b{color:var(--ti)}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -925,10 +931,11 @@ function savePrint(){try{const o={};PKEYS.forEach(k=>o[k]=UI[k]);localStorage.se
 const clampN=(v,a,b,d)=>{v=Number(v);return isFinite(v)&&v?Math.min(b,Math.max(a,v)):d};
 function lsize(){return UI.lSize==='custom'?[clampN(UI.lW,20,150,58),clampN(UI.lH,15,150,40)]:SIZES[UI.lSize]}
 const packCode=p=>p?String(p).split(/\s+/).filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,3):'';
-function labelItems(){
+function labelItems(all){
   const d=S.days[UI.lDate];if(!d)return[];const mn=menuName(d);const B=bal();
   let a=liveEntries(d).map(([k,e])=>({k,...info(k,e),note:e.note||'',menu:mn,paid:(B[k]||ZB).bal>=0}));
   if(UI.lSchool)a=a.filter(x=>x.school===UI.lSchool);
+  if(!all)a=a.filter(x=>x.pack!=='Lunch Box');
   a.sort(UI.lSort==='name'?(x,y)=>cmpN(x.name,y.name):UI.lSort==='pack'?(x,y)=>cmpN(x.pack,y.pack)||sortKids(x,y):sortKids);
   return a;
 }
@@ -945,9 +952,16 @@ const dateLbl=d=>{const x=parseD(d);return x.getDate()+' '+MON[x.getMonth()]+' '
 VIEWS.label=()=>{
   const [w,h]=lsize();const s=Math.min(w/58,h/40);const items=labelItems();const sk=UI.lSkip;
   const n=items.filter(x=>!sk[UI.lDate+'|'+x.k]).length;const cp=clampN(UI.lCopies,1,5,1);
+  const allI=labelItems(true),nLB=allI.filter(x=>x.pack==='Lunch Box').length,nSkip=items.length-n;
   const opt=k=>`<option value="${k}"${k===UI.lSize?' selected':''}>${k.replace('x',' × ')} mm</option>`;
   return`<div class="vh"><div><h1>Cetak Thermal Label Stiker</h1><p>${esc(fmtD(UI.lDate))} · ${n} label${cp>1?' × '+cp+' rangkap':''} · ${w} × ${h} mm</p></div>
-    <div class="row"><button class="btn" data-act="pdf" ${n?'':'disabled'}>${I('download',16)}PDF</button><button class="btn" data-act="printTest" ${n?'':'disabled'} title="Cetak 2 label untuk cek posisi dan jarak antar label">${I('printer',16)}Tes 2 label</button><button class="btn pri" data-act="print" ${n?'':'disabled'} style="padding:10px 18px">${I('printer',17)}Print Label</button></div></div>
+    <div class="row"><button class="btn" data-act="pdf" ${n?'':'disabled'}>${I('download',16)}PDF</button><button class="btn" data-act="printTest" ${n?'':'disabled'} title="Cetak 2 label untuk cek posisi dan jarak antar label">${I('printer',16)}Tes 2 label</button><button class="btn pri" data-act="print" ${n?'':'disabled'} style="padding:10px 18px">${I('printer',17)}Print ${n*cp} label</button></div></div>
+  <div class="lsum">
+    <div class="lsc1"><b class="num">${n}</b><span>anak dicetak${cp>1?` · ${n*cp} label (${cp} rangkap)`:''}</span></div>
+    <div class="lsc2 t-sky"><b class="num">${items.length}</b><span>Plastic Box${UI.lSchool?' · '+esc(UI.lSchool):''}</span></div>
+    <div class="lsc2 t-pch"><b class="num">${nLB}</b><span>Lunch Box · tidak dicetak</span></div>
+    ${nSkip?`<div class="lsc2 t-pnk"><b class="num">${nSkip}</b><span>dilewati manual</span></div>`:''}
+  </div>
   <div class="grid g2" style="margin-bottom:14px">
   <div class="card pad"><div class="sec-h"><h2>Label</h2></div><div class="fg">
     <label class="f">Tanggal<input type="date" class="inp" id="lDate" data-bind="lDate" value="${UI.lDate}"></label>
@@ -971,7 +985,7 @@ VIEWS.label=()=>{
   ${items.length?`<div class="lbls">${items.map(x=>{const key=UI.lDate+'|'+x.k,off=!!sk[key];const r=reqText(x);const code=packCode(x.pack);
     return`<button type="button" class="lbl${off?' skip':''}" style="width:${w}mm;height:${h}mm;--s:${s.toFixed(3)}" data-act="lSkip" data-key="${esc(key)}" aria-pressed="${!off}" title="${off?'Dilewati':'Ikut dicetak'}">
 ${labelInner(x)}</button>`}).join('')}</div>`
-  :empty('Tidak ada porsi terjadwal di tanggal ini','Buat jadwal di menu Jadwal & Pengiriman, label akan langsung tersedia.',`<button class="btn pri" data-act="goDay" data-d="${UI.lDate}">Buka jadwal tanggal ini</button>`)}</div>
+  :allI.length?empty('Tidak ada label Plastic Box untuk dicetak','Semua porsi '+(UI.lSchool?'sekolah ini ':'')+'di tanggal ini memakai Lunch Box, jadi tidak perlu label.'):empty('Tidak ada porsi terjadwal di tanggal ini','Buat jadwal di menu Jadwal & Pengiriman, label akan langsung tersedia.',`<button class="btn pri" data-act="goDay" data-d="${UI.lDate}">Buka jadwal tanggal ini</button>`)}</div>
   <div class="card pad" style="margin-top:14px"><div class="sec-h"><h2>Cara print ke printer thermal</h2></div><ol class="howto">
     <li>Klik <b>Print Label</b>. Di dialog print buka <b>More settings</b>, pilih <b>Paper size ${w} × ${h} mm</b> (ukuran dari driver printer) dan <b>Layout: Portrait</b>.</li>
     <li>Pilih printer thermal, <b>Margins: None</b>, <b>Scale: Default</b>, matikan <b>Headers and footers</b>, lalu Print. Chrome mengingat pilihan ini.</li>
@@ -987,12 +1001,12 @@ let M=null;
 function openM(cfg){M=cfg;M.st=M.st||{};$('#ov').hidden=false;drawM(true)}
 function drawM(first){
   if(!M)return;const a=document.activeElement;const fid=!first&&a&&a.id&&$('#dlg').contains(a)?a.id:null;let ss=null;try{ss=fid?a.selectionStart:null}catch(e){}
-  const sc=$('#dlg-b').scrollTop;
+  const sc=$('#dlg-b').scrollTop;const ls=[...$('#dlg-b').querySelectorAll('.picklist')].map(e=>e.scrollTop);
   $('#dlg-t').textContent=M.title;$('#dlg').className='dlg'+(M.wide?' wide':'');
   $('#dlg-b').innerHTML=M.body();
   $('#dlg-f').innerHTML=M.foot?M.foot():`${M.left||''}<span style="flex:1"></span><button type="button" class="btn ghost" data-act="closeM">Batal</button><button class="btn ${M.danger?'danger':'pri'}" type="submit">${M.ok||'Simpan'}</button>`;
   if(first){$('#dlg-b').scrollTop=0;setTimeout(()=>{const f=$('#dlg-b [autofocus]')||$('#dlg-b input,#dlg-b select');f&&f.focus()},30)}
-  else{$('#dlg-b').scrollTop=sc;if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}}
+  else{$('#dlg-b').scrollTop=sc;$('#dlg-b').querySelectorAll('.picklist').forEach((e,i)=>{if(ls[i]!=null)e.scrollTop=ls[i]});if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}}
 }
 function closeM(){M=null;$('#ov').hidden=true}
 $('#dlgf').addEventListener('submit',async e=>{e.preventDefault();if(!M||!M.submit)return;const fd=new FormData(e.target);const o={};for(const[k,v]of fd.entries())o[k]=v;const btn=$('#dlg-f [type=submit]');if(btn)btn.disabled=true;let r;try{r=await M.submit(o,fd)}finally{if(btn)btn.disabled=false}if(r!==false)closeM()});
@@ -1085,7 +1099,7 @@ function assignForm(date,menuId){
         <div class="row"><div class="search" style="max-width:none">${I('search',16)}<input class="inp" id="asQ" data-m="q" data-redraw value="${esc(st.q)}" placeholder="Cari anak…"></div>
         <button type="button" class="btn sm" data-act="asSub">Sesuai langganan ${DAYN[w]}</button><button type="button" class="btn sm" data-act="asAll">Semua</button><button type="button" class="btn sm" data-act="asNone">Kosongkan</button></div>
         <div class="picklist">${Object.keys(groups).length?Object.entries(groups).map(([s,xs])=>`<div class="ph">${esc(s)} · ${xs.length}</div>${xs.map(k=>`<label><input type="checkbox" data-act="asTog" data-k="${k.id}"${st.sel[k.id]?' checked':''}><b>${esc(k.name)}</b>${k.allergy&&k.allergy!=='-'?`<span class="alg" style="font-size:12px">${I('alert',12)}${esc(k.allergy)}</span>`:''}<span class="gr">${esc(k.grade)} · ${esc(k.pack||'')}${kidDays(k).includes(w)?'':' · tidak langganan'}</span></label>`).join('')}`).join(''):`<div class="empty">Belum ada anak. Tambah di Database Anak.</div>`}</div>
-        <p class="hint"><b>${n}</b> anak dipilih · estimasi ${rp(Object.keys(st.sel).filter(k=>st.sel[k]&&S.kids[k]).reduce((s,k)=>s+priceFor(S.kids[k],m),0))}</p>`},
+        <p class="hint" id="asCount"><b>${n}</b> anak dipilih · estimasi ${rp(Object.keys(st.sel).filter(k=>st.sel[k]&&S.kids[k]).reduce((s,k)=>s+priceFor(S.kids[k],m),0))}</p>`},
     submit:async()=>{const st=M.st;if(!st.date){toast('Pilih tanggal','err');return false}
       const ids=Object.keys(st.sel).filter(k=>st.sel[k]);
       const old=S.days[st.date];
@@ -1357,7 +1371,7 @@ const ACT={
   copyM:()=>copyText(M.st.txt,'Pesan'),
   csv:csvExport, pdf:makePdf, print:()=>printLabels(false), printTest:()=>printLabels(true),
   lSkip:d=>{UI.lSkip[d.key]=!UI.lSkip[d.key];schedule()},
-  asTog:(d,t)=>{M.st.sel[d.k]=t.checked;drawM()},
+  asTog:(d,t)=>{M.st.sel[d.k]=t.checked;const st=M.st,m=S.menus[st.menuId];const ids=Object.keys(st.sel).filter(k=>st.sel[k]);const c=$('#asCount');if(c)c.innerHTML=`<b>${ids.length}</b> anak dipilih · estimasi ${rp(ids.filter(k=>S.kids[k]).reduce((s,k)=>s+priceFor(S.kids[k],m),0))}`},
   asAll:()=>{const q=M.st.q.trim().toLowerCase();kidsArr().filter(k=>k.active!==false&&(!q||(k.name+' '+k.school+' '+k.grade).toLowerCase().includes(q))).forEach(k=>M.st.sel[k.id]=true);drawM()},
   asNone:()=>{M.st.sel={};drawM()},
   asSub:()=>{const w=parseD(M.st.date).getDay();M.st.sel={};activeKids().forEach(k=>{if(kidDays(k).includes(w))M.st.sel[k.id]=true});drawM()},
