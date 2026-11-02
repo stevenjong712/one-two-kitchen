@@ -1177,11 +1177,12 @@ function ledgerView(kid){
 }
 function billText(kid){
   const k=S.kids[kid],b=bal()[kid]||ZB;const pr=Number(k.price)||Number(S.cfg.price)||60000;
+  const sisa=b.dep-b.used; /* tagihan hanya dari porsi yang sudah terkirim */
   let t=`Halo ${k.parent?'Bapak/Ibu '+k.parent:'Bapak/Ibu'},\nBerikut ringkasan catering *${k.name}* (${k.school||''} ${k.grade||''}) dari ${S.cfg.name} per ${fmtD(TODAY)}:\n\n`;
-  t+=`• Total DP: ${rp(b.dep)}\n• Terpakai: ${b.up} porsi (${rp(b.used)})\n• Terjadwal: ${b.rp} porsi (${rp(b.res)})\n• Sisa saldo: *${rp(b.bal)}*\n\n`;
-  if(b.bal<0)t+=`Mohon melakukan pembayaran sebesar *${rp(-b.bal)}* untuk melunasi porsi yang sudah berjalan. `;
-  else t+=`Saldo cukup untuk ±${Math.floor(b.bal/pr)} porsi lagi. `;
-  t+=`Untuk top-up berikutnya, 10 porsi = ${rp(10*pr)}.\n\nTerima kasih.`;
+  t+=`• Total DP: ${rp(b.dep)}\n• Terkirim: ${b.up} porsi (${rp(b.used)})\n• Sisa saldo: *${rp(sisa)}*\n\n`;
+  if(sisa<0)t+=`Mohon melakukan pembayaran sebesar *${rp(-sisa)}* untuk melunasi porsi yang sudah terkirim.`;
+  else t+=`Saldo cukup untuk ±${Math.floor(sisa/pr)} porsi lagi.`;
+  t+=`\n\nTerima kasih.`;
   return t;
 }
 function billModal(kid){
