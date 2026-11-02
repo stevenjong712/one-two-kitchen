@@ -251,8 +251,8 @@ table.t{width:100%;border-collapse:collapse;font-size:13px}
 .lbl .lnn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .lbl .lp{flex:none;border:.35mm solid #111;border-radius:.6mm;padding:.2mm calc(.9mm*var(--s));font-size:max(calc(9px*var(--s)),8px);font-weight:800}
 .lbl .ls{display:flex;align-items:center;gap:calc(1.2mm*var(--s));min-width:0}
-.lbl .lsc{flex:1;min-width:0;font-weight:800;text-transform:uppercase;font-size:max(calc(12.6px*var(--s)),9.6px);line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-.lbl .lg{flex:none;color:#111;font-weight:800;font-size:max(calc(12.6px*var(--s)),9.6px);line-height:1.05;text-transform:uppercase;white-space:nowrap}
+.lbl .lsc{flex:1;min-width:0;font-weight:500;text-transform:uppercase;font-size:max(calc(12.6px*var(--s)),9.6px);line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.lbl .lg{flex:none;color:#111;font-weight:500;font-size:max(calc(12.6px*var(--s)),9.6px);line-height:1.05;text-transform:uppercase;white-space:nowrap}
 .lbl .lm{flex:1;min-height:0;font-size:max(calc(8.3px*var(--s)),7.5px);line-height:1.12;text-transform:uppercase;overflow:hidden}
 .lbl .lq{flex:none;border:.5mm solid #111;border-radius:.7mm;padding:calc(.9mm*var(--s));font-weight:800;text-transform:uppercase;font-size:max(calc(10.1px*var(--s)),8.8px);line-height:1.13;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4}
 .lbl .lm+*{margin-top:auto}
@@ -943,7 +943,7 @@ VIEWS.label=()=>{
   const n=items.filter(x=>!sk[UI.lDate+'|'+x.k]).length;const cp=clampN(UI.lCopies,1,5,1);
   const opt=k=>`<option value="${k}"${k===UI.lSize?' selected':''}>${k.replace('x',' × ')} mm</option>`;
   return`<div class="vh"><div><h1>Cetak Thermal Label Stiker</h1><p>${esc(fmtD(UI.lDate))} · ${n} label${cp>1?' × '+cp+' rangkap':''} · ${w} × ${h} mm</p></div>
-    <div class="row"><button class="btn" data-act="pdf" ${n?'':'disabled'}>${I('download',16)}PDF</button><button class="btn" data-act="printTest" ${n?'':'disabled'} title="Cetak 1 label untuk cek posisi">${I('printer',16)}Tes 1 label</button><button class="btn pri" data-act="print" ${n?'':'disabled'} style="padding:10px 18px">${I('printer',17)}Print Label</button></div></div>
+    <div class="row"><button class="btn" data-act="pdf" ${n?'':'disabled'}>${I('download',16)}PDF</button><button class="btn" data-act="printTest" ${n?'':'disabled'} title="Cetak 2 label untuk cek posisi dan jarak antar label">${I('printer',16)}Tes 2 label</button><button class="btn pri" data-act="print" ${n?'':'disabled'} style="padding:10px 18px">${I('printer',17)}Print Label</button></div></div>
   <div class="grid g2" style="margin-bottom:14px">
   <div class="card pad"><div class="sec-h"><h2>Label</h2></div><div class="fg">
     <label class="f">Tanggal<input type="date" class="inp" id="lDate" data-bind="lDate" value="${UI.lDate}"></label>
@@ -971,7 +971,8 @@ ${labelInner(x)}</button>`}).join('')}</div>`
   <div class="card pad" style="margin-top:14px"><div class="sec-h"><h2>Cara print ke printer thermal</h2></div><ol class="howto">
     <li>Klik <b>Print Label</b>. Di dialog print buka <b>More settings</b>, pilih <b>Paper size ${w} × ${h} mm</b> (ukuran dari driver printer) dan <b>Layout: Portrait</b>.</li>
     <li>Pilih printer thermal, <b>Margins: None</b>, <b>Scale: Default</b>, matikan <b>Headers and footers</b>, lalu Print. Chrome mengingat pilihan ini.</li>
-    <li>Keluar banyak halaman kosong? Biasanya Paper size di dialog belum sama dengan ukuran stiker (misalnya masih A4 atau 58×210). Pilih ukuran stiker yang benar, lalu coba <b>Tes 1 label</b> dulu.</li>
+    <li>Keluar banyak halaman kosong? Biasanya Paper size di dialog belum sama dengan ukuran stiker (misalnya masih A4 atau 58×210). Pilih ukuran stiker yang benar, lalu coba <b>Tes 2 label</b> dulu.</li>
+    <li>Ada jarak besar antara label pertama dan berikutnya? Atur driver printer: <b>Media type: Labels with gaps</b> (gap 2–3 mm) dan tinggi kertas sama dengan tinggi stiker, lalu kalibrasi printer (tahan tombol FEED sampai keluar beberapa stiker kosong).</li>
     <li>Supaya tanpa dialog sama sekali: buat shortcut Chrome dengan tambahan <b>--kiosk-printing</b>, jadikan printer thermal sebagai printer default, lalu buka aplikasi dari shortcut itu. Klik Print Label langsung mencetak.</li>
     <li>Pertama kali saja: di pengaturan driver printer, pilih ukuran kertas yang sama dan mode gap/label.</li>
   </ol></div>`;
@@ -1203,7 +1204,7 @@ function buildPdf(){
     y+=nh+0.9*s;
     /* sekolah + grade (besar) */
     const gf=Math.max(9.5*s,7.2);const sch=String(x.school||'-').toUpperCase(),gr=String(x.grade||'').toUpperCase();
-    bold(1);fs(gf);const gh=gf*PT+1.4*s;const gw=gr?tw(gr):0;
+    bold(0);fs(gf);const gh=gf*PT+1.4*s;const gw=gr?tw(gr):0;
     if(gr){doc.text(gr,X(w-m),Y(y+gh/2+gf*PT*0.36),{align:'right'})}
     let sf=gf;const sW=W-(gr?gw+1.5*s:0);fs(sf);while(tw(sch)>sW&&sf>6){sf-=0.25;fs(sf)}
     let sh=gh;
@@ -1247,7 +1248,7 @@ function saveFile(name,data,msg){
 function fitMenus(root){(root||document).querySelectorAll('.lbl .lm').forEach(el=>{el.style.webkitLineClamp='';el.style.visibility='';if(!el.textContent.trim())return;const lh=parseFloat(getComputedStyle(el).lineHeight)||10;const n=Math.floor((el.clientHeight+0.5)/lh);if(n<1){el.style.visibility='hidden';return}el.style.display='-webkit-box';el.style.webkitBoxOrient='vertical';el.style.webkitLineClamp=String(n);el.style.flex='none';el.style.height=(n*lh)+'px'})}
 function printLabels(onlyFirst){
   const [w,h]=lsize();let items=labelItems().filter(x=>!UI.lSkip[UI.lDate+'|'+x.k]);if(!items.length)return;
-  if(onlyFirst===true)items=items.slice(0,1);
+  if(onlyFirst===true)items=items.slice(0,2);
   const s=Math.min(w/58,h/40),cp=onlyFirst===true?1:clampN(UI.lCopies,1,5,1),ox=clampN(UI.lOx,-10,10,0),oy=clampN(UI.lOy,-10,10,0);
   const k=clampN(UI.lScale,50,100,90)/100;
   const o=UI.lOrient||'portrait',rot=o==='rotate';const pw=rot?h:w,ph=rot?w:h;
