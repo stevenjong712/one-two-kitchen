@@ -252,7 +252,7 @@ table.t{width:100%;border-collapse:collapse;font-size:13px}
 .lbl .lp{flex:none;border:.35mm solid #111;border-radius:.6mm;padding:.2mm calc(.9mm*var(--s));font-size:max(calc(9px*var(--s)),8px);font-weight:800}
 .lbl .ls{display:flex;align-items:center;gap:calc(1.2mm*var(--s));min-width:0}
 .lbl .lsc{flex:1;min-width:0;font-weight:800;text-transform:uppercase;font-size:max(calc(12.6px*var(--s)),9.6px);line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-.lbl .lg{flex:none;background:#111;color:#fff;font-weight:800;font-size:max(calc(12.6px*var(--s)),9.6px);padding:.4mm calc(1mm*var(--s));border-radius:.6mm;text-transform:uppercase;white-space:nowrap}
+.lbl .lg{flex:none;color:#111;font-weight:800;font-size:max(calc(12.6px*var(--s)),9.6px);line-height:1.05;text-transform:uppercase;white-space:nowrap}
 .lbl .lm{flex:1;min-height:0;font-size:max(calc(8.3px*var(--s)),7.5px);line-height:1.12;text-transform:uppercase;overflow:hidden}
 .lbl .lq{flex:none;border:.5mm solid #111;border-radius:.7mm;padding:calc(.9mm*var(--s));font-weight:800;text-transform:uppercase;font-size:max(calc(10.1px*var(--s)),8.8px);line-height:1.13;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4}
 .lbl .lm+*{margin-top:auto}
@@ -278,9 +278,9 @@ img{max-width:100%}
   body>*:not(#printArea){display:none!important}
   #printArea{display:block!important}
   body{background:#fff!important}
-  #printArea .lbl{border:0!important;border-radius:0!important;box-shadow:none!important;break-after:page;page-break-after:always;margin:0}
-  #printArea .lbl:last-child{break-after:auto;page-break-after:auto}
-  .lbl .lg{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea .pg{overflow:hidden;break-after:page;page-break-after:always;margin:0;position:relative}
+  #printArea .pg:last-child{break-after:auto;page-break-after:auto}
+  #printArea .lbl{border:0!important;border-radius:0!important;box-shadow:none!important;margin:0}
 }
 /* modal */
 #ov{position:fixed;inset:0;z-index:50;background:rgba(20,14,6,.45);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
@@ -913,8 +913,8 @@ VIEWS.keuangan=()=>{
 
 /* ----- Label ----- */
 const SIZES={'58x40':[58,40],'58x30':[58,30],'50x30':[50,30],'50x25':[50,25],'40x30':[40,30],'60x40':[60,40],'70x50':[70,50],'80x50':[80,50],'100x50':[100,50],'100x75':[100,75]};
-const PKEYS=['lSize','lW','lH','lOx','lOy','lMenu','lCopies'];
-Object.assign(UI,{lW:58,lH:40,lOx:0,lOy:0,lPay:true,lCopies:1});
+const PKEYS=['lSize','lW','lH','lOx','lOy','lMenu','lCopies','lOrient'];
+Object.assign(UI,{lW:58,lH:40,lOx:0,lOy:0,lPay:true,lCopies:1,lOrient:'portrait'});
 try{const o=JSON.parse(localStorage.getItem('otk-print')||'{}');PKEYS.forEach(k=>{if(o[k]!==undefined)UI[k]=o[k]});if(UI.lSize!=='custom'&&!SIZES[UI.lSize])UI.lSize='58x40'}catch(e){}
 function savePrint(){try{const o={};PKEYS.forEach(k=>o[k]=UI[k]);localStorage.setItem('otk-print',JSON.stringify(o))}catch(e){}}
 const clampN=(v,a,b,d)=>{v=Number(v);return isFinite(v)&&v?Math.min(b,Math.max(a,v)):d};
@@ -956,6 +956,8 @@ VIEWS.label=()=>{
     ${UI.lSize==='custom'?`<label class="f">Lebar (mm)<input class="inp" type="number" id="lW" data-bind="lW" min="20" max="150" value="${UI.lW}"></label><label class="f">Tinggi (mm)<input class="inp" type="number" id="lH" data-bind="lH" min="15" max="150" value="${UI.lH}"></label>`:''}
     <label class="f">Geser kanan/kiri (mm)<input class="inp" type="number" id="lOx" data-bind="lOx" step="0.5" min="-5" max="5" value="${UI.lOx}"></label>
     <label class="f">Geser atas/bawah (mm)<input class="inp" type="number" id="lOy" data-bind="lOy" step="0.5" min="-5" max="5" value="${UI.lOy}"></label>
+    <label class="f full">Arah cetak<select class="inp" id="lOrient" data-bind="lOrient"><option value="portrait"${UI.lOrient==='portrait'?' selected':''}>Portrait · ikut ukuran kertas printer (disarankan)</option><option value="rotate"${UI.lOrient==='rotate'?' selected':''}>Portrait · label diputar 90°</option><option value="landscape"${UI.lOrient==='landscape'?' selected':''}>Landscape · ukuran halaman = ukuran stiker</option></select></label>
+    <p class="hint full">Pilih "diputar 90°" hanya kalau hasil cetak masih menyamping.</p>
     <p class="hint full">Isi geser jika hasil cetak miring ke satu sisi. Nilai plus menggeser ke kanan / ke bawah.</p>
   </div></div></div>
   <div class="card"><div class="sec-h" style="padding:14px 18px 0;margin:0;flex-wrap:wrap"><span class="lbl-cap" style="color:var(--brand-ink)">Preview cetak</span><span class="muted">Klik label untuk melewati / mengikutkan</span></div>
@@ -964,7 +966,7 @@ VIEWS.label=()=>{
 ${labelInner(x)}</button>`}).join('')}</div>`
   :empty('Tidak ada porsi terjadwal di tanggal ini','Buat jadwal di menu Jadwal & Pengiriman, label akan langsung tersedia.',`<button class="btn pri" data-act="goDay" data-d="${UI.lDate}">Buka jadwal tanggal ini</button>`)}</div>
   <div class="card pad" style="margin-top:14px"><div class="sec-h"><h2>Cara print ke printer thermal</h2></div><ol class="howto">
-    <li>Klik <b>Print Label</b>. Dialog print langsung terbuka dengan ukuran kertas ${w} × ${h} mm.</li>
+    <li>Klik <b>Print Label</b>. Di dialog print buka <b>More settings</b>, pilih <b>Paper size ${w} × ${h} mm</b> (ukuran dari driver printer) dan <b>Layout: Portrait</b>.</li>
     <li>Pilih printer thermal, <b>Margins: None</b>, <b>Scale: Default</b>, matikan <b>Headers and footers</b>, lalu Print. Chrome mengingat pilihan ini.</li>
     <li>Supaya tanpa dialog sama sekali: buat shortcut Chrome dengan tambahan <b>--kiosk-printing</b>, jadikan printer thermal sebagai printer default, lalu buka aplikasi dari shortcut itu. Klik Print Label langsung mencetak.</li>
     <li>Pertama kali saja: di pengaturan driver printer, pilih ukuran kertas yang sama dan mode gap/label.</li>
@@ -1197,8 +1199,8 @@ function buildPdf(){
     y+=nh+0.9*s;
     /* sekolah + grade (besar) */
     const gf=Math.max(9.5*s,7.2);const sch=String(x.school||'-').toUpperCase(),gr=String(x.grade||'').toUpperCase();
-    bold(1);fs(gf);const gh=gf*PT+1.4*s;const gw=gr?tw(gr)+2*s:0;
-    if(gr){doc.setFillColor(0);doc.roundedRect(X(w-m-gw),Y(y),gw,gh,0.6,0.6,'F');doc.setTextColor(255);doc.text(gr,X(w-m-gw+s),Y(y+gh/2+gf*PT*0.36));doc.setTextColor(0)}
+    bold(1);fs(gf);const gh=gf*PT+1.4*s;const gw=gr?tw(gr):0;
+    if(gr){doc.text(gr,X(w-m),Y(y+gh/2+gf*PT*0.36),{align:'right'})}
     let sf=gf;const sW=W-(gr?gw+1.5*s:0);fs(sf);while(tw(sch)>sW&&sf>6){sf-=0.25;fs(sf)}
     let sh=gh;
     if(tw(sch)>sW){fs(sf);const ls=doc.splitTextToSize(sch,sW).slice(0,2);const lh=sf*PT*1.05;sh=Math.max(gh,ls.length*lh+0.3*s);const top=y+sh/2-(ls.length*lh)/2;ls.forEach((l,j)=>doc.text(l,X(m),Y(top+(j+0.82)*lh)))}
@@ -1242,9 +1244,12 @@ function fitMenus(root){(root||document).querySelectorAll('.lbl .lm').forEach(el
 function printLabels(){
   const [w,h]=lsize();const items=labelItems().filter(x=>!UI.lSkip[UI.lDate+'|'+x.k]);if(!items.length)return;
   const s=Math.min(w/58,h/40),cp=clampN(UI.lCopies,1,5,1),ox=clampN(UI.lOx,-10,10,0),oy=clampN(UI.lOy,-10,10,0);
-  let html='';items.forEach(x=>{for(let c=0;c<cp;c++)html+=`<div class="lbl" style="width:${w}mm;height:${h}mm;--s:${s.toFixed(3)};${ox||oy?`transform:translate(${ox}mm,${oy}mm);`:''}">${labelInner(x)}</div>`});
+  const o=UI.lOrient||'portrait',rot=o==='rotate';const pw=rot?h:w,ph=rot?w:h;
+  const tf=[ox||oy?`translate(${ox}mm,${oy}mm)`:'',rot?`translate(${h}mm,0) rotate(90deg)`:''].filter(Boolean).join(' ');
+  let html='';items.forEach(x=>{for(let c=0;c<cp;c++)html+=`<div class="pg" style="width:${pw}mm;height:${ph}mm"><div class="lbl" style="width:${w}mm;height:${h}mm;--s:${s.toFixed(3)};${tf?`transform:${tf};transform-origin:0 0;`:''}">${labelInner(x)}</div></div>`});
   $('#printArea').innerHTML=html;
-  $('#pageStyle').textContent=`@page{size:${w}mm ${h}mm;margin:0}@media print{html,body{width:${w}mm;margin:0!important;padding:0!important}}`;
+  const size=o==='landscape'?`${w}mm ${h}mm`:o==='rotate'?`${pw}mm ${ph}mm`:'auto';
+  $('#pageStyle').textContent=`@page{size:${size};margin:0}@media print{html,body{margin:0!important;padding:0!important}}`;
   const pa=$('#printArea');pa.style.cssText='display:block;position:fixed;left:-9999px;top:0';fitMenus(pa);pa.style.cssText='';
   setTimeout(()=>window.print(),60);
 }
