@@ -278,8 +278,9 @@ img{max-width:100%}
   body>*:not(#printArea){display:none!important}
   #printArea{display:block!important}
   body{background:#fff!important}
-  #printArea .pg{overflow:hidden;break-after:page;page-break-after:always;margin:0;position:relative}
-  #printArea .pg:last-child{break-after:auto;page-break-after:auto}
+  #printArea{margin:0;padding:0}
+  #printArea .pg{overflow:hidden;margin:0;padding:0;position:relative;break-inside:avoid;page-break-inside:avoid}
+  #printArea .pg+.pg{break-before:page;page-break-before:always}
   #printArea .lbl{border:0!important;border-radius:0!important;box-shadow:none!important;margin:0}
 }
 /* modal */
@@ -913,8 +914,8 @@ VIEWS.keuangan=()=>{
 
 /* ----- Label ----- */
 const SIZES={'58x40':[58,40],'58x30':[58,30],'50x30':[50,30],'50x25':[50,25],'40x30':[40,30],'60x40':[60,40],'70x50':[70,50],'80x50':[80,50],'100x50':[100,50],'100x75':[100,75]};
-const PKEYS=['lSize','lW','lH','lOx','lOy','lMenu','lCopies','lOrient'];
-Object.assign(UI,{lW:58,lH:40,lOx:0,lOy:0,lPay:true,lCopies:1,lOrient:'portrait'});
+const PKEYS=['lSize','lW','lH','lOx','lOy','lMenu','lCopies','lOrient','lScale'];
+Object.assign(UI,{lW:58,lH:40,lOx:0,lOy:0,lPay:true,lCopies:1,lOrient:'portrait',lScale:90});
 try{const o=JSON.parse(localStorage.getItem('otk-print')||'{}');PKEYS.forEach(k=>{if(o[k]!==undefined)UI[k]=o[k]});if(UI.lSize!=='custom'&&!SIZES[UI.lSize])UI.lSize='58x40'}catch(e){}
 function savePrint(){try{const o={};PKEYS.forEach(k=>o[k]=UI[k]);localStorage.setItem('otk-print',JSON.stringify(o))}catch(e){}}
 const clampN=(v,a,b,d)=>{v=Number(v);return isFinite(v)&&v?Math.min(b,Math.max(a,v)):d};
@@ -942,7 +943,7 @@ VIEWS.label=()=>{
   const n=items.filter(x=>!sk[UI.lDate+'|'+x.k]).length;const cp=clampN(UI.lCopies,1,5,1);
   const opt=k=>`<option value="${k}"${k===UI.lSize?' selected':''}>${k.replace('x',' × ')} mm</option>`;
   return`<div class="vh"><div><h1>Cetak Thermal Label Stiker</h1><p>${esc(fmtD(UI.lDate))} · ${n} label${cp>1?' × '+cp+' rangkap':''} · ${w} × ${h} mm</p></div>
-    <div class="row"><button class="btn" data-act="pdf" ${n?'':'disabled'}>${I('download',16)}PDF</button><button class="btn pri" data-act="print" ${n?'':'disabled'} style="padding:10px 18px">${I('printer',17)}Print Label</button></div></div>
+    <div class="row"><button class="btn" data-act="pdf" ${n?'':'disabled'}>${I('download',16)}PDF</button><button class="btn" data-act="printTest" ${n?'':'disabled'} title="Cetak 1 label untuk cek posisi">${I('printer',16)}Tes 1 label</button><button class="btn pri" data-act="print" ${n?'':'disabled'} style="padding:10px 18px">${I('printer',17)}Print Label</button></div></div>
   <div class="grid g2" style="margin-bottom:14px">
   <div class="card pad"><div class="sec-h"><h2>Label</h2></div><div class="fg">
     <label class="f">Tanggal<input type="date" class="inp" id="lDate" data-bind="lDate" value="${UI.lDate}"></label>
@@ -956,6 +957,8 @@ VIEWS.label=()=>{
     ${UI.lSize==='custom'?`<label class="f">Lebar (mm)<input class="inp" type="number" id="lW" data-bind="lW" min="20" max="150" value="${UI.lW}"></label><label class="f">Tinggi (mm)<input class="inp" type="number" id="lH" data-bind="lH" min="15" max="150" value="${UI.lH}"></label>`:''}
     <label class="f">Geser kanan/kiri (mm)<input class="inp" type="number" id="lOx" data-bind="lOx" step="0.5" min="-5" max="5" value="${UI.lOx}"></label>
     <label class="f">Geser atas/bawah (mm)<input class="inp" type="number" id="lOy" data-bind="lOy" step="0.5" min="-5" max="5" value="${UI.lOy}"></label>
+    <label class="f full">Ukuran isi label saat dicetak<select class="inp" id="lScale" data-bind="lScale">${[100,95,90,85,80,75,70].map(v=>`<option value="${v}"${Number(UI.lScale)===v?' selected':''}>${v}%${v===90?' (disarankan)':v===100?' · penuh':''}</option>`).join('')}</select></label>
+    <p class="hint full">Kecilkan kalau tepi kanan/bawah terpotong. Isi label otomatis ditaruh di tengah stiker.</p>
     <label class="f full">Arah cetak<select class="inp" id="lOrient" data-bind="lOrient"><option value="portrait"${UI.lOrient==='portrait'?' selected':''}>Portrait · ikut ukuran kertas printer (disarankan)</option><option value="rotate"${UI.lOrient==='rotate'?' selected':''}>Portrait · label diputar 90°</option><option value="landscape"${UI.lOrient==='landscape'?' selected':''}>Landscape · ukuran halaman = ukuran stiker</option></select></label>
     <p class="hint full">Pilih "diputar 90°" hanya kalau hasil cetak masih menyamping.</p>
     <p class="hint full">Isi geser jika hasil cetak miring ke satu sisi. Nilai plus menggeser ke kanan / ke bawah.</p>
@@ -968,6 +971,7 @@ ${labelInner(x)}</button>`}).join('')}</div>`
   <div class="card pad" style="margin-top:14px"><div class="sec-h"><h2>Cara print ke printer thermal</h2></div><ol class="howto">
     <li>Klik <b>Print Label</b>. Di dialog print buka <b>More settings</b>, pilih <b>Paper size ${w} × ${h} mm</b> (ukuran dari driver printer) dan <b>Layout: Portrait</b>.</li>
     <li>Pilih printer thermal, <b>Margins: None</b>, <b>Scale: Default</b>, matikan <b>Headers and footers</b>, lalu Print. Chrome mengingat pilihan ini.</li>
+    <li>Keluar banyak halaman kosong? Biasanya Paper size di dialog belum sama dengan ukuran stiker (misalnya masih A4 atau 58×210). Pilih ukuran stiker yang benar, lalu coba <b>Tes 1 label</b> dulu.</li>
     <li>Supaya tanpa dialog sama sekali: buat shortcut Chrome dengan tambahan <b>--kiosk-printing</b>, jadikan printer thermal sebagai printer default, lalu buka aplikasi dari shortcut itu. Klik Print Label langsung mencetak.</li>
     <li>Pertama kali saja: di pengaturan driver printer, pilih ukuran kertas yang sama dan mode gap/label.</li>
   </ol></div>`;
@@ -1241,15 +1245,20 @@ function saveFile(name,data,msg){
 }
 /* direct print: labels rendered as HTML pages sized exactly to the sticker */
 function fitMenus(root){(root||document).querySelectorAll('.lbl .lm').forEach(el=>{el.style.webkitLineClamp='';el.style.visibility='';if(!el.textContent.trim())return;const lh=parseFloat(getComputedStyle(el).lineHeight)||10;const n=Math.floor((el.clientHeight+0.5)/lh);if(n<1){el.style.visibility='hidden';return}el.style.display='-webkit-box';el.style.webkitBoxOrient='vertical';el.style.webkitLineClamp=String(n);el.style.flex='none';el.style.height=(n*lh)+'px'})}
-function printLabels(){
-  const [w,h]=lsize();const items=labelItems().filter(x=>!UI.lSkip[UI.lDate+'|'+x.k]);if(!items.length)return;
-  const s=Math.min(w/58,h/40),cp=clampN(UI.lCopies,1,5,1),ox=clampN(UI.lOx,-10,10,0),oy=clampN(UI.lOy,-10,10,0);
+function printLabels(onlyFirst){
+  const [w,h]=lsize();let items=labelItems().filter(x=>!UI.lSkip[UI.lDate+'|'+x.k]);if(!items.length)return;
+  if(onlyFirst===true)items=items.slice(0,1);
+  const s=Math.min(w/58,h/40),cp=onlyFirst===true?1:clampN(UI.lCopies,1,5,1),ox=clampN(UI.lOx,-10,10,0),oy=clampN(UI.lOy,-10,10,0);
+  const k=clampN(UI.lScale,50,100,90)/100;
   const o=UI.lOrient||'portrait',rot=o==='rotate';const pw=rot?h:w,ph=rot?w:h;
-  const tf=[ox||oy?`translate(${ox}mm,${oy}mm)`:'',rot?`translate(${h}mm,0) rotate(90deg)`:''].filter(Boolean).join(' ');
-  let html='';items.forEach(x=>{for(let c=0;c<cp;c++)html+=`<div class="pg" style="width:${pw}mm;height:${ph}mm"><div class="lbl" style="width:${w}mm;height:${h}mm;--s:${s.toFixed(3)};${tf?`transform:${tf};transform-origin:0 0;`:''}">${labelInner(x)}</div></div>`});
+  /* page box is a hair smaller than the paper so rounding never spills onto an extra (blank) page */
+  const bw=pw-0.6,bh=ph-0.8;
+  const vw=rot?h*k:w*k,vh=rot?w*k:h*k;const cx=(bw-vw)/2+ox,cy=(bh-vh)/2+oy;
+  const tf=`translate(${cx.toFixed(2)}mm,${cy.toFixed(2)}mm)`+(rot?` translate(${(h*k).toFixed(2)}mm,0) rotate(90deg)`:'')+` scale(${k})`;
+  let html='';items.forEach(x=>{for(let c=0;c<cp;c++)html+=`<div class="pg" style="width:${bw.toFixed(2)}mm;height:${bh.toFixed(2)}mm"><div class="lbl" style="width:${w}mm;height:${h}mm;--s:${s.toFixed(3)};transform:${tf};transform-origin:0 0">${labelInner(x)}</div></div>`});
   $('#printArea').innerHTML=html;
   const size=o==='landscape'?`${w}mm ${h}mm`:o==='rotate'?`${pw}mm ${ph}mm`:'auto';
-  $('#pageStyle').textContent=`@page{size:${size};margin:0}@media print{html,body{margin:0!important;padding:0!important}}`;
+  $('#pageStyle').textContent=`@page{size:${size};margin:0}@media print{html,body{margin:0!important;padding:0!important;height:auto!important;min-height:0!important;background:#fff!important}body::before{display:none!important}}`;
   const pa=$('#printArea');pa.style.cssText='display:block;position:fixed;left:-9999px;top:0';fitMenus(pa);pa.style.cssText='';
   setTimeout(()=>window.print(),60);
 }
@@ -1329,7 +1338,7 @@ const ACT={
   payOwe:()=>{const k=$('#pKid').value;if(!k){toast('Pilih anak dulu','err');return}const b=(bal()[k]||ZB).bal;if(b>=0){toast('Saldo anak ini tidak minus');return}$('#pAmt').value=-b},
   ledger:d=>ledgerView(d.k), bill:d=>billModal(d.k),
   copyM:()=>copyText(M.st.txt,'Pesan'),
-  csv:csvExport, pdf:makePdf, print:printLabels,
+  csv:csvExport, pdf:makePdf, print:()=>printLabels(false), printTest:()=>printLabels(true),
   lSkip:d=>{UI.lSkip[d.key]=!UI.lSkip[d.key];schedule()},
   asTog:(d,t)=>{M.st.sel[d.k]=t.checked;drawM()},
   asAll:()=>{const q=M.st.q.trim().toLowerCase();kidsArr().filter(k=>k.active!==false&&(!q||(k.name+' '+k.school+' '+k.grade).toLowerCase().includes(q))).forEach(k=>M.st.sel[k.id]=true);drawM()},
