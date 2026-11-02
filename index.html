@@ -95,7 +95,7 @@ main{padding-block:22px 60px}
 .inp:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:transparent}
 select.inp{padding-right:28px}
 textarea.inp{resize:vertical}
-label.f{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
+label.f,div.f{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
 .hint{font-size:12.5px;color:var(--muted);margin:0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
 .pad{padding:18px}
@@ -590,7 +590,7 @@ const ICONS={
 const I=(n,s=18)=>P.replace(/%s/g,s)+(ICONS[n]||'')+'</svg>';
 
 /* ---------- state ---------- */
-const DEFAULT_CFG={name:'One Two Kitchen',tagline:'Daily Kid Catering Management System',price:60000,lowPorsi:3,labelFooter:''};
+const DEFAULT_CFG={name:'One Two Kitchen',tagline:'Daily Kid Catering Management System',price:60000,lowPorsi:3,labelFooter:'',labelSize:'80x50',labelSizes:[]};
 const S={kids:{},menus:{},days:{},pays:{},exps:{},cfg:{...DEFAULT_CFG},mode:'connecting',canWrite:true,fresh:false,stale:false};
 const COLS=['kids','menus','days','pays','exps'];
 const UI={jPack:'',tab:'dashboard',jDate:TODAY,aQ:'',aSchool:'',aPack:'',aShow:'active',mDay:'',mQ:'',kMonth:TODAY.slice(0,7),kTab:'saldo',kQ:'',kFilter:'',lDate:TODAY,lSize:'58x40',lSchool:'',lSort:'school',lMenu:true,lSkip:{}};
@@ -928,12 +928,18 @@ VIEWS.keuangan=()=>{
 
 /* ----- Label ----- */
 const SIZES={'58x40':[58,40],'58x30':[58,30],'50x30':[50,30],'50x25':[50,25],'40x30':[40,30],'60x40':[60,40],'70x50':[70,50],'80x50':[80,50],'100x50':[100,50],'100x75':[100,75]};
-const PKEYS=['lSize','lW','lH','lOx','lOy','lMenu','lCopies','lOrient','lScale'];
-Object.assign(UI,{lW:58,lH:40,lOx:0,lOy:0,lPay:true,lCopies:1,lOrient:'portrait',lScale:90});
-try{const o=JSON.parse(localStorage.getItem('otk-print')||'{}');PKEYS.forEach(k=>{if(o[k]!==undefined)UI[k]=o[k]});if(UI.lSize!=='custom'&&!SIZES[UI.lSize])UI.lSize='58x40'}catch(e){}
+const PKEYS=['lOx','lOy','lMenu','lCopies','lOrient','lScale'];
+Object.assign(UI,{lSize:'',lW:80,lH:50,lOx:0,lOy:0,lPay:true,lCopies:1,lOrient:'portrait',lScale:90});
+try{const o=JSON.parse(localStorage.getItem('otk-print')||'{}');PKEYS.forEach(k=>{if(o[k]!==undefined)UI[k]=o[k]})}catch(e){}
 function savePrint(){try{const o={};PKEYS.forEach(k=>o[k]=UI[k]);localStorage.setItem('otk-print',JSON.stringify(o))}catch(e){}}
 const clampN=(v,a,b,d)=>{v=Number(v);return isFinite(v)&&v?Math.min(b,Math.max(a,v)):d};
-function lsize(){return UI.lSize==='custom'?[clampN(UI.lW,20,150,58),clampN(UI.lH,15,150,40)]:SIZES[UI.lSize]}
+const parseSz=k=>{const m=/^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)$/.exec(String(k||''));return m?[clampN(m[1],20,150,80),clampN(m[2],15,150,50)]:null};
+const allSizes=()=>{const o={...SIZES};(S.cfg.labelSizes||[]).forEach(k=>{const v=parseSz(k);if(v)o[k]=v});return o};
+const defSize=()=>{const k=S.cfg.labelSize||'80x50';return allSizes()[k]||parseSz(k)?k:'80x50'};
+/* ukuran aktif: pilihan sementara di halaman ini, kalau tidak ada pakai default bersama */
+const curSizeKey=()=>UI.lSize||defSize();
+function lsize(){const k=curSizeKey();if(k==='custom')return[clampN(UI.lW,20,150,80),clampN(UI.lH,15,150,50)];return allSizes()[k]||parseSz(k)||[80,50]}
+const sizeKeyNow=()=>{const k=curSizeKey();if(k!=='custom')return k;const [w,h]=lsize();return w+'x'+h};
 const packCode=p=>p?String(p).split(/\s+/).filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,3):'';
 function labelItems(all){
   const d=S.days[UI.lDate];if(!d)return[];const mn=menuName(d);const B=bal();
@@ -957,7 +963,7 @@ VIEWS.label=()=>{
   const [w,h]=lsize();const s=Math.min(w/58,h/40);const items=labelItems();const sk=UI.lSkip;
   const n=items.filter(x=>!sk[UI.lDate+'|'+x.k]).length;const cp=clampN(UI.lCopies,1,5,1);
   const allI=labelItems(true),nLB=allI.filter(x=>x.pack==='Lunch Box').length,nSkip=items.length-n;
-  const opt=k=>`<option value="${k}"${k===UI.lSize?' selected':''}>${k.replace('x',' × ')} mm</option>`;
+  const opt=k=>`<option value="${k}"${k===curSizeKey()?' selected':''}>${k.replace('x',' × ')} mm${k===defSize()?' · default':''}</option>`;
   return`<div class="vh"><div><h1>Cetak Thermal Label Stiker</h1><p>${esc(fmtD(UI.lDate))} · ${n} label${cp>1?' × '+cp+' rangkap':''} · ${w} × ${h} mm</p></div>
     <div class="row"><button class="btn" data-act="pdf" ${n?'':'disabled'}>${I('download',16)}PDF</button><button class="btn" data-act="printTest" ${n?'':'disabled'} title="Cetak 2 label untuk cek posisi dan jarak antar label">${I('printer',16)}Tes 2 label</button><button class="btn pri" data-act="print" ${n?'':'disabled'} style="padding:10px 18px">${I('printer',17)}Print ${n*cp} label</button></div></div>
   <div class="lsum">
@@ -974,9 +980,11 @@ VIEWS.label=()=>{
     <label class="f">Rangkap per anak<select class="inp" id="lCopies" data-bind="lCopies">${[1,2,3].map(c=>`<option value="${c}"${c===cp?' selected':''}>${c} label</option>`).join('')}</select></label>
     <div class="full row" style="gap:16px"><label class="chk"><input type="checkbox" id="lMenu" data-bind="lMenu"${UI.lMenu?' checked':''}>Tampilkan menu</label></div>
   </div></div>
-  <div class="card pad"><div class="sec-h"><h2>Printer thermal</h2><span class="hint">Tersimpan di perangkat ini</span></div><div class="fg">
-    <label class="f full">Ukuran stiker<select class="inp" id="lSize" data-bind="lSize"><optgroup label="Kecil">${['40x30','50x25','50x30','58x30'].map(opt).join('')}</optgroup><optgroup label="Sedang">${['58x40','60x40','70x50','80x50'].map(opt).join('')}</optgroup><optgroup label="Besar">${['100x50','100x75'].map(opt).join('')}</optgroup><option value="custom"${UI.lSize==='custom'?' selected':''}>Ukuran lain…</option></select></label>
-    ${UI.lSize==='custom'?`<label class="f">Lebar (mm)<input class="inp" type="number" id="lW" data-bind="lW" min="20" max="150" value="${UI.lW}"></label><label class="f">Tinggi (mm)<input class="inp" type="number" id="lH" data-bind="lH" min="15" max="150" value="${UI.lH}"></label>`:''}
+  <div class="card pad"><div class="sec-h"><h2>Printer thermal</h2><span class="hint">Geser, skala & arah tersimpan di perangkat ini</span></div><div class="fg">
+    <div class="f full"><span>Ukuran stiker</span><div class="row" style="flex-wrap:nowrap"><select class="inp" id="lSize" data-bind="lSize" style="flex:1"><optgroup label="Kecil">${['40x30','50x25','50x30','58x30'].map(opt).join('')}</optgroup><optgroup label="Sedang">${['58x40','60x40','70x50','80x50'].map(opt).join('')}</optgroup><optgroup label="Besar">${['100x50','100x75'].map(opt).join('')}</optgroup>${(S.cfg.labelSizes||[]).filter(k=>!SIZES[k]&&parseSz(k)).length?`<optgroup label="Ukuran tersimpan">${(S.cfg.labelSizes||[]).filter(k=>!SIZES[k]&&parseSz(k)).map(opt).join('')}</optgroup>`:''}<option value="custom"${curSizeKey()==='custom'?' selected':''}>Ukuran lain…</option></select>
+      ${sizeKeyNow()===defSize()?`<span class="pill ok" style="flex:none">Default</span>`:`<button type="button" class="btn sm" data-act="setDefSize" style="flex:none">Jadikan default</button>`}</div>
+      <span class="hint">Default dipakai semua perangkat: <b>${defSize().replace('x',' × ')} mm</b>. Ganti ukuran di sini hanya untuk cetak kali ini.</span></div>
+    ${curSizeKey()==='custom'?`<label class="f">Lebar (mm)<input class="inp" type="number" id="lW" data-bind="lW" min="20" max="150" value="${UI.lW}"></label><label class="f">Tinggi (mm)<input class="inp" type="number" id="lH" data-bind="lH" min="15" max="150" value="${UI.lH}"></label>`:''}
     <label class="f">Geser kanan/kiri (mm)<input class="inp" type="number" id="lOx" data-bind="lOx" step="0.5" min="-5" max="5" value="${UI.lOx}"></label>
     <label class="f">Geser atas/bawah (mm)<input class="inp" type="number" id="lOy" data-bind="lOy" step="0.5" min="-5" max="5" value="${UI.lOy}"></label>
     <label class="f full">Ukuran isi label saat dicetak<select class="inp" id="lScale" data-bind="lScale">${[100,95,90,85,80,75,70].map(v=>`<option value="${v}"${Number(UI.lScale)===v?' selected':''}>${v}%${v===90?' (disarankan)':v===100?' · penuh':''}</option>`).join('')}</select></label>
@@ -1276,11 +1284,11 @@ function fitMenus(root){fitNames(root);(root||document).querySelectorAll('.lbl .
   if(!el.textContent.trim())return;
   const base=parseFloat(getComputedStyle(el).fontSize)||10;
   const shrink=min=>{let f=base,g=0;el.style.fontSize=f+'px';while(el.scrollHeight>el.clientHeight+0.5&&f>min&&g++<80){f-=0.25;el.style.fontSize=f+'px'}return el.scrollHeight<=el.clientHeight+0.5};
-  if(shrink(6.6))return;
+  if(shrink(Math.max(6.6,base*0.72)))return;
   /* rapatkan: nama sekolah 1 baris, catatan & alergi sedikit lebih kecil */
   L.classList.add('tight');
   if(sc){let f=parseFloat(getComputedStyle(sc).fontSize),g=0;const lh=()=>parseFloat(getComputedStyle(sc).lineHeight)||f*1.05;while(sc.scrollHeight>lh()*1.3&&f>6.5&&g++<60){f-=0.25;sc.style.fontSize=f+'px'}}
-  shrink(5)})}
+  shrink(Math.max(5,base*0.45))})}
 function printLabels(onlyFirst){
   const [w,h]=lsize();let items=labelItems().filter(x=>!UI.lSkip[UI.lDate+'|'+x.k]);if(!items.length)return;
   if(onlyFirst===true)items=items.slice(0,2);
@@ -1334,10 +1342,16 @@ async function settingsForm(){
     <label class="f full">Tagline<input class="inp" name="tagline" value="${esc(c.tagline)}"></label>
     <label class="f">Harga default / porsi<input class="inp" type="number" name="price" step="1000" min="0" value="${c.price}"></label>
     <label class="f">Saldo menipis jika kurang dari<input class="inp" type="number" name="lowPorsi" min="0" max="50" value="${c.lowPorsi}"><span class="hint">porsi</span></label></div>
+    <div class="card pad" style="box-shadow:none;background:var(--sunk)"><div class="sec-h"><h2>Ukuran label</h2></div>
+      <label class="f">Ukuran default (semua perangkat)<select class="inp" name="labelSize">${Object.keys(allSizes()).sort((a,b)=>allSizes()[a][0]-allSizes()[b][0]||allSizes()[a][1]-allSizes()[b][1]).map(k=>`<option value="${k}"${k===defSize()?' selected':''}>${k.replace('x',' × ')} mm</option>`).join('')}</select></label>
+      <p class="hint" style="margin:10px 0 6px">Ukuran tambahan untuk printer lain</p>
+      ${(S.cfg.labelSizes||[]).filter(k=>!SIZES[k]).map(k=>`<div class="li"><div class="t"><b>${k.replace('x',' × ')} mm</b></div><button type="button" class="btn sm" data-act="delSize" data-k="${k}">${I('trash',14)}Hapus</button></div>`).join('')||'<p class="hint">Belum ada.</p>'}
+      <div class="row" style="margin-top:8px"><input class="inp" id="nsW" type="number" min="20" max="150" placeholder="Lebar mm" style="width:110px"><span>×</span><input class="inp" id="nsH" type="number" min="15" max="150" placeholder="Tinggi mm" style="width:110px"><button type="button" class="btn" data-act="addSize">${I('plus',14)}Tambah ukuran</button></div>
+    </div>
     <div class="card pad" style="box-shadow:none;background:var(--sunk)"><div class="sec-h"><h2>Backup data</h2></div><p class="hint" style="margin-bottom:10px">Simpan seluruh data ke file JSON, atau pulihkan dari file backup. Import menimpa data dengan ID yang sama.</p>
     <div class="row"><button type="button" class="btn" data-act="bkExport">${I('download',16)}Export backup</button><button type="button" class="btn" data-act="bkImport">${I('upload',16)}Import backup</button></div></div>
 `},
-    submit:async o=>{const ok=await put('config','main',{...S.cfg,name:o.name.trim()||DEFAULT_CFG.name,tagline:o.tagline.trim(),price:Number(o.price)||DEFAULT_CFG.price,lowPorsi:Number(o.lowPorsi)||0});if(ok)toast('Pengaturan disimpan','ok');return ok}});
+    submit:async o=>{const ok=await put('config','main',{...S.cfg,labelSize:o.labelSize||S.cfg.labelSize,name:o.name.trim()||DEFAULT_CFG.name,tagline:o.tagline.trim(),price:Number(o.price)||DEFAULT_CFG.price,lowPorsi:Number(o.lowPorsi)||0});if(ok)toast('Pengaturan disimpan','ok');return ok}});
 }
 
 /* ---------- actions ---------- */
@@ -1353,6 +1367,9 @@ const ACT={
   eEdit:d=>entryForm(d.d,d.k),
   jumpSch:d=>{const g=[...document.querySelectorAll('.grp')].find(x=>x.dataset.sch===d.s);if(g){const y=g.getBoundingClientRect().top+window.scrollY-70;window.scrollTo({top:y,behavior:'smooth'})}},
   aSch:d=>{UI.aSchool=UI.aSchool===d.s?'':d.s;schedule()},
+  setDefSize:async()=>{const k=sizeKeyNow();const list=[...new Set([...(S.cfg.labelSizes||[]),...(SIZES[k]?[]:[k])])];if(await put('config','main',{...S.cfg,labelSize:k,labelSizes:list})){UI.lSize='';toast('Ukuran default: '+k.replace('x',' × ')+' mm','ok')}},
+  delSize:async d=>{const list=(S.cfg.labelSizes||[]).filter(k=>k!==d.k);const def=S.cfg.labelSize===d.k?'80x50':S.cfg.labelSize;if(await put('config','main',{...S.cfg,labelSizes:list,labelSize:def})){M&&drawM();toast('Ukuran '+d.k.replace('x',' × ')+' dihapus','ok')}},
+  addSize:async()=>{const w=clampN($('#nsW').value,20,150,0),h=clampN($('#nsH').value,15,150,0);if(!w||!h){toast('Isi lebar dan tinggi (mm)','err');return}const k=w+'x'+h;if(SIZES[k]||(S.cfg.labelSizes||[]).includes(k)){toast('Ukuran itu sudah ada','err');return}if(await put('config','main',{...S.cfg,labelSizes:[...(S.cfg.labelSizes||[]),k]})){M&&drawM();toast('Ukuran '+w+' × '+h+' mm ditambahkan','ok')}},
   jPack:d=>{UI.jPack=UI.jPack===d.v?'':d.v;schedule()},
   ePack:async d=>{const dd=dayClone(d.d);const e=dd.entries[d.k];if(!e)return;e.pack=(e.pack||'Plastic Box')==='Lunch Box'?'Plastic Box':'Lunch Box';if(await put('days',d.d,dd))toast('Kemasan '+(e.name||'')+' hari ini: '+e.pack,'ok')},
   eDel:d=>{const x=info(d.k,S.days[d.d].entries[d.k]);ask('Hapus dari jadwal?',`<b>${esc(x.name)}</b> dihapus dari jadwal ${esc(fmtD(d.d))} dan saldonya tidak dipotong. Gunakan status <b>Batal</b> jika ingin tetap tercatat.`,'Hapus',async()=>{const dd=dayClone(d.d);delete dd.entries[d.k];if(Object.keys(dd.entries).length)await put('days',d.d,dd);else await del('days',d.d)})},
