@@ -675,7 +675,7 @@ function bal(){
     if(e.status==='cancelled')continue;const b=g(k);const pr=Number(e.price)||0;
     if(d.date<=TODAY||e.status==='delivered'){b.used+=pr;b.up++}else{b.res+=pr;b.rp++}
   }
-  for(const b of Object.values(B))b.bal=b.dep-b.used-b.res;
+  for(const b of Object.values(B))b.bal=b.dep-b.used; /* saldo hanya dipotong porsi yang sudah terkirim */
   return memoB=B;
 }
 const ZB={dep:0,used:0,res:0,up:0,rp:0,bal:0};
@@ -823,7 +823,7 @@ VIEWS.jadwal=()=>{
       ${Object.entries(groups).sort((a,b)=>cmpN(a[0],b[0])).map(([sch,xs])=>`<div class="grp" data-sch="${esc(sch)}"><div class="grp-h"><span class="ghn">${esc(sch)}<span class="gcount num">${xs.filter(x=>x.e.status!=='cancelled').length} anak</span></span><span class="muted" style="font-weight:600;font-size:12.5px">${(()=>{const lv=xs.filter(x=>x.e.status!=='cancelled');const pb=lv.filter(x=>(x.pack||'Plastic Box')!=='Lunch Box').length,lb=lv.length-pb;return 'Plastic Box '+pb+' · Lunch Box '+lb})()}</span></div>
         ${xs.map(x=>`<div class="erow st-${x.e.status}"><div class="en"><div class="enl"><b>${esc(x.name)}</b><span class="sub">${esc(x.grade)}</span>${packPill(x.pack,` data-act="ePack" data-d="${date}" data-k="${x.k}" title="Klik untuk ganti kemasan hari ini" aria-label="Kemasan ${esc(x.pack||'Plastic Box')}, klik untuk ganti"`)}</div>${x.allergy&&x.allergy!=='-'?`<div class="alg">${I('alert',13)}<span>${esc(x.allergy)}</span></div>`:''}${x.e.note?`<div class="nt">Catatan: ${esc(x.e.note)}</div>`:''}</div><span class="ep">${rp(x.e.price)}</span>${seg(x)}<div class="eact"><button class="iconbtn" data-act="eEdit" data-d="${date}" data-k="${x.k}" aria-label="Ubah porsi ${esc(x.name)}">${I('edit',16)}</button><button class="iconbtn" data-act="eDel" data-d="${date}" data-k="${x.k}" aria-label="Hapus ${esc(x.name)} dari jadwal">${I('x',16)}</button></div></div>`).join('')}</div>`).join('')}`;
   }
-  return`<div class="vh"><div><h1>Jadwal & Pengiriman</h1><p>Minggu ${shortD(mon)} – ${shortD(addDays(mon,5))} ${parseD(mon).getFullYear()}. Saldo DP terpotong per porsi; status Batal mengembalikan saldo.</p></div>
+  return`<div class="vh"><div><h1>Jadwal & Pengiriman</h1><p>Minggu ${shortD(mon)} – ${shortD(addDays(mon,5))} ${parseD(mon).getFullYear()}. Saldo DP terpotong saat porsi terkirim (atau tanggalnya sudah lewat); status Batal tidak dihitung.</p></div>
     <div class="row"><button class="iconbtn" data-act="jWeek" data-n="-7" aria-label="Minggu sebelumnya" style="border:1px solid var(--line);background:var(--surface)">${I('left')}</button><input type="date" class="inp" id="jDate" data-bind="jDate" value="${UI.jDate}" style="width:auto" aria-label="Pilih tanggal"><button class="iconbtn" data-act="jWeek" data-n="7" aria-label="Minggu berikutnya" style="border:1px solid var(--line);background:var(--surface)">${I('right')}</button><button class="btn" data-act="jSel" data-d="${TODAY}">Hari ini</button><button class="btn pri" data-act="weekGen" data-d="${UI.jDate}">${I('wand',16)}Buat jadwal minggu</button></div></div>
   <div class="week">${strip}</div>
   <div class="card">${body}</div>`;
@@ -898,7 +898,7 @@ VIEWS.keuangan=()=>{
     ks.sort((a,b)=>a.b.bal-b.b.bal||cmpN(a.name,b.name));
     inner=`<div class="tool" style="padding:14px 14px 0"><div class="search">${I('search',16)}<input class="inp" id="kQ" data-bind="kQ" value="${esc(UI.kQ)}" placeholder="Cari anak…" aria-label="Cari anak"></div>
       <select class="inp" id="kFilter" data-bind="kFilter" aria-label="Status saldo"><option value="">Semua status</option><option value="bad"${UI.kFilter==='bad'?' selected':''}>Kurang bayar</option><option value="warn"${UI.kFilter==='warn'?' selected':''}>Saldo menipis</option><option value="ok"${UI.kFilter==='ok'?' selected':''}>Aman</option><option value="none"${UI.kFilter==='none'?' selected':''}>Belum DP</option></select></div>
-      ${ks.length?`<div class="tw"><table class="t"><thead><tr><th>Anak</th><th class="r">Total DP</th><th class="r">Terpakai</th><th class="r">Terjadwal</th><th class="r">Sisa saldo</th><th>Status</th><th class="r">Aksi</th></tr></thead><tbody>
+      ${ks.length?`<div class="tw"><table class="t"><thead><tr><th>Anak</th><th class="r">Total DP</th><th class="r">Terkirim</th><th class="r">Terjadwal</th><th class="r">Sisa saldo</th><th>Status</th><th class="r">Aksi</th></tr></thead><tbody>
       ${ks.map(k=>`<tr><td><b>${esc(k.name)}</b><div class="muted" style="font-size:12px">${esc(k.school||'-')} · ${esc(k.grade||'-')}</div></td><td class="r">${rp(k.b.dep)}</td><td class="r">${rp(k.b.used)}<div class="muted" style="font-size:11.5px">${k.b.up} porsi</div></td><td class="r">${rp(k.b.res)}<div class="muted" style="font-size:11.5px">${k.b.rp} porsi</div></td><td class="r"><b class="${k.b.bal<0?'neg':''}">${rp(k.b.bal)}</b></td><td>${stPill(k.b)}</td>
       <td><div class="acts"><button class="btn sm" data-act="ledger" data-k="${k.id}" title="Riwayat">${I('hist',14)}</button><button class="btn sm" data-act="bill" data-k="${k.id}" title="Pesan tagihan WA">${I('send',14)}</button><button class="btn sm pri" data-act="payNew" data-k="${k.id}">+DP</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('Tidak ada data','Tambah anak di Database Anak terlebih dulu.')}`;
   }else if(UI.kTab==='exps'){
@@ -913,7 +913,7 @@ VIEWS.keuangan=()=>{
     inner=ps.length?`<div class="tw"><table class="t"><thead><tr><th>Tanggal</th><th>Anak</th><th>Jenis</th><th>Metode</th><th>Catatan</th><th class="r">Jumlah</th><th></th></tr></thead><tbody>
       ${ps.map(p=>{const k=S.kids[p.kidId];const v=payVal(p);return`<tr><td style="white-space:nowrap">${shortD(p.date)}</td><td><b>${esc(k?k.name:'(anak dihapus)')}</b></td><td>${PAYT[p.type]||esc(p.type)}</td><td>${esc(p.method||'-')}</td><td class="muted">${esc(p.note||'')}</td><td class="r"><b class="${v<0?'neg':'pos'}">${v<0?'-':'+'}${rp(Math.abs(v))}</b></td><td><div class="acts"><button class="btn sm" data-act="payEdit" data-p="${p.id}" aria-label="Ubah">${I('edit',14)}</button><button class="btn sm" data-act="payDel" data-p="${p.id}" aria-label="Hapus">${I('trash',14)}</button></div></td></tr>`}).join('')}</tbody></table></div>`:empty('Belum ada pembayaran di '+mlabel,'Catat DP atau pelunasan dengan tombol Catat Pembayaran.');
   }
-  return`<div class="vh"><div><h1>Laporan Keuangan & Pelunasan</h1><p>Saldo = total DP − porsi terpakai − porsi terjadwal. Porsi berstatus Batal tidak memotong saldo.</p></div>
+  return`<div class="vh"><div><h1>Laporan Keuangan & Pelunasan</h1><p>Saldo = total DP − porsi terkirim. Porsi terjadwal belum memotong saldo; porsi Batal tidak dihitung.</p></div>
     <div class="row"><input type="month" class="inp" id="kMonth" data-bind="kMonth" value="${mo}" style="width:auto" aria-label="Bulan"><button class="btn" data-act="csv">${I('download',16)}Export CSV</button><button class="btn exp" data-act="expNew">${I('minus',16)}Catat pengeluaran</button><button class="btn pri" data-act="payNew">${I('plus',16)}Catat pembayaran</button></div></div>
   <div class="grid g3" style="margin-bottom:14px">
     <div class="card kpi"><span class="ki ok">${I('money',22)}</span><div><small>Uang masuk · ${MON[m-1]}</small><b class="num">${rp(ms.cash-ms.refund)}</b><span class="s">${ms.refund?'Refund '+rp(ms.refund):'DP & pelunasan'}</span></div></div>
@@ -1174,19 +1174,19 @@ function ledgerRows(kid){
   for(const p of Object.values(S.pays))if(p.kidId===kid)rows.push({date:p.date,desc:(PAYT[p.type]||p.type)+(p.method?' · '+p.method:'')+(p.note?' · '+p.note:''),amt:payVal(p),o:0});
   for(const d of Object.values(S.days)){const e=(d.entries||{})[kid];if(!e)continue;
     const fut=d.date>TODAY&&e.status!=='delivered';
-    rows.push({date:d.date,desc:'Porsi · '+(menuName(d)||'menu belum dipilih')+(e.status==='cancelled'?' (batal)':fut?' (terjadwal)':e.status==='delivered'?' (terkirim)':''),amt:e.status==='cancelled'?0:-(Number(e.price)||0),o:1,c:e.status==='cancelled'})}
+    rows.push({date:d.date,desc:'Porsi · '+(menuName(d)||'menu belum dipilih')+(e.status==='cancelled'?' (batal)':fut?' (terjadwal)':e.status==='delivered'?' (terkirim)':''),amt:(e.status==='cancelled'||fut)?0:-(Number(e.price)||0),o:1,c:e.status==='cancelled'||fut})}
   rows.sort((a,b)=>a.date.localeCompare(b.date)||a.o-b.o);let r=0;rows.forEach(x=>{r+=x.amt;x.run=r});return rows;
 }
 function ledgerView(kid){
   const k=S.kids[kid];if(!k)return;const b=bal()[kid]||ZB;const rows=ledgerRows(kid);
   openM({title:'Riwayat saldo · '+k.name,wide:true,
-    body:()=>`<div class="counts"><div class="cnt"><small>Total DP</small><b class="num">${rp(b.dep)}</b></div><div class="cnt"><small>Terpakai (${b.up})</small><b class="num">${rp(b.used)}</b></div><div class="cnt"><small>Terjadwal (${b.rp})</small><b class="num">${rp(b.res)}</b></div><div class="cnt"><small>Sisa saldo</small><b class="num ${b.bal<0?'neg':''}">${rp(b.bal)}</b></div></div>
+    body:()=>`<div class="counts"><div class="cnt"><small>Total DP</small><b class="num">${rp(b.dep)}</b></div><div class="cnt"><small>Terkirim (${b.up})</small><b class="num">${rp(b.used)}</b></div><div class="cnt"><small>Terjadwal (${b.rp}) · belum dipotong</small><b class="num">${rp(b.res)}</b></div><div class="cnt"><small>Sisa saldo</small><b class="num ${b.bal<0?'neg':''}">${rp(b.bal)}</b></div></div>
     ${rows.length?`<div class="tw" style="border:1px solid var(--line);border-radius:10px;max-height:380px;overflow:auto"><table class="t ledg"><thead><tr><th>Tanggal</th><th>Keterangan</th><th class="r">Mutasi</th><th class="r">Saldo</th></tr></thead><tbody>${rows.slice().reverse().map(x=>`<tr${x.c?' class="muted"':''}><td style="white-space:nowrap">${shortD(x.date)} ${x.date.slice(0,4)}</td><td>${esc(x.desc)}</td><td class="r ${x.amt<0?'neg':x.amt>0?'pos':''}">${x.amt?(x.amt>0?'+':'')+rp(x.amt):'–'}</td><td class="r"><b>${rp(x.run)}</b></td></tr>`).join('')}</tbody></table></div>`:empty('Belum ada transaksi','')}`,
     foot:()=>`<button type="button" class="btn" data-act="bill" data-k="${kid}">${I('send',16)}Pesan tagihan</button><span style="flex:1"></span><button type="button" class="btn" data-act="closeM">Tutup</button><button type="button" class="btn pri" data-act="payNew" data-k="${kid}">+ Catat DP</button>`});
 }
 function billText(kid){
   const k=S.kids[kid],b=bal()[kid]||ZB;const pr=Number(k.price)||Number(S.cfg.price)||60000;
-  const sisa=b.dep-b.used; /* tagihan hanya dari porsi yang sudah terkirim */
+  const sisa=b.bal; /* tagihan hanya dari porsi yang sudah terkirim */
   let t=`Halo ${k.parent?'Bapak/Ibu '+k.parent:'Bapak/Ibu'},\nBerikut ringkasan catering *${k.name}* (${k.school||''} ${k.grade||''}) dari ${S.cfg.name} per ${fmtD(TODAY)}:\n\n`;
   t+=`• Total DP: ${rp(b.dep)}\n• Terkirim: ${b.up} porsi (${rp(b.used)})\n• Sisa saldo: *${rp(sisa)}*\n\n`;
   if(sisa<0)t+=`Mohon melakukan pembayaran sebesar *${rp(-sisa)}* untuk melunasi porsi yang sudah terkirim.`;
@@ -1309,7 +1309,7 @@ function printLabels(onlyFirst){
 window.addEventListener('afterprint',()=>{$('#printArea').innerHTML=''});
 function csvExport(){
   const B=bal();const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const lines=[['Nama','Sekolah','Kelas','Kemasan','Ortu','WA','Total DP','Porsi terpakai','Nilai terpakai','Porsi terjadwal','Nilai terjadwal','Sisa saldo','Status'].map(q).join(',')];
+  const lines=[['Nama','Sekolah','Kelas','Kemasan','Ortu','WA','Total DP','Porsi terkirim','Nilai terkirim','Porsi terjadwal','Nilai terjadwal','Sisa saldo','Status'].map(q).join(',')];
   kidsArr().sort(sortKids).forEach(k=>{const b=B[k.id]||ZB;lines.push([k.name,k.school,k.grade,k.pack,k.parent,k.wa,b.dep,b.up,b.used,b.rp,b.res,b.bal,stat(b).l].map(q).join(','))});
   saveFile(`saldo-catering-${TODAY}.csv`,'﻿'+lines.join('\n'));
 }
