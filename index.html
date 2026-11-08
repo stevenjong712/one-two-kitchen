@@ -440,6 +440,9 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .lsum span{font-size:13px;font-weight:600;color:var(--muted)}
 .lsum .lsc1{background:var(--brand);border-color:var(--brand);color:#fff}.lsum .lsc1 span{color:rgba(255,255,255,.9)}
 .lsum .lsc2{background:var(--tb)}.lsum .lsc2 b{color:var(--ti)}
+.akrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line)}
+.akrow:last-child{border-bottom:0}
+.akrow .t{display:grid;gap:2px;min-width:0}.akrow .gr{margin:0}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -805,7 +808,7 @@ VIEWS.jadwal=()=>{
   const date=UI.jDate,d=S.days[date];
   let body;
   if(!d||!Object.keys(d.entries||{}).length){
-    body=`<div class="dayhead"><div><span class="lbl-cap">${esc(dowName(date))}</span><h2>${fmtD(date)}</h2></div></div>`+empty('Belum ada jadwal di hari ini','Pilih menu dan anak yang makan di tanggal ini. Anak yang berlangganan hari '+esc(dowName(date))+' langsung tercentang.',`<div class="row"><button class="btn pri" data-act="assign" data-d="${date}">${I('plus',16)}Jadwalkan hari ini</button><button class="btn" data-act="weekGen" data-d="${date}">${I('wand',16)}Buat seminggu sekaligus</button></div>`);
+    body=`<div class="dayhead"><div><span class="lbl-cap">${esc(dowName(date))}</span><h2>${fmtD(date)}</h2></div></div>`+empty('Belum ada jadwal di hari ini','Pilih menu dan anak yang makan di tanggal ini. Anak yang berlangganan hari '+esc(dowName(date))+' langsung tercentang.',`<div class="row"><button class="btn pri" data-act="assign" data-d="${date}">${I('plus',16)}Jadwalkan hari ini</button><button class="btn" data-act="addKid" data-d="${date}">${I('plus',16)}Tambah satu anak</button><button class="btn" data-act="weekGen" data-d="${date}">${I('wand',16)}Buat seminggu sekaligus</button></div>`);
   }else{
     const all=Object.entries(d.entries).map(([k,e])=>({k,e,...info(k,e)})).sort(sortKids);
     const live=all.filter(x=>x.e.status!=='cancelled');
@@ -817,7 +820,7 @@ VIEWS.jadwal=()=>{
     body=`<div class="dayhead"><div style="min-width:0;flex:1"><span class="lbl-cap">${esc(dowName(date))}${date===TODAY?' · hari ini':''}</span><h2>${fmtD(date)}</h2>
       <div class="menupick"><select class="inp" id="jMenu" data-chg="dayMenu" data-d="${date}" aria-label="Menu hari ini">${menuOptions(d.menuId)}</select></div>
       ${S.menus[d.menuId]&&S.menus[d.menuId].notes?`<p class="hint" style="margin-top:6px">Catatan menu: ${esc(S.menus[d.menuId].notes)}</p>`:''}</div>
-      <div class="row"><button class="btn pri" data-act="allDone" data-d="${date}">${I('check',16)}Semua terkirim</button><button class="btn" data-act="assign" data-d="${date}">${I('users',16)}Atur anak</button><button class="btn" data-act="dayCopy" data-d="${date}">${I('copy',16)}Rekap WA</button><button class="btn" data-act="goLabel" data-d="${date}">${I('printer',16)}Label</button><button class="btn ghost" data-act="dayClear" data-d="${date}" title="Hapus jadwal hari ini">${I('trash',16)}</button></div></div>
+      <div class="row"><button class="btn pri" data-act="allDone" data-d="${date}">${I('check',16)}Semua terkirim</button><button class="btn" data-act="addKid" data-d="${date}">${I('plus',16)}Tambah anak</button><button class="btn" data-act="assign" data-d="${date}">${I('users',16)}Atur anak</button><button class="btn" data-act="dayCopy" data-d="${date}">${I('copy',16)}Rekap WA</button><button class="btn" data-act="goLabel" data-d="${date}">${I('printer',16)}Label</button><button class="btn ghost" data-act="dayClear" data-d="${date}" title="Hapus jadwal hari ini">${I('trash',16)}</button></div></div>
       <div class="schstrip">${(()=>{const c={};live.forEach(x=>c[x.school]=(c[x.school]||0)+1);return Object.entries(c).sort((a,b)=>b[1]-a[1]||cmpN(a[0],b[0])).map(([sc,n])=>`<a class="schc" href="javascript:void 0" data-act="jumpSch" data-s="${esc(sc)}"><b class="num">${n}</b><span>${esc(sc)}</span></a>`).join('')})()}</div>
       <div class="sumbar"><span class="pill info">${live.length} porsi</span><span class="pill ok">${done} terkirim</span>${canc?`<span class="pill bad">${canc} batal</span>`:''}${['Plastic Box','Lunch Box'].map(p=>`<button type="button" class="pk ${p==='Lunch Box'?'pk-lb':'pk-pb'}" data-act="jPack" data-v="${p}" aria-pressed="${UI.jPack===p}" style="${UI.jPack&&UI.jPack!==p?'opacity:.45':''}" title="Tampilkan hanya ${p}">${p}: ${byPack[p]||0}</button>`).join('')}${UI.jPack?`<button type="button" class="btn sm ghost" data-act="jPack" data-v="">Tampilkan semua</button>`:''}<span class="pill">Nilai ${rp(total)}</span></div>
       ${Object.entries(groups).sort((a,b)=>cmpN(a[0],b[0])).map(([sch,xs])=>`<div class="grp" data-sch="${esc(sch)}"><div class="grp-h"><span class="ghn">${esc(sch)}<span class="gcount num">${xs.filter(x=>x.e.status!=='cancelled').length} anak</span></span><span class="muted" style="font-weight:600;font-size:12.5px">${(()=>{const lv=xs.filter(x=>x.e.status!=='cancelled');const pb=lv.filter(x=>(x.pack||'Plastic Box')!=='Lunch Box').length,lb=lv.length-pb;return 'Plastic Box '+pb+' · Lunch Box '+lb})()}</span></div>
@@ -1100,9 +1103,11 @@ function assignForm(date,menuId){
     onChange:p=>{if(p==='date'){const q=M.st.q;M.st=init(M.st.date);M.st.q=q}},
     body:()=>{const st=M.st;const w=parseD(st.date).getDay();const ex=S.days[st.date];
       const q=st.q.trim().toLowerCase();
-      const ks=kidsArr().filter(k=>k.active!==false||st.sel[k.id]).sort(sortKids);
+      const ks=kidsArr().sort(sortKids);
       const shown=ks.filter(k=>!q||(k.name+' '+k.school+' '+k.grade).toLowerCase().includes(q));
-      const groups={};shown.forEach(k=>(groups[k.school||'-']=groups[k.school||'-']||[]).push(k));
+      const groups={};const NA='Nonaktif · bisa ditambah untuk hari tertentu';
+      shown.filter(k=>k.active!==false).forEach(k=>(groups[k.school||'Tanpa sekolah']=groups[k.school||'Tanpa sekolah']||[]).push(k));
+      const ina=shown.filter(k=>k.active===false);if(ina.length)groups[NA]=ina;
       const n=Object.values(st.sel).filter(Boolean).length;const m=S.menus[st.menuId];
       return`<div class="fg"><label class="f">Tanggal<input type="date" class="inp" id="asDate" data-m="date" data-redraw value="${st.date}"></label>
         <label class="f">Menu<select class="inp" id="asMenu" data-m="menuId" data-redraw>${menuOptions(st.menuId)}</select></label></div>
@@ -1110,7 +1115,7 @@ function assignForm(date,menuId){
         ${ex&&Object.keys(ex.entries||{}).length?`<div class="banner info">${I('alert',16)}Tanggal ini sudah punya ${Object.keys(ex.entries).length} anak. Status & catatan yang ada tetap dipertahankan; anak yang tidak dicentang akan dihapus dari jadwal.</div>`:''}
         <div class="row"><div class="search" style="max-width:none">${I('search',16)}<input class="inp" id="asQ" data-m="q" data-redraw value="${esc(st.q)}" placeholder="Cari anak…"></div>
         <button type="button" class="btn sm" data-act="asSub">Sesuai langganan ${DAYN[w]}</button><button type="button" class="btn sm" data-act="asAll">Semua</button><button type="button" class="btn sm" data-act="asNone">Kosongkan</button></div>
-        <div class="picklist">${Object.keys(groups).length?Object.entries(groups).map(([s,xs])=>`<div class="ph">${esc(s)} · ${xs.length}</div>${xs.map(k=>`<label><input type="checkbox" data-act="asTog" data-k="${k.id}"${st.sel[k.id]?' checked':''}><b>${esc(k.name)}</b>${k.allergy&&k.allergy!=='-'?`<span class="alg" style="font-size:12px">${I('alert',12)}${esc(k.allergy)}</span>`:''}<span class="gr">${esc(k.grade)} · ${esc(k.pack||'')}${kidDays(k).includes(w)?'':' · tidak langganan'}</span></label>`).join('')}`).join(''):`<div class="empty">Belum ada anak. Tambah di Database Anak.</div>`}</div>
+        <div class="picklist">${Object.keys(groups).length?Object.entries(groups).map(([s,xs])=>`<div class="ph">${esc(s)} · ${xs.length}</div>${xs.map(k=>`<label><input type="checkbox" data-act="asTog" data-k="${k.id}"${st.sel[k.id]?' checked':''}><b>${esc(k.name)}</b>${k.allergy&&k.allergy!=='-'?`<span class="alg" style="font-size:12px">${I('alert',12)}${esc(k.allergy)}</span>`:''}<span class="gr">${esc(k.grade)} · ${esc(k.pack||'')}${k.active===false?' · '+esc(k.school||'-')+' · nonaktif':kidDays(k).includes(w)?'':' · tidak langganan'}</span></label>`).join('')}`).join(''):`<div class="empty">Belum ada anak. Tambah di Database Anak.</div>`}</div>
         <p class="hint" id="asCount"><b>${n}</b> anak dipilih · estimasi ${rp(Object.keys(st.sel).filter(k=>st.sel[k]&&S.kids[k]).reduce((s,k)=>s+priceFor(S.kids[k],m),0))}</p>`},
     submit:async()=>{const st=M.st;if(!st.date){toast('Pilih tanggal','err');return false}
       const ids=Object.keys(st.sel).filter(k=>st.sel[k]);
@@ -1121,6 +1126,17 @@ function assignForm(date,menuId){
       const ok=await put('days',st.date,d);if(ok){toast(ids.length+' porsi dijadwalkan untuk '+fmtD(st.date),'ok');UI.jDate=st.date;if(UI.tab!=='jadwal')go('jadwal')}return ok}});
 }
 
+
+/* ----- quick add one kid to a day ----- */
+function addKidForm(date){
+  openM({title:'Tambah anak · '+shortD(date),wide:false,st:{q:''},
+    body:()=>{const d=S.days[date];const have=new Set(Object.keys((d&&d.entries)||{}));const q=M.st.q.trim().toLowerCase();
+      const ks=kidsArr().filter(k=>!have.has(k.id)).filter(k=>!q||(k.name+' '+(k.school||'')+' '+(k.grade||'')).toLowerCase().includes(q)).sort((a,b)=>(a.active===false)-(b.active===false)||sortKids(a,b));
+      return`<p class="hint">Pilih anak yang makan di ${esc(fmtD(date))}. Anak nonaktif juga bisa ditambahkan untuk hari ini saja, tanpa mengubah status langganannya.</p>
+      <div class="search" style="max-width:none">${I('search',16)}<input class="inp" id="akQ" data-m="q" data-redraw value="${esc(M.st.q)}" placeholder="Cari nama, sekolah, kelas…" autofocus></div>
+      <div class="picklist" style="max-height:min(420px,50vh)">${ks.length?ks.map(k=>`<div class="akrow"><div class="t"><b>${esc(k.name)}</b><span class="gr">${esc(k.school||'Tanpa sekolah')} · ${esc(k.grade||'-')} · ${esc(k.pack||'Plastic Box')}${k.active===false?' · nonaktif':''}</span></div><button type="button" class="btn sm pri" data-act="addKidGo" data-d="${date}" data-k="${k.id}">${I('plus',14)}Tambah</button></div>`).join(''):`<div class="empty">${q?'Tidak ada anak yang cocok.':'Semua anak sudah ada di jadwal hari ini.'}</div>`}</div>`},
+    foot:()=>`<span class="hint" style="flex:1">${Object.keys((S.days[date]&&S.days[date].entries)||{}).length} anak di jadwal hari ini</span><button type="button" class="btn pri" data-act="closeM">Selesai</button>`});
+}
 /* ----- week generator ----- */
 function weekForm(anyDate){
   const mk=mon=>{const rows={};const used=[];for(let i=1;i<=6;i++){const dt=addDays(mon,i-1);const s=suggestMenu(dt,used);if(s)used.push(s);rows[i]={on:i<=5,menu:s}}return{mon,rows}};
@@ -1364,6 +1380,8 @@ const ACT={
   weekGen:d=>{if(!menusArr().length&&!activeKids().length){toast('Tambah data anak dan menu dulu','err');return}weekForm(d.d)},
   assign:d=>assignForm(d.d),
   est:async d=>{const dd=dayClone(d.d);if(!dd.entries[d.k])return;dd.entries[d.k].status=d.s;await put('days',d.d,dd)},
+  addKid:d=>addKidForm(d.d),
+  addKidGo:async d=>{const k=S.kids[d.k];if(!k)return;const dd=dayClone(d.d);if(dd.entries[d.k])return;if(!dd.menuId){const sid=suggestMenu(d.d);if(sid&&S.menus[sid]){dd.menuId=sid;dd.menuName=S.menus[sid].name}}dd.entries[d.k]=mkEntry(k,S.menus[dd.menuId]);if(await put('days',d.d,dd)){toast(k.name+' ditambahkan ke '+shortD(d.d),'ok');if(M)drawM()}},
   eEdit:d=>entryForm(d.d,d.k),
   jumpSch:d=>{const g=[...document.querySelectorAll('.grp')].find(x=>x.dataset.sch===d.s);if(g){const y=g.getBoundingClientRect().top+window.scrollY-70;window.scrollTo({top:y,behavior:'smooth'})}},
   aSch:d=>{UI.aSchool=UI.aSchool===d.s?'':d.s;schedule()},
