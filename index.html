@@ -666,7 +666,8 @@ const packs=()=>PACKS;
 const packSel=(name,val,id)=>`<select class="inp" name="${name}"${id?` id="${id}"`:''}>${PACKS.map(p=>`<option${p===(val||'Plastic Box')?' selected':''}>${p}</option>`).join('')}</select>`;
 const packPill=(p,attrs)=>`<button type="button" class="pk ${p==='Lunch Box'?'pk-lb':'pk-pb'}"${attrs||''}>${p==='Lunch Box'?I('food',13):I('box',13)}${esc(p||'Plastic Box')}</button>`;
 const kidDays=k=>Array.isArray(k.days)&&k.days.length?k.days:[1,2,3,4,5];
-const priceFor=(k,m)=>Number(k&&k.price)||Number(m&&m.price)||Number(S.cfg.price)||0;
+const hasOwnPrice=k=>!!k&&(k.priceMode==='own'||Number(k.price)>0);
+const priceFor=(k,m)=>hasOwnPrice(k)?(Number(k.price)||0):(Number(m&&m.price)||Number(S.cfg.price)||0);
 const sortKids=(a,b)=>cmpN(a.school,b.school)||cmpN(a.grade,b.grade)||cmpN(a.name,b.name);
 function info(kidId,e){const k=S.kids[kidId];return{name:(k&&k.name)||e.name||'(anak dihapus)',school:(k&&k.school)||e.school||'-',grade:(k&&k.grade)||e.grade||'',pack:e.pack||(k&&k.pack)||'',allergy:(k&&k.allergy)||e.allergy||'',parent:(k&&k.parent)||'',wa:(k&&k.wa)||''}}
 function mkEntry(k,m){return{price:priceFor(k,m),pack:k.pack||'',status:'scheduled',note:'',name:k.name||'',school:k.school||'',grade:k.grade||'',allergy:k.allergy||''}}
@@ -853,7 +854,7 @@ VIEWS.anak=()=>{
     return`<button class="kid${k.active===false?' inactive':''}" data-act="kidEdit" data-k="${k.id}"><div class="top1"><span class="nm">${esc(k.name)}</span>${pk(k.pack)}</div>
     <span class="sc">${esc(k.school||'-')} · ${esc(k.grade||'-')}${k.parent?' · Ortu: '+esc(k.parent):''}</span>
     ${k.allergy&&k.allergy!=='-'?`<span class="alg" style="font-size:13px">${I('alert',14)}<span>Req/Alergi: ${esc(k.allergy)}</span></span>`:`<span class="muted" style="font-size:12.5px">Req/Alergi: –</span>`}
-    <span class="days" aria-label="Hari langganan">${[1,2,3,4,5,6].map(i=>`<i class="${dd.includes(i)?'on':''}" title="${DAYN[i]}">${DAYS1[i]}</i>`).join('')}${k.price?`<span class="pill pcust" style="margin-left:6px" title="Harga khusus">★ ${rp(k.price)}/porsi</span>`:''}${k.active===false?'<span class="pill" style="margin-left:6px">Nonaktif</span>':''}</span>
+    <span class="days" aria-label="Hari langganan">${[1,2,3,4,5,6].map(i=>`<i class="${dd.includes(i)?'on':''}" title="${DAYN[i]}">${DAYS1[i]}</i>`).join('')}${hasOwnPrice(k)?`<span class="pill pcust" style="margin-left:6px" title="Harga khusus">★ ${Number(k.price)?rp(k.price)+'/porsi':'Gratis'}</span>`:''}${k.active===false?'<span class="pill" style="margin-left:6px">Nonaktif</span>':''}</span>
     <span class="ft"><span>Saldo <b class="num ${b.bal<0?'neg':''}">${rp(b.bal)}</b></span>${stPill(b)}</span></button>`};
   return`<div class="vh"><div><h1>Database Anak & Langganan</h1><p>${tot} anak terdaftar. Klik kartu untuk ubah profil, kemasan default, hari langganan, dan harga khusus.</p></div>
     <div class="row"><button class="btn" data-act="kidImport">${I('upload',16)}Import massal</button><button class="btn pri" data-act="kidNew">${I('plus',16)}Tambah anak</button></div></div>
@@ -1055,8 +1056,8 @@ function kidForm(id){
       <label class="f">Kelas / grade<input class="inp" name="grade" value="${esc(k.grade||'')}" placeholder="3A"></label>
       <label class="f">Kemasan default${packSel('pack',k.pack)}</label>
       <div class="f full prc"><span>Harga per porsi</span>
-        <div class="seg2"><label><input type="radio" name="priceMode" value="def"${k.price?'':' checked'}>Ikut harga default <b class="num">${rp(S.cfg.price)}</b></label><label><input type="radio" name="priceMode" value="own"${k.price?' checked':''}>Harga khusus anak ini</label></div>
-        <div class="row prc-own"><span class="muted">Rp</span><input class="inp" name="price" id="kidPrice" type="number" inputmode="numeric" min="0" step="1000" value="${k.price||''}" placeholder="contoh 50000" style="max-width:200px"><span class="hint">dipakai otomatis setiap anak ini dijadwalkan</span></div>
+        <div class="seg2"><label><input type="radio" name="priceMode" value="def"${hasOwnPrice(k)?'':' checked'}>Ikut harga default <b class="num">${rp(S.cfg.price)}</b></label><label><input type="radio" name="priceMode" value="own"${hasOwnPrice(k)?' checked':''}>Harga khusus anak ini</label></div>
+        <div class="row prc-own"><span class="muted">Rp</span><input class="inp" name="price" id="kidPrice" type="number" inputmode="numeric" min="0" step="1000" value="${hasOwnPrice(k)&&Number(k.price)?k.price:''}" placeholder="kosong = gratis (Rp 0)" style="max-width:200px"><span class="hint">dipakai otomatis setiap anak ini dijadwalkan. Kosongkan atau isi 0 untuk gratis.</span></div>
         ${id?`<label class="chk" style="font-weight:600"><input type="checkbox" name="applyFuture" checked>Perbarui juga porsi yang sudah dijadwalkan tapi belum terkirim</label>`:''}
       </div>
       <label class="f full">Request / alergi<input class="inp" name="allergy" value="${esc(k.allergy&&k.allergy!=='-'?k.allergy:'')}" placeholder="Contoh: Tidak suka cheese"></label>
@@ -1069,8 +1070,7 @@ function kidForm(id){
     <datalist id="dlSchools">${schools().map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`,
     submit:async(o,fd)=>{
       if(!o.name||!o.name.trim()){toast('Nama anak wajib diisi','err');return false}
-      const data={...(id?S.kids[id]:{created:Date.now()}),name:o.name.trim().toUpperCase(),school:(o.school||'').trim(),grade:(o.grade||'').trim(),pack:(o.pack||'').trim(),price:o.priceMode==='own'?(Number(o.price)||0):0,allergy:(o.allergy||'').trim(),parent:(o.parent||'').trim(),wa:(o.wa||'').trim(),days:fd.getAll('days').map(Number),note:(o.note||'').trim(),active:fd.has('active')};
-      if(o.priceMode==='own'&&!(Number(o.price)>0)){toast('Isi harga khusus, atau pilih Ikut harga default','err');return false}
+      const data={...(id?S.kids[id]:{created:Date.now()}),name:o.name.trim().toUpperCase(),school:(o.school||'').trim(),grade:(o.grade||'').trim(),pack:(o.pack||'').trim(),price:o.priceMode==='own'?Math.max(0,Number(o.price)||0):0,priceMode:o.priceMode==='own'?'own':'def',allergy:(o.allergy||'').trim(),parent:(o.parent||'').trim(),wa:(o.wa||'').trim(),days:fd.getAll('days').map(Number),note:(o.note||'').trim(),active:fd.has('active')};
       const kid=id||uid('k');const ok=await put('kids',kid,data);if(!ok)return ok;
       let upd=0;
       if(id&&fd.has('applyFuture')){
@@ -1220,7 +1220,7 @@ function ledgerView(kid){
     foot:()=>`<button type="button" class="btn" data-act="bill" data-k="${kid}">${I('send',16)}Pesan tagihan</button><span style="flex:1"></span><button type="button" class="btn" data-act="closeM">Tutup</button><button type="button" class="btn pri" data-act="payNew" data-k="${kid}">+ Catat DP</button>`});
 }
 function billText(kid){
-  const k=S.kids[kid],b=bal()[kid]||ZB;const pr=Number(k.price)||Number(S.cfg.price)||60000;
+  const k=S.kids[kid],b=bal()[kid]||ZB;const pr=priceFor(k,null)||Number(S.cfg.price)||60000;
   const sisa=b.bal; /* tagihan hanya dari porsi yang sudah terkirim */
   let t=`Halo ${k.parent?'Bapak/Ibu '+k.parent:'Bapak/Ibu'},\nBerikut ringkasan catering *${k.name}* (${k.school||''} ${k.grade||''}) dari ${S.cfg.name} per ${fmtD(TODAY)}:\n\n`;
   t+=`• Total DP: ${rp(b.dep)}\n• Terkirim: ${b.up} porsi (${rp(b.used)})\n• Sisa saldo: *${rp(sisa)}*\n\n`;
