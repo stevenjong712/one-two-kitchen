@@ -443,6 +443,14 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .akrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line)}
 .akrow:last-child{border-bottom:0}
 .akrow .t{display:grid;gap:2px;min-width:0}.akrow .gr{margin:0}
+.seg2{display:flex;gap:8px;flex-wrap:wrap}
+.seg2 label{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-weight:600;color:var(--ink);cursor:pointer;background:var(--surface)}
+.seg2 label:has(input:checked){border-color:var(--brand);background:var(--brand-soft);color:var(--brand-ink)}
+.seg2 input{accent-color:var(--brand)}
+.prc{gap:8px}
+.prc .prc-own{display:none}
+.prc:has(input[value=own]:checked) .prc-own{display:flex}
+.pill.pcust{background:var(--butter-soft);color:var(--butter-ink)}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -845,7 +853,7 @@ VIEWS.anak=()=>{
     return`<button class="kid${k.active===false?' inactive':''}" data-act="kidEdit" data-k="${k.id}"><div class="top1"><span class="nm">${esc(k.name)}</span>${pk(k.pack)}</div>
     <span class="sc">${esc(k.school||'-')} · ${esc(k.grade||'-')}${k.parent?' · Ortu: '+esc(k.parent):''}</span>
     ${k.allergy&&k.allergy!=='-'?`<span class="alg" style="font-size:13px">${I('alert',14)}<span>Req/Alergi: ${esc(k.allergy)}</span></span>`:`<span class="muted" style="font-size:12.5px">Req/Alergi: –</span>`}
-    <span class="days" aria-label="Hari langganan">${[1,2,3,4,5,6].map(i=>`<i class="${dd.includes(i)?'on':''}" title="${DAYN[i]}">${DAYS1[i]}</i>`).join('')}${k.price?`<span class="pill" style="margin-left:6px">${rp(k.price)}/porsi</span>`:''}${k.active===false?'<span class="pill" style="margin-left:6px">Nonaktif</span>':''}</span>
+    <span class="days" aria-label="Hari langganan">${[1,2,3,4,5,6].map(i=>`<i class="${dd.includes(i)?'on':''}" title="${DAYN[i]}">${DAYS1[i]}</i>`).join('')}${k.price?`<span class="pill pcust" style="margin-left:6px" title="Harga khusus">★ ${rp(k.price)}/porsi</span>`:''}${k.active===false?'<span class="pill" style="margin-left:6px">Nonaktif</span>':''}</span>
     <span class="ft"><span>Saldo <b class="num ${b.bal<0?'neg':''}">${rp(b.bal)}</b></span>${stPill(b)}</span></button>`};
   return`<div class="vh"><div><h1>Database Anak & Langganan</h1><p>${tot} anak terdaftar. Klik kartu untuk ubah profil, kemasan default, hari langganan, dan harga khusus.</p></div>
     <div class="row"><button class="btn" data-act="kidImport">${I('upload',16)}Import massal</button><button class="btn pri" data-act="kidNew">${I('plus',16)}Tambah anak</button></div></div>
@@ -1046,7 +1054,11 @@ function kidForm(id){
       <label class="f">Sekolah<input class="inp" name="school" list="dlSchools" value="${esc(k.school||'')}" placeholder="SPH Pluit Village"></label>
       <label class="f">Kelas / grade<input class="inp" name="grade" value="${esc(k.grade||'')}" placeholder="3A"></label>
       <label class="f">Kemasan default${packSel('pack',k.pack)}</label>
-      <label class="f">Harga khusus / porsi<input class="inp" name="price" type="number" inputmode="numeric" min="0" step="1000" value="${k.price||''}" placeholder="Ikut harga menu"></label>
+      <div class="f full prc"><span>Harga per porsi</span>
+        <div class="seg2"><label><input type="radio" name="priceMode" value="def"${k.price?'':' checked'}>Ikut harga default <b class="num">${rp(S.cfg.price)}</b></label><label><input type="radio" name="priceMode" value="own"${k.price?' checked':''}>Harga khusus anak ini</label></div>
+        <div class="row prc-own"><span class="muted">Rp</span><input class="inp" name="price" id="kidPrice" type="number" inputmode="numeric" min="0" step="1000" value="${k.price||''}" placeholder="contoh 50000" style="max-width:200px"><span class="hint">dipakai otomatis setiap anak ini dijadwalkan</span></div>
+        ${id?`<label class="chk" style="font-weight:600"><input type="checkbox" name="applyFuture" checked>Perbarui juga porsi yang sudah dijadwalkan tapi belum terkirim</label>`:''}
+      </div>
       <label class="f full">Request / alergi<input class="inp" name="allergy" value="${esc(k.allergy&&k.allergy!=='-'?k.allergy:'')}" placeholder="Contoh: Tidak suka cheese"></label>
       <label class="f">Nama orang tua<input class="inp" name="parent" value="${esc(k.parent||'')}"></label>
       <label class="f">No. WhatsApp ortu<input class="inp" name="wa" inputmode="tel" value="${esc(k.wa||'')}" placeholder="0812…"></label>
@@ -1057,8 +1069,15 @@ function kidForm(id){
     <datalist id="dlSchools">${schools().map(s=>`<option value="${esc(s)}">`).join('')}</datalist>`,
     submit:async(o,fd)=>{
       if(!o.name||!o.name.trim()){toast('Nama anak wajib diisi','err');return false}
-      const data={...(id?S.kids[id]:{created:Date.now()}),name:o.name.trim().toUpperCase(),school:(o.school||'').trim(),grade:(o.grade||'').trim(),pack:(o.pack||'').trim(),price:Number(o.price)||0,allergy:(o.allergy||'').trim(),parent:(o.parent||'').trim(),wa:(o.wa||'').trim(),days:fd.getAll('days').map(Number),note:(o.note||'').trim(),active:fd.has('active')};
-      const ok=await put('kids',id||uid('k'),data);if(ok)toast(id?'Data anak disimpan':'Anak ditambahkan','ok');return ok;
+      const data={...(id?S.kids[id]:{created:Date.now()}),name:o.name.trim().toUpperCase(),school:(o.school||'').trim(),grade:(o.grade||'').trim(),pack:(o.pack||'').trim(),price:o.priceMode==='own'?(Number(o.price)||0):0,allergy:(o.allergy||'').trim(),parent:(o.parent||'').trim(),wa:(o.wa||'').trim(),days:fd.getAll('days').map(Number),note:(o.note||'').trim(),active:fd.has('active')};
+      if(o.priceMode==='own'&&!(Number(o.price)>0)){toast('Isi harga khusus, atau pilih Ikut harga default','err');return false}
+      const kid=id||uid('k');const ok=await put('kids',kid,data);if(!ok)return ok;
+      let upd=0;
+      if(id&&fd.has('applyFuture')){
+        const list=[];for(const [dt,d] of Object.entries(S.days)){const e=d.entries&&d.entries[id];if(!e||e.status!=='scheduled'||dt<TODAY)continue;const np=priceFor(data,S.menus[d.menuId]);if(Number(e.price)===np)continue;const dd=clone(d);dd.entries[id].price=np;list.push(['days',dt,dd]);upd++}
+        if(list.length)await putMany(list);
+      }
+      toast((id?'Data anak disimpan':'Anak ditambahkan')+(upd?` · harga ${upd} porsi terjadwal diperbarui`:''),'ok');return ok;
     }});
 }
 function kidImport(){
