@@ -489,6 +489,13 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .impt td{padding:7px 10px}.impt tr.bad td{background:var(--bad-soft);opacity:.75}.impt tr.dup td{background:var(--butter-soft)}
 .inp.sm{min-height:30px;padding:3px 7px;font-size:12.5px;border-radius:8px}
 .impt select[data-impf=type]{min-width:92px}.impt select[data-impf=cat]{min-width:200px}
+.rawtw{max-height:min(320px,40vh);overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.rawt td,.rawt th{padding:5px 8px;font-size:12.5px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.rawt th{position:sticky;top:0;z-index:1}
+.rawt tr.hd td{background:var(--brand-soft);font-weight:700}.rawt tr.out td{opacity:.45}
+.rawt .btn.sm{padding:3px 7px;font-size:11.5px}
+.impmap{min-width:0;max-width:100%}.rawtw{max-width:100%}
+.impt input[type=date].inp.sm{width:140px}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -1188,15 +1195,16 @@ let M=null;
 function openM(cfg){M=cfg;M.st=M.st||{};$('#ov').hidden=false;document.body.classList.add('modal-open');drawM(true)}
 function drawM(first){
   if(!M)return;const a=document.activeElement;const fid=!first&&a&&a.id&&$('#dlg').contains(a)?a.id:null;let ss=null;try{ss=fid?a.selectionStart:null}catch(e){}
-  const sc=$('#dlg-b').scrollTop;const ls=[...$('#dlg-b').querySelectorAll('.picklist,.imptw')].map(e=>e.scrollTop);
+  const sc=$('#dlg-b').scrollTop;const ls=[...$('#dlg-b').querySelectorAll('.picklist,.imptw,.rawtw')].map(e=>e.scrollTop);
   $('#dlg-t').textContent=M.title;$('#dlg').className='dlg'+(M.wide?' wide':'');
   $('#dlg-b').innerHTML=M.body();
   $('#dlg-f').innerHTML=M.foot?M.foot():`${M.left||''}<span style="flex:1"></span><button type="button" class="btn ghost" data-act="closeM">Batal</button><button class="btn ${M.danger?'danger':'pri'}" type="submit">${M.ok||'Simpan'}</button>`;
   if(first){$('#dlg-b').scrollTop=0;setTimeout(()=>{const f=$('#dlg-b [autofocus]')||$('#dlg-b input,#dlg-b select');f&&f.focus()},30)}
-  else{$('#dlg-b').scrollTop=sc;$('#dlg-b').querySelectorAll('.picklist,.imptw').forEach((e,i)=>{if(ls[i]!=null)e.scrollTop=ls[i]});if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}}
+  else{$('#dlg-b').scrollTop=sc;$('#dlg-b').querySelectorAll('.picklist,.imptw,.rawtw').forEach((e,i)=>{if(ls[i]!=null)e.scrollTop=ls[i]});if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}}
 }
 function closeM(){M=null;$('#ov').hidden=true;document.body.classList.remove('modal-open')}
 $('#dlgf').addEventListener('submit',async e=>{e.preventDefault();if(!M||!M.submit)return;const fd=new FormData(e.target);const o={};for(const[k,v]of fd.entries())o[k]=v;const btn=$('#dlg-f [type=submit]');if(btn)btn.disabled=true;let r;try{r=await M.submit(o,fd)}finally{if(btn)btn.disabled=false}if(r!==false)closeM()});
+document.addEventListener('toggle',e=>{const t=e.target;if(M&&M.st&&t.dataset&&t.dataset.impdet){if(t.dataset.impdet==='raw')M.st.raw=t.open;else M.st.mapOpen=t.open}},true);
 $('#ov').addEventListener('mousedown',e=>{if(e.target.id==='ov')closeM()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&M)closeM()});
 function ask(title,text,ok,fn){openM({title,danger:true,ok,body:()=>`<p class="lead">${text}</p>`,submit:async()=>{await fn()}})}
@@ -1594,7 +1602,11 @@ function parseAnyDate(v){
 function parseAmount(v){if(typeof v==='number')return v;let s=String(v||'').trim();if(!s)return NaN;const neg=/^-|^\(.*\)$/.test(s)||/-\s*rp/i.test(s);
   s=s.replace(/rp\.?|idr|\s|\(|\)|-/gi,'');if(/,\d{1,2}$/.test(s))s=s.replace(/,\d{1,2}$/,'');if(/\.\d{1,2}$/.test(s)&&!/\.\d{3}/.test(s))s=s.replace(/\.\d{1,2}$/,'');s=s.replace(/[.,]/g,'');const n=Number(s);return isNaN(n)?NaN:(neg?-n:n)}
 const IMP_FIELDS=[['date','Tanggal',/tanggal|tgl|date|hari/],['amount','Jumlah',/jumlah|nominal|amount|total|harga|biaya|nilai|pengeluaran|debit|rp/],['desc','Deskripsi',/deskripsi|keterangan|description|ket\b|item|uraian|catatan|detail|barang|nama/],['cat','Kategori',/kategori|category|kat\b|jenis biaya|akun/],['type','Tipe',/tipe|type|jenis|transaksi/]];
-function impMapGuess(h){const map={};const used=new Set();IMP_FIELDS.forEach(([f,,re])=>{const i=h.findIndex((x,j)=>!used.has(j)&&re.test(String(x).toLowerCase()));if(i>=0){map[f]=i;used.add(i)}});return map}
+function impMapGuess(h){const map={};const used=new Set();const L=h.map(x=>String(x).toLowerCase().trim());
+  /* jumlah: utamakan kolom Total/Jumlah daripada Harga satuan */
+  const ap=[/^(grand\s*)?total|sub\s*total|total\s*(harga|biaya|bayar)?$/,/jumlah|nominal|amount|pengeluaran|debit|nilai|biaya/,/total/,/harga|rp/];
+  for(const re of ap){const i=L.findIndex(x=>x&&re.test(x)&&!/qty|kuantitas|banyak/.test(x));if(i>=0){map.amount=i;used.add(i);break}}
+  IMP_FIELDS.forEach(([f,,re])=>{if(map[f]!=null)return;const i=L.findIndex((x,j)=>!used.has(j)&&re.test(x));if(i>=0){map[f]=i;used.add(i)}});return map}
 function impCatOf(raw,desc){const r=String(raw||'').toLowerCase().trim();
   const hit=EXPCAT.find(c=>c.toLowerCase()===r);if(hit)return hit;
   if(/bahan|makan|food|sayur|daging|ayam|beras|bumbu/.test(r))return'Bahan Baku Makanan';
@@ -1605,48 +1617,73 @@ function impCatOf(raw,desc){const r=String(raw||'').toLowerCase().trim();
   if(r)return String(raw).trim();
   return desc?EXP_OF(guessCat(desc)):'Lain-lain'}
 function impBuild(st){
-  const rows=st.rows,hi=st.hdr,map=st.map;const out=[];
+  const rows=st.rows,map=st.map,ov=st.ov||(st.ov={});const out=[];
   const have=new Set(Object.values(S.exps).map(x=>[x.date,Number(x.amount),String(x.desc||'').trim().toLowerCase()].join('|')));const seen=new Set();
-  for(let r=hi+1;r<rows.length;r++){const row=rows[r]||[];if(!row.some(c=>String(c).trim()!==''))continue;
+  const from=Math.max(st.hdr+1,st.from??(st.hdr+1)),to=Math.min(rows.length-1,st.to??(rows.length-1));
+  let lastDate='';
+  for(let r=from;r<=to;r++){const row=rows[r]||[];if(!row.some(c=>String(c).trim()!==''))continue;
     const get=f=>map[f]!=null&&map[f]!==''?row[map[f]]:'';
-    const date=parseAnyDate(get('date'));let amt=parseAmount(get('amount'));const desc=String(get('desc')||'').trim();
-    const tRaw=String(get('type')||'').toLowerCase();let type=/masuk|income|pemasukan|kredit|credit|\bin\b/.test(tRaw)?'in':'out';
-    if(!isNaN(amt)&&amt<0){amt=-amt;type='out'}
-    const err=!date?'Tanggal tidak terbaca':(isNaN(amt)||!(amt>0))?'Jumlah kosong/tidak terbaca':'';
-    if(!date&&/^(sub\s*)?total|^grand|^jumlah|^saldo/i.test(desc))continue;
+    const o=ov[r]||{};
+    let date=parseAnyDate(get('date'));
+    const rawAmt=parseAmount(get('amount'));
+    /* baris judul hari: ada tanggal tapi tanpa jumlah -> jadi tanggal untuk baris di bawahnya */
+    if(date&&(isNaN(rawAmt)||!rawAmt)&&!o.amt){lastDate=date;if(st.fill==='up')continue}
+    if(date)lastDate=date;
+    let auto='';
+    if(!date){if(st.fill==='up'&&lastDate){date=lastDate;auto='ikut atas'}else if(st.fill==='fixed'&&st.fixDate){date=st.fixDate;auto='tanggal tetap'}}
+    if(o.date){date=o.date;auto=''}
+    let amt=o.amt!=null&&o.amt!==''?Number(o.amt):rawAmt;const desc=o.desc!=null?o.desc:String(get('desc')||'').trim();
+    const tRaw=String(get('type')||'').toLowerCase();let type=o.type||(/masuk|income|pemasukan|kredit|credit|\bin\b/.test(tRaw)?'in':'out');
+    if(!isNaN(amt)&&amt<0){amt=-amt;if(!o.type)type='out'}
+    if(!date&&!o.amt&&/^(sub\s*)?total|^grand|^jumlah|^saldo/i.test(desc))continue;
+    if((!date||auto)&&!o.amt&&!o.date&&(isNaN(rawAmt)||!rawAmt)&&row.filter(c=>String(c).trim()!=='').length<=1)continue;
+    if(!o.amt&&row.some(c=>/^(sub\s*)?total\b|^grand\s*total/i.test(String(c).trim())))continue;
+    const err=!date?'Tanggal kosong':(isNaN(amt)||!(amt>0))?'Jumlah kosong':'';
     const key=[date,amt,desc.toLowerCase()].join('|');const dup=!err&&(have.has(key)||seen.has(key));seen.add(key);
-    out.push({r:r+1,date,amt:isNaN(amt)?0:amt,desc,type,cat:impCatOf(get('cat'),desc),err,dup,sel:!err&&!dup});
+    const sel=o.sel!=null?(o.sel&&!err):(!err&&!dup);
+    out.push({r,date,amt:isNaN(amt)?0:amt,desc,type,cat:o.cat||impCatOf(get('cat'),desc),err,dup,sel,auto,raw:row});
   }
   return out}
-function impHeaderGuess(rows){let best=0,score=-1;for(let i=0;i<Math.min(rows.length,12);i++){const r=rows[i]||[];const sc=IMP_FIELDS.reduce((a,[,,re])=>a+(r.some(c=>typeof c==='string'&&re.test(c.toLowerCase()))?1:0),0);if(sc>score){score=sc;best=i}}return best}
-function impUseSheet(st,name){const ws=st.wb.Sheets[name];st.sheet=name;st.rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});st.hdr=impHeaderGuess(st.rows);st.map=impMapGuess((st.rows[st.hdr]||[]).map(String));st.items=impBuild(st)}
+function impHeaderGuess(rows){let best=0,score=-1;for(let i=0;i<Math.min(rows.length,15);i++){const r=rows[i]||[];const sc=IMP_FIELDS.reduce((a,[,,re])=>a+(r.some(c=>typeof c==='string'&&re.test(c.toLowerCase()))?1:0),0);if(sc>score){score=sc;best=i}}return best}
+function impUseSheet(st,name){const ws=st.wb.Sheets[name];st.sheet=name;st.rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});st.hdr=impHeaderGuess(st.rows);st.map=impMapGuess((st.rows[st.hdr]||[]).map(String));st.from=null;st.to=null;st.ov={};st.items=impBuild(st);st.raw=st.items.filter(x=>x.err).length>st.items.length/2}
+const cellTxt=(v,isD)=>isD&&typeof v==='number'&&v>20000&&v<80000&&window.XLSX?(parseAnyDate(v)||String(v)):String(v??'');
 function importForm(){
-  openM({title:'Impor pengeluaran dari Excel',wide:true,st:{step:'pick'},
+  openM({title:'Impor pengeluaran dari Excel',wide:true,st:{step:'pick',fill:'up',fixDate:TODAY},
     body:()=>{const st=M.st;
       if(st.step==='pick')return`<p class="lead">Pilih file Excel (.xlsx, .xls) atau CSV berisi pengeluaran harian. Anda akan memilih tab dan memeriksa semua baris dulu sebelum masuk ke laporan.</p>
         <label class="impdrop" for="impFile">${I('upload',26)}<b>Pilih file Excel</b><span class="hint">Kolom yang dikenali: Tanggal, Kategori, Deskripsi/Keterangan, Jumlah, Tipe (opsional)</span></label><input type="file" id="impFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden>
         ${st.loading?`<p class="hint">Membaca file…</p>`:''}${st.error?`<div class="banner warn">${I('alert')}${esc(st.error)}</div>`:''}`;
       const it=st.items;const ok=it.filter(x=>!x.err),sel=it.filter(x=>x.sel),dup=it.filter(x=>x.dup),bad=it.filter(x=>x.err);
-      const hdr=(st.rows[st.hdr]||[]).map((h,i)=>({i,h:String(h||'').trim()||('Kolom '+(i+1))}));
+      const hrow=st.hdr>=0?(st.rows[st.hdr]||[]):[];
       const cats=[...new Set([...EXPCAT,...it.map(x=>x.cat)])];
+      const from=st.from??(st.hdr+1),to=st.to??(st.rows.length-1);
+      const ncol=Math.min(12,Math.max(...st.rows.slice(0,200).map(r=>(r||[]).length),1));
+      const hdr=Array.from({length:Math.max(ncol,hrow.length)},(_,i)=>({i,h:String(hrow[i]??'').trim()||'(tanpa judul)'}));
       return`<div class="fg">
         <label class="f">File<input class="inp" value="${esc(st.file)}" readonly></label>
         <label class="f">Tab / sheet<select class="inp" id="impSheet">${st.wb.SheetNames.map(n=>`<option${n===st.sheet?' selected':''}>${esc(n)}</option>`).join('')}</select></label></div>
-        <details class="impmap"${Object.keys(st.map).length<3?' open':''}><summary>Pencocokan kolom · baris judul ${st.hdr+1}</summary><div class="fg" style="margin-top:10px">
-          <label class="f">Baris judul<select class="inp" data-impm="hdr">${st.rows.slice(0,15).map((r,i)=>`<option value="${i}"${i===st.hdr?' selected':''}>Baris ${i+1}: ${esc((r||[]).filter(String).slice(0,4).join(' · ').slice(0,50))}</option>`).join('')}</select></label>
-          ${IMP_FIELDS.map(([f,l])=>`<label class="f">${l}${f==='date'||f==='amount'?' *':''}<select class="inp" data-impm="${f}"><option value="">— tidak ada —</option>${hdr.map(h=>`<option value="${h.i}"${st.map[f]===h.i?' selected':''}>${esc(h.h)}</option>`).join('')}</select></label>`).join('')}
+        <details class="impmap" data-impdet="raw"${st.raw?' open':''}><summary>Pilih baris manual · judul ${st.hdr>=0?'baris '+(st.hdr+1):'tidak ada'}, data baris ${from+1}–${to+1}</summary>
+          <p class="hint" style="margin:8px 0">Klik tombol di kiri baris untuk menentukan baris judul kolom, baris pertama data, dan baris terakhir data. Nomor baris sama dengan nomor di Excel.</p>
+          <div class="tw rawtw"><table class="t rawt"><thead><tr><th>Baris</th><th>Atur</th>${Array.from({length:ncol},(_,c)=>`<th>${String.fromCharCode(65+c)}</th>`).join('')}</tr></thead><tbody>
+          ${st.rows.slice(0,300).map((r,i)=>{const cls=i===st.hdr?'hd':(i>=from&&i<=to?'in':'out');return`<tr class="${cls}"><td class="muted">${i+1}</td><td style="white-space:nowrap"><button type="button" class="btn sm${i===st.hdr?' pri':''}" data-act="impRow" data-k="hdr" data-i="${i}" title="Jadikan baris judul kolom">Judul</button> <button type="button" class="btn sm${i===from&&i!==st.hdr?' pri':''}" data-act="impRow" data-k="from" data-i="${i}" title="Data mulai dari baris ini">Mulai</button> <button type="button" class="btn sm${i===to?' pri':''}" data-act="impRow" data-k="to" data-i="${i}" title="Data berakhir di baris ini">Akhir</button></td>${Array.from({length:ncol},(_,c)=>`<td>${esc(cellTxt((r||[])[c],c===st.map.date).slice(0,40))}</td>`).join('')}</tr>`}).join('')}
+          </tbody></table></div></details>
+        <details class="impmap" data-impdet="map"${st.mapOpen??(Object.keys(st.map).length<3)?' open':''}><summary>Pencocokan kolom</summary><div class="fg" style="margin-top:10px">
+          ${IMP_FIELDS.map(([f,l])=>`<label class="f">${l}${f==='date'||f==='amount'?' *':''}<select class="inp" data-impm="${f}"><option value="">— tidak ada —</option>${hdr.map(h=>`<option value="${h.i}"${st.map[f]===h.i?' selected':''}>${esc(String.fromCharCode(65+h.i))} · ${esc(h.h.slice(0,30))}</option>`).join('')}</select></label>`).join('')}
+          <label class="f">Jika tanggal kosong<select class="inp" data-impopt="fill"><option value="up"${st.fill==='up'?' selected':''}>Ikut tanggal baris di atasnya</option><option value="fixed"${st.fill==='fixed'?' selected':''}>Pakai tanggal tetap</option><option value="none"${st.fill==='none'?' selected':''}>Tandai bermasalah</option></select></label>
+          ${st.fill==='fixed'?`<label class="f">Tanggal tetap<input class="inp" type="date" data-impopt="fixDate" value="${esc(st.fixDate||TODAY)}"></label>`:''}
         </div></details>
         <div class="lsum" style="margin:0">
           <div class="lsc1"><b class="num">${sel.length}</b><span>akan diimpor · ${rp(sel.filter(x=>x.type==='out').reduce((a,x)=>a+x.amt,0))}</span></div>
-          ${dup.length?`<div class="lsc2 t-btr"><b class="num">${dup.length}</b><span>mungkin duplikat (tidak dicentang)</span></div>`:''}
-          ${bad.length?`<div class="lsc2 t-pnk"><b class="num">${bad.length}</b><span>baris bermasalah, dilewati</span></div>`:''}
+          ${dup.length?`<div class="lsc2 t-btr"><b class="num">${dup.length}</b><span>mungkin duplikat</span></div>`:''}
+          ${bad.length?`<div class="lsc2 t-pnk"><b class="num">${bad.length}</b><span>perlu dilengkapi · isi tanggal/jumlah di tabel</span></div>`:''}
         </div>
         ${it.length?`<div class="tw imptw"><table class="t impt"><thead><tr><th><input type="checkbox" id="impAll" aria-label="Pilih semua"${ok.length&&ok.every(x=>x.sel)?' checked':''}></th><th>Baris</th><th>Tanggal</th><th>Tipe</th><th>Kategori</th><th>Deskripsi</th><th class="r">Jumlah</th><th>Status</th></tr></thead><tbody>
-          ${it.map((x,i)=>`<tr class="${x.err?'bad':x.dup?'dup':''}"><td><input type="checkbox" data-impsel="${i}"${x.sel?' checked':''}${x.err?' disabled':''} aria-label="Impor baris ${x.r}"></td><td class="muted">${x.r}</td><td style="white-space:nowrap">${x.date?shortD(x.date)+' '+x.date.slice(0,4):'–'}</td>
-          <td><select class="inp sm" data-impf="type" data-i="${i}"${x.err?' disabled':''}><option value="out"${x.type==='out'?' selected':''}>Keluar</option><option value="in"${x.type==='in'?' selected':''}>Masuk</option></select></td>
-          <td><select class="inp sm" data-impf="cat" data-i="${i}"${x.err?' disabled':''}>${cats.map(c=>`<option${c===x.cat?' selected':''}>${esc(c)}</option>`).join('')}</select></td>
-          <td>${esc(x.desc||'–')}</td><td class="r"><b>${x.amt?rp(x.amt):'–'}</b></td><td>${x.err?`<span class="pill bad">${esc(x.err)}</span>`:x.dup?'<span class="pill warn">Sudah ada?</span>':'<span class="pill ok">Siap</span>'}</td></tr>`).join('')}
-        </tbody></table></div>`:empty('Tidak ada baris data di tab ini','Pilih tab lain atau ubah baris judul.')}`},
+          ${it.map((x,i)=>`<tr class="${x.err?'bad':x.dup?'dup':''}"><td><input type="checkbox" data-impsel="${i}"${x.sel?' checked':''}${x.err?' disabled':''} aria-label="Impor baris ${x.r+1}"></td><td class="muted">${x.r+1}</td>
+          <td style="white-space:nowrap"><input class="inp sm" type="date" data-impfix="date" data-i="${i}" value="${esc(x.date)}" aria-label="Tanggal baris ${x.r+1}">${x.auto?`<span class="hint" style="display:block">${esc(x.auto)}</span>`:''}</td>
+          <td><select class="inp sm" data-impf="type" data-i="${i}"><option value="out"${x.type==='out'?' selected':''}>Keluar</option><option value="in"${x.type==='in'?' selected':''}>Masuk</option></select></td>
+          <td><select class="inp sm" data-impf="cat" data-i="${i}">${cats.map(c=>`<option${c===x.cat?' selected':''}>${esc(c)}</option>`).join('')}</select></td>
+          <td><input class="inp sm" data-impfix="desc" data-i="${i}" value="${esc(x.desc)}" aria-label="Deskripsi baris ${x.r+1}" style="min-width:180px"></td><td class="r"><input class="inp sm num" type="number" min="0" step="500" data-impfix="amt" data-i="${i}" value="${x.amt||''}" style="width:120px;text-align:right" aria-label="Jumlah baris ${x.r+1}"></td><td>${x.err?`<span class="pill bad">${esc(x.err)}</span>`:x.dup?'<span class="pill warn">Sudah ada?</span>':'<span class="pill ok">Siap</span>'}</td></tr>`).join('')}
+        </tbody></table></div>`:empty('Tidak ada baris data yang terbaca','Buka "Pilih baris manual" untuk menentukan baris judul dan baris data, atau pilih tab lain.')}`},
     foot:()=>M.st.step==='pick'?`<span style="flex:1"></span><button type="button" class="btn ghost" data-act="closeM">Batal</button>`:`<button type="button" class="btn ghost" data-act="impBack">${I('left',16)}Pilih file lain</button><span style="flex:1"></span><button type="button" class="btn ghost" data-act="closeM">Batal</button><button type="button" class="btn pri" data-act="impGo"${M.st.items.some(x=>x.sel)?'':' disabled'}>Impor ${M.st.items.filter(x=>x.sel).length} transaksi</button>`});
 }
 async function impReadFile(f){
@@ -1692,7 +1729,12 @@ async function settingsForm(){
 /* ---------- actions ---------- */
 const ACT={
   closeM, settings:settingsForm,
-  impOpen:()=>importForm(), impBack:()=>{M.st={step:'pick'};drawM()}, impGo:()=>impCommit(),
+  impOpen:()=>importForm(),
+  impRow:d=>{const st=M.st,i=Number(d.i);st.raw=true;
+    if(d.k==='hdr'){st.hdr=i;st.map=impMapGuess((st.rows[i]||[]).map(String));if(st.from!=null&&st.from<=i)st.from=null}
+    else if(d.k==='from'){st.from=i;if(st.hdr>=i){st.hdr=i-1;if(st.hdr<0)st.hdr=-1}if(st.to!=null&&st.to<i)st.to=null}
+    else{st.to=i;if(st.from!=null&&st.from>i)st.from=null}
+    st.items=impBuild(st);drawM()}, impBack:()=>{M.st={step:'pick'};drawM()}, impGo:()=>impCommit(),
   impUndo:d=>{const ids=Object.entries(S.exps).filter(([,x])=>x.importBatch===d.b).map(([id])=>id);ask('Batalkan impor?',`${ids.length} transaksi hasil impor ini akan dihapus dari laporan.`,'Hapus '+ids.length+' transaksi',async()=>{for(const id of ids)await del('exps',id);try{localStorage.removeItem('otk-lastimp')}catch(e){}toast(ids.length+' transaksi impor dihapus','ok')})}, go:d=>go(d.t),
   goDay:d=>{UI.jDate=d.d;go('jadwal');schedule()},
   goLabel:d=>{UI.lDate=d.d;go('label');schedule()},
@@ -1778,10 +1820,12 @@ document.addEventListener('input',e=>{const t=e.target;if(t.type==='checkbox'||t
 document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='impFile'){const f=t.files&&t.files[0];t.value='';if(f&&M)impReadFile(f);return}
   if(t.id==='impSheet'&&M){impUseSheet(M.st,t.value);drawM();return}
-  if(t.dataset.impm!==undefined&&M){const f=t.dataset.impm;if(f==='hdr'){M.st.hdr=Number(t.value);M.st.map=impMapGuess((M.st.rows[M.st.hdr]||[]).map(String))}else{if(t.value==='')delete M.st.map[f];else M.st.map[f]=Number(t.value)}M.st.items=impBuild(M.st);drawM();return}
-  if(t.dataset.impsel!==undefined&&M){M.st.items[Number(t.dataset.impsel)].sel=t.checked;drawM();return}
-  if(t.id==='impAll'&&M){M.st.items.forEach(x=>{if(!x.err)x.sel=t.checked});drawM();return}
-  if(t.dataset.impf&&M){const x=M.st.items[Number(t.dataset.i)];if(x){x[t.dataset.impf]=t.value}drawM();return}
+  if(t.dataset.impm!==undefined&&M){const f=t.dataset.impm;if(t.value==='')delete M.st.map[f];else M.st.map[f]=Number(t.value);M.st.mapOpen=true;M.st.items=impBuild(M.st);drawM();return}
+  if(t.dataset.impopt&&M){M.st[t.dataset.impopt]=t.value;M.st.mapOpen=true;M.st.items=impBuild(M.st);drawM();return}
+  if(t.dataset.impsel!==undefined&&M){const x=M.st.items[Number(t.dataset.impsel)];(M.st.ov[x.r]=M.st.ov[x.r]||{}).sel=t.checked;M.st.items=impBuild(M.st);drawM();return}
+  if(t.id==='impAll'&&M){M.st.items.forEach(x=>{if(!x.err)(M.st.ov[x.r]=M.st.ov[x.r]||{}).sel=t.checked});M.st.items=impBuild(M.st);drawM();return}
+  if(t.dataset.impf&&M){const x=M.st.items[Number(t.dataset.i)];if(x){(M.st.ov[x.r]=M.st.ov[x.r]||{})[t.dataset.impf]=t.value}M.st.items=impBuild(M.st);drawM();return}
+  if(t.dataset.impfix&&M){const x=M.st.items[Number(t.dataset.i)];if(x){const o=(M.st.ov[x.r]=M.st.ov[x.r]||{});const f=t.dataset.impfix;o[f]=f==='amt'?(t.value===''?'':Number(t.value)):t.value;if(x.err)o.sel=true}M.st.items=impBuild(M.st);drawM();return}
   if(t.dataset.shopprice!==undefined){const k=t.dataset.shopprice,v=Math.max(0,Number(t.value)||0);shopSave(x=>{if(v){x.prices[k]=v;x.checked[k]=true}else delete x.prices[k]});return}
   if(t.dataset.chg==='dayMenu'){const dd=dayClone(t.dataset.d);const m=S.menus[t.value];dd.menuId=t.value;dd.menuName=m?m.name:'';put('days',t.dataset.d,dd).then(ok=>ok&&toast('Menu diganti','ok'));return}
   if(t.type==='checkbox'&&t.dataset.act)return;
