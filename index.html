@@ -478,6 +478,9 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .shhid{padding:10px 18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 .expl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-radius:14px;margin-bottom:14px;background:var(--sunk);border:1px dashed var(--line);color:var(--muted);font-weight:500}
 .expl>span{flex:1;min-width:220px}.expl.on{background:var(--mint-soft);border:1px solid var(--mint);color:var(--mint-ink)}.expl.on b{color:var(--ink)}
+.exlist{display:grid;gap:6px;flex-basis:100%}
+.exi{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;color:var(--ink)}
+.exi .hint{display:block;word-break:break-word}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -943,8 +946,8 @@ const shopDoc=()=>shopDocOf(shopId());
 const shopXid=id=>'shop_'+id;
 const rangeLabel=(a,b)=>a===b?shortD(a)+' '+parseD(a).getFullYear():shortD(a)+' – '+shortD(b)+' '+parseD(b).getFullYear();
 /* semua item yang tampil (hitungan resep + item tambahan), sudah memperhitungkan edit & sembunyikan */
-function shopItems(){
-  const[from,to]=shopRange();const R=shopCalc(from,to);const doc=shopDoc();const qo=doc.qty||{},hid=doc.hidden||{};
+function shopItems(id){
+  let from,to;if(id){[from,to]=id.split('_');to=to||from}else[from,to]=shopRange();const R=shopCalc(from,to);const doc=id?shopDocOf(id):shopDoc();const qo=doc.qty||{},hid=doc.hidden||{};
   const calc=R.items.map(it=>({...it,auto:fmtQty(it.qty,it.unit),qtyTxt:qo[it.key]||fmtQty(it.qty,it.unit),edited:!!qo[it.key]}));
   const extra=(doc.extra||[]).map((x,i)=>({key:x.id?'x:'+x.id:'x'+i+'|'+x.name,name:x.name,qtyTxt:x.qty||'',cat:x.cat||'Lainnya',src:['item tambahan'],xi:i}));
   const all=[...calc,...extra].filter(it=>!hid[it.key]);
@@ -958,7 +961,7 @@ VIEWS.belanja=()=>{
   const order=[...ICATS,...Object.keys(groups).filter(c=>!ICATS.includes(c))];
   const done=all.filter(it=>chk[it.key]).length;const porsi=R.days.reduce((a,d)=>a+d.tot,0);
   const total=shopTotal(doc,all);const priced=all.filter(it=>Number(pr[it.key])>0).length;
-  const xid=shopXid(shopId());const ex=S.exps[xid];
+  const lx=shopExpsOf(shopId());const ex=lx[0];
   const mon=mondayOf(TODAY);const quick=[['Hari ini',TODAY,TODAY],['Besok',nextWorkDay(TODAY),nextWorkDay(TODAY)],['Minggu ini',TODAY,addDays(mon,5)],['Minggu depan',addDays(mon,7),addDays(mon,12)]];
   const rangeTxt=from===to?fmtD(from):rangeLabel(from,to);
   const row=it=>`<div class="shrow${chk[it.key]?' done':''}">
@@ -979,14 +982,14 @@ VIEWS.belanja=()=>{
     <div class="lsc2 t-mnt"><b class="num">${done}/${all.length}</b><span>item sudah dibeli</span></div>
     <div class="lsc2 t-btr"><b class="num">${rp(total)}</b><span>total belanja · ${priced} item berharga</span></div>
   </div>
-  <div class="expl${ex?' on':''}">${I('wallet',18)}<span>${ex?`Tersambung ke pengeluaran <b>${esc(shortD(ex.date))}</b> · ${esc(ex.category)} · <b class="num">${rp(ex.amount)}</b>. Berubah otomatis saat harga diubah atau item dihapus.`:'Belum ada harga. Isi kolom harga di setiap item; totalnya otomatis dicatat sebagai pengeluaran Bahan Baku Makanan.'}</span>${ex?`<button type="button" class="btn sm" data-act="expEdit" data-x="${xid}">${I('edit',14)}Ubah pengeluaran</button><button type="button" class="btn sm" data-act="shopGoExp" data-m="${ex.date.slice(0,7)}">Lihat di Keuangan</button>`:''}</div>
+  <div class="expl${lx.length?' on':''}">${I('wallet',18)}${lx.length?`<span>Tersambung ke ${lx.length} catatan pengeluaran, berubah otomatis saat harga diubah atau item dihapus.</span><div class="exlist">${lx.map(x=>`<div class="exi"><span><b>${esc(x.category)}</b> · ${esc(shortD(x.date))}<br><span class="hint">${esc(x.desc)}</span></span><b class="num">${rp(x.amount)}</b><button type="button" class="btn sm" data-act="expEdit" data-x="${x.xid}" aria-label="Ubah pengeluaran ${esc(x.category)}">${I('edit',14)}</button></div>`).join('')}</div><button type="button" class="btn sm" data-act="shopGoExp" data-m="${ex.date.slice(0,7)}">Lihat di Keuangan</button>`:`<span>Belum ada harga. Isi kolom harga di setiap item; totalnya otomatis dicatat di pengeluaran sesuai kategori barang (bahan makanan, kemasan, gas, dll.).</span>`}</div>
   ${R.missing.length?`<div class="banner warn" style="flex-wrap:wrap">${I('alert')}<span style="flex:1;min-width:200px">Bahan belum diisi untuk: ${R.missing.map(x=>`<b>${esc(dishParts(x.name).slice(0,2).join(' + ')||x.name)}</b>`).join(', ')}. Isi sekali di menu, berikutnya otomatis terhitung.</span>${R.missing.filter(x=>x.mid&&S.menus[x.mid]).map(x=>`<button class="btn sm" data-act="menuEdit" data-m="${x.mid}">Isi bahan · ${esc((dishParts(x.name)[1]||dishParts(x.name)[0]||'').slice(0,24))}</button>`).join('')}</div>`:''}
   <div class="grid shopg">
     <div class="card">${all.length?order.filter(c=>groups[c]).map(c=>{const g=groups[c];const gt=g.reduce((a,it)=>a+(Number(pr[it.key])||0),0);return`<div class="grp"><div class="grp-h"><span class="ghn">${esc(c)}<span class="gcount num">${g.length}</span></span><span class="muted" style="font-size:12.5px">${g.filter(it=>chk[it.key]).length} dibeli${gt?' · '+rp(gt):''}</span></div>
       ${g.sort((a,b)=>cmpN(a.name,b.name)).map(row).join('')}</div>`}).join('')
       :empty(R.days.length?'Belum ada bahan yang bisa dihitung':'Tidak ada jadwal di periode ini',R.days.length?'Isi bahan per porsi di menu yang dijadwalkan, atau tambah item manual di bawah.':'Pilih tanggal lain, atau tambah item manual di bawah.')}
       ${hiddenN?`<div class="shhid">${hiddenN} item dihapus dari daftar ini · <a href="javascript:void 0" data-act="shopUnhide">Kembalikan semua</a></div>`:''}
-      <div class="shadd"><input class="inp" id="sxName" placeholder="Item lain, mis. Gas 3 kg" aria-label="Nama item"><input class="inp" id="sxQty" placeholder="Jumlah" style="max-width:110px" aria-label="Jumlah"><input class="inp" id="sxPrice" type="number" inputmode="numeric" min="0" step="500" placeholder="Harga Rp" style="max-width:120px" aria-label="Harga"><select class="inp" id="sxCat" style="width:auto" aria-label="Kategori">${ICATS.map(c=>`<option${c==='Lainnya'?' selected':''}>${c}</option>`).join('')}</select><button type="button" class="btn sm" data-act="shopXAdd">${I('plus',14)}Tambah</button></div>
+      <div class="shadd"><input class="inp" id="sxName" placeholder="Item lain, mis. Gas 3 kg" aria-label="Nama item"><input class="inp" id="sxQty" placeholder="Jumlah" style="max-width:110px" aria-label="Jumlah"><input class="inp" id="sxPrice" type="number" inputmode="numeric" min="0" step="500" placeholder="Harga Rp" style="max-width:120px" aria-label="Harga"><select class="inp" id="sxCat" style="width:auto" aria-label="Kategori"><option value="">Kategori otomatis</option>${ICATS.map(c=>`<option>${c}</option>`).join('')}</select><button type="button" class="btn sm" data-act="shopXAdd">${I('plus',14)}Tambah</button></div>
     </div>
     <div class="card pad"><div class="sec-h"><h2>Jadwal yang dihitung</h2></div>
       ${R.days.length?R.days.map(d=>`<div class="li"><div class="t"><b>${esc(fmtD(d.dt))}</b>${d.ms.map(m=>`<span style="display:block">${m.ok?'':'⚠ '}${esc(dishParts(m.name).slice(0,3).join(' + '))} · ${m.n} porsi</span>`).join('')}</div><b class="num">${d.tot}</b></div>`).join(''):empty('Tidak ada jadwal','Periode ini belum punya porsi terjadwal.')}
@@ -1004,15 +1007,20 @@ function shopPrint(){const t=shopText();
   $('#pageStyle').textContent='@page{size:auto;margin:12mm}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body::before{display:none!important}}';
   setTimeout(()=>window.print(),60)}
 /* simpan daftar + sinkron ke pengeluaran */
+const shopExpsOf=id=>Object.entries(S.exps).filter(([,x])=>x&&x.shopId===id).map(([xid,x])=>({xid,...x}));
 async function syncShopExp(id,d){
-  const{all}=(id===shopId())?shopItems():{all:null};
-  const keys=all?new Set(all.map(it=>it.key)):null;const hid=d.hidden||{};
-  const prices=Object.entries(d.prices||{}).filter(([k,v])=>Number(v)>0&&!hid[k]&&(!keys||keys.has(k)));
-  const total=prices.reduce((a,[,v])=>a+Number(v),0);const xid=shopXid(id);const ex=S.exps[xid];
-  const[a,b]=id.split('_');
-  if(total>0){const data={...(ex||{created:Date.now(),date:TODAY,category:'Bahan Baku Makanan',type:'out'}),type:'out',amount:total,shopId:id,desc:(ex&&ex.desc&&!ex.desc.startsWith('Belanja pasar'))?ex.desc:`Belanja pasar ${rangeLabel(a,b)} · ${prices.length} item`};
-    if(!ex||ex.amount!==data.amount||ex.desc!==data.desc)await put('exps',xid,data)}
-  else if(ex)await del('exps',xid);
+  const{all}=shopItems(id);const pr=d.prices||{},hid=d.hidden||{};
+  const groups={};all.forEach(it=>{const v=Number(pr[it.key])||0;if(!(v>0)||hid[it.key])return;const ec=EXP_OF(it.cat);(groups[ec]=groups[ec]||[]).push({it,v})});
+  const[a,b]=id.split('_');const dateLbl=rangeLabel(a,b||a);
+  const existing=shopExpsOf(id);const keep=new Set();
+  for(const [ec,list] of Object.entries(groups)){
+    const xid='shop_'+id+'__'+ec.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');keep.add(xid);
+    const ex=S.exps[xid];const total=list.reduce((t,x)=>t+x.v,0);
+    const auto=`Belanja ${dateLbl}: `+list.sort((p,q)=>cmpN(p.it.name,q.it.name)).map(({it,v})=>`${it.name}${it.qtyTxt?' '+it.qtyTxt:''} (${rp(v)})`).join(', ');
+    const data={...(ex||{created:Date.now(),date:TODAY,type:'out'}),type:'out',category:ex&&ex.catLocked?ex.category:ec,shopCat:ec,amount:total,shopId:id,desc:ex&&ex.descLocked?ex.desc:auto};
+    if(!ex||ex.amount!==data.amount||ex.desc!==data.desc||ex.category!==data.category)await put('exps',xid,data);
+  }
+  for(const x of existing)if(!keep.has(x.xid))await del('exps',x.xid);
 }
 async function shopSave(mut,id){id=id||shopId();const d=clone(shopDocOf(id));['checked','prices','qty','hidden'].forEach(k=>d[k]=d[k]||{});d.extra=d.extra||[];mut(d);if(!d.from){const[a,b]=id.split('_');d.from=a;d.to=b}
   if(!(await put('shop',id,d)))return false;await syncShopExp(id,d);return true}
@@ -1246,8 +1254,12 @@ function parseImport(t){
 /* ----- bahan / ingredients ----- */
 const UNITS=['g','kg','ml','L','butir','pcs','buah','siung','ikat','lembar','bungkus','botol','pack','sdm','sdt'];
 const COUNT_UNITS=['butir','pcs','buah','siung','ikat','lembar','bungkus','botol','pack'];
-const ICATS=['Daging & Ayam','Seafood','Sayur & Buah','Bumbu & Rempah','Sembako','Tahu, Tempe & Telur','Kemasan','Lainnya'];
+const ICATS=['Daging & Ayam','Seafood','Sayur & Buah','Bumbu & Rempah','Sembako','Tahu, Tempe & Telur','Kemasan','Gas & Utilitas','Peralatan Dapur','Lainnya'];
+/* kategori daftar belanja -> kategori pengeluaran di laporan keuangan */
+const EXP_OF=c=>({'Kemasan':'Kemasan / Box Bento','Gas & Utilitas':'Gas & Utilitas','Peralatan Dapur':'Peralatan Dapur','Lainnya':'Lain-lain'})[c]||'Bahan Baku Makanan';
 function guessCat(n){n=String(n||'').toLowerCase();
+  if(/\bgas\b|elpiji|lpg|galon|air minum|listrik|token|bensin|e-?toll|parkir/.test(n))return'Gas & Utilitas';
+  if(/panci|wajan|pisau|spatula|talenan|sendok sayur|saringan|blender|rice cooker|kompor|baskom|ember/.test(n))return'Peralatan Dapur';
   if(/ayam|daging|sapi|babi|bacon|sosis|sausage|beef|pork|chicken|bebek|kambing/.test(n))return'Daging & Ayam';
   if(/udang|ikan|dori|salmon|cumi|kepiting|kerang|tuna|shrimp|fish/.test(n))return'Seafood';
   if(/telur|telor|egg|tahu|tempe/.test(n))return'Tahu, Tempe & Telur';
@@ -1553,7 +1565,7 @@ function expForm(id){
       ${linked?`<div class="banner info full" style="margin:0">${I('cart',16)}<span style="flex:1">Jumlah mengikuti total harga di daftar belanja. Ubah harga per item di sana.</span><button type="button" class="btn sm" data-act="shopOpen" data-s="${esc(x.shopId)}">Buka daftar belanja</button></div>`:''}</div>
       <datalist id="dlCats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`,
     submit:async o=>{const a=Number(o.amount);if(!a||a<0){toast('Isi jumlah','err');return false}
-      const ok=await put('exps',id||uid('x'),{...(id?S.exps[id]:{created:Date.now()}),date:o.date||TODAY,type:o.type,category:(o.category||'Lain-lain').trim(),desc:(o.desc||'').trim(),amount:linked?x.amount:a});
+      const ok=await put('exps',id||uid('x'),{...(id?S.exps[id]:{created:Date.now()}),date:o.date||TODAY,type:o.type,category:(o.category||'Lain-lain').trim(),desc:(o.desc||'').trim(),amount:linked?x.amount:a,...(linked?{descLocked:(o.desc||'').trim()!==(x.desc||''),catLocked:(o.category||'').trim()!==(x.category||'')}:{})});
       if(ok){toast('Transaksi disimpan','ok');UI.kMonth=(o.date||TODAY).slice(0,7);UI.kTab='exps'}return ok}});
 }
 
@@ -1602,7 +1614,7 @@ const ACT={
   ingCopy:()=>{const v=$('#ingCopy')&&$('#ingCopy').value;const m=S.menus[v];if(!m){toast('Pilih menu dulu','err');return}const keep=M.st.ing.filter(x=>x.name.trim());M.st.ing=[...keep,...clone(m.ingredients).map(x=>({name:x.name,qty:x.qty,unit:x.unit||'g',cat:x.cat||'',per:x.per||'porsi'}))];drawM();toast(m.ingredients.length+' bahan disalin, sesuaikan jumlahnya','ok')},
   shopQuick:d=>{UI.sFrom=d.a;UI.sTo=d.b;schedule()},
   shopTog:(d,t)=>shopSave(x=>{if(t.checked)x.checked[d.k]=true;else delete x.checked[d.k]}),
-  shopXAdd:()=>{const n=($('#sxName').value||'').trim();if(!n){toast('Isi nama item','err');return}const q=($('#sxQty').value||'').trim(),c=$('#sxCat').value,pr=Math.max(0,Number($('#sxPrice').value)||0);const id=uid('i');
+  shopXAdd:()=>{const n=($('#sxName').value||'').trim();if(!n){toast('Isi nama item','err');return}const q=($('#sxQty').value||'').trim(),c=$('#sxCat').value||guessCat(n),pr=Math.max(0,Number($('#sxPrice').value)||0);const id=uid('i');
     shopSave(x=>{x.extra.push({id,name:n,qty:q,cat:c});if(pr){x.prices['x:'+id]=pr;x.checked['x:'+id]=true}}).then(ok=>ok&&toast(n+' ditambahkan','ok'))},
   shopEdit:d=>shopEditForm(d.k),
   shopDel:d=>{const{all}=shopItems();const it=all.find(x=>x.key===d.k);if(!it)return;const doc=shopDoc();const p=Number((doc.prices||{})[d.k])||0;
@@ -1627,7 +1639,7 @@ const ACT={
   kTab:d=>{UI.kTab=d.v;schedule()},
   expNew:()=>expForm(null),
   expCat:(d,t)=>{const i=$('#expCatIn');if(i)i.value=d.v;t.parentElement.querySelectorAll('.btn').forEach(b=>b.classList.toggle('pri',b===t))}, expEdit:d=>expForm(d.x),
-  expDel:d=>{const x=S.exps[d.x];if(!x)return;ask('Hapus transaksi?',`${esc(x.category||'')} ${rp(x.amount)} pada ${shortD(x.date)} dihapus.${x.shopId?' Harga di daftar belanja terkait juga dikosongkan.':''}`,'Hapus',async()=>{if(x.shopId){const sid=x.shopId;const dd=clone(shopDocOf(sid));dd.prices={};await put('shop',sid,dd)}await del('exps',d.x);toast('Transaksi dihapus','ok')})},
+  expDel:d=>{const x=S.exps[d.x];if(!x)return;ask('Hapus transaksi?',`${esc(x.category||'')} ${rp(x.amount)} pada ${shortD(x.date)} dihapus.${x.shopId?' Harga barang terkait di daftar belanja juga dikosongkan.':''}`,'Hapus',async()=>{if(x.shopId){const sid=x.shopId;const{all}=shopItems(sid);const dd=clone(shopDocOf(sid));dd.prices=dd.prices||{};all.forEach(it=>{if(!x.shopCat||EXP_OF(it.cat)===x.shopCat)delete dd.prices[it.key]});await put('shop',sid,dd)}await del('exps',d.x);toast('Transaksi dihapus','ok')})},
   payNew:d=>payForm(d.k), payEdit:d=>payForm(null,d.p),
   payDel:d=>{const p=S.pays[d.p];ask('Hapus pembayaran?',`${PAYT[p.type]} ${rp(p.amount)} untuk <b>${esc((S.kids[p.kidId]||{}).name||'')}</b> pada ${shortD(p.date)} dihapus dan saldo dihitung ulang.`,'Hapus',async()=>{await del('pays',d.p);toast('Pembayaran dihapus','ok')})},
   payQuick:d=>{const a=$('#pAmt');if(a){a.value=d.v;a.focus()}},
