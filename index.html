@@ -461,7 +461,6 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .ming.none{color:var(--faint)}
 .shopg{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start}
 @media (max-width:900px){.shopg{grid-template-columns:minmax(0,1fr)}}
-.shrow{display:flex;align-items:center;gap:12px;padding:11px 18px;border-top:1px solid var(--line);cursor:pointer}
 .grp-h+.shrow{border-top:0}
 .shrow input{width:20px;height:20px;accent-color:var(--brand);flex:none}
 .shn{flex:1;min-width:0;display:grid;gap:1px}.shn b{font-size:14.5px}
@@ -470,6 +469,15 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .shadd{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-top:1px dashed var(--line);background:var(--sunk);border-radius:0 0 var(--r) var(--r)}
 .shadd .inp{flex:1;min-width:140px}
 #printArea .shopprint pre{font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;margin:0;color:#000}
+.shrow{display:grid;grid-template-columns:minmax(0,1fr) auto 150px auto;gap:10px;align-items:center;padding:10px 18px;border-top:1px solid var(--line)}
+.shl{display:flex;align-items:center;gap:12px;min-width:0;cursor:pointer}
+.shp{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);font-weight:600}
+.shp .inp{min-height:36px;padding:6px 9px;text-align:right;width:100%;min-width:0;flex:1}
+.sha{display:flex;gap:0}.sha .iconbtn{width:32px;height:32px;color:var(--muted)}.sha .iconbtn:hover{background:var(--sunk);color:var(--ink)}
+@media (max-width:640px){.shrow{grid-template-columns:minmax(0,1fr) auto;padding:10px 14px}.shp{grid-column:1;padding-left:32px;max-width:240px}.sha{grid-row:2;grid-column:2;justify-self:end}.lsum b{font-size:22px}}
+.shhid{padding:10px 18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.expl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-radius:14px;margin-bottom:14px;background:var(--sunk);border:1px dashed var(--line);color:var(--muted);font-weight:500}
+.expl>span{flex:1;min-width:220px}.expl.on{background:var(--mint-soft);border:1px solid var(--mint);color:var(--mint-ink)}.expl.on b{color:var(--ink)}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -930,18 +938,36 @@ function shopCalc(from,to){
   return{items:Object.values(items),days,missing:Object.values(missing)};
 }
 const shopId=()=>{const[a,b]=shopRange();return a+'_'+b};
-const shopDoc=()=>S.shop[shopId()]||{checked:{},extra:[]};
+const shopDocOf=id=>S.shop[id]||{checked:{},extra:[],prices:{},qty:{},hidden:{}};
+const shopDoc=()=>shopDocOf(shopId());
+const shopXid=id=>'shop_'+id;
+const rangeLabel=(a,b)=>a===b?shortD(a)+' '+parseD(a).getFullYear():shortD(a)+' – '+shortD(b)+' '+parseD(b).getFullYear();
+/* semua item yang tampil (hitungan resep + item tambahan), sudah memperhitungkan edit & sembunyikan */
+function shopItems(){
+  const[from,to]=shopRange();const R=shopCalc(from,to);const doc=shopDoc();const qo=doc.qty||{},hid=doc.hidden||{};
+  const calc=R.items.map(it=>({...it,auto:fmtQty(it.qty,it.unit),qtyTxt:qo[it.key]||fmtQty(it.qty,it.unit),edited:!!qo[it.key]}));
+  const extra=(doc.extra||[]).map((x,i)=>({key:x.id?'x:'+x.id:'x'+i+'|'+x.name,name:x.name,qtyTxt:x.qty||'',cat:x.cat||'Lainnya',src:['item tambahan'],xi:i}));
+  const all=[...calc,...extra].filter(it=>!hid[it.key]);
+  return{R,doc,all,hiddenN:[...calc,...extra].filter(it=>hid[it.key]).length,from,to};
+}
+const shopTotal=(doc,all)=>all.reduce((a,it)=>a+(Number((doc.prices||{})[it.key])||0),0);
+const domId=k=>'sp'+Array.from(String(k)).reduce((h,c)=>(h*31+c.charCodeAt(0))|0,7).toString(36).replace('-','m');
 VIEWS.belanja=()=>{
-  const[from,to]=shopRange();const R=shopCalc(from,to);const doc=shopDoc();const chk=doc.checked||{};
-  const extra=(doc.extra||[]).map((x,i)=>({key:'x'+i+'|'+x.name,name:x.name,unit:'',qtyTxt:x.qty||'',cat:x.cat||'Lainnya',src:['tambahan'],xi:i}));
-  const all=[...R.items.map(it=>({...it,qtyTxt:fmtQty(it.qty,it.unit)})),...extra];
+  const{R,doc,all,hiddenN,from,to}=shopItems();const chk=doc.checked||{},pr=doc.prices||{};
   const groups={};all.forEach(it=>(groups[it.cat]=groups[it.cat]||[]).push(it));
   const order=[...ICATS,...Object.keys(groups).filter(c=>!ICATS.includes(c))];
   const done=all.filter(it=>chk[it.key]).length;const porsi=R.days.reduce((a,d)=>a+d.tot,0);
+  const total=shopTotal(doc,all);const priced=all.filter(it=>Number(pr[it.key])>0).length;
+  const xid=shopXid(shopId());const ex=S.exps[xid];
   const mon=mondayOf(TODAY);const quick=[['Hari ini',TODAY,TODAY],['Besok',nextWorkDay(TODAY),nextWorkDay(TODAY)],['Minggu ini',TODAY,addDays(mon,5)],['Minggu depan',addDays(mon,7),addDays(mon,12)]];
-  const rangeTxt=from===to?fmtD(from):shortD(from)+' – '+shortD(to)+' '+parseD(to).getFullYear();
-  return`<div class="vh"><div><h1>Daftar Belanja Pasar</h1><p>Dihitung dari jadwal ${esc(rangeTxt)}: jumlah porsi tiap menu × bahan per porsi.</p></div>
-    <div class="row"><button class="btn" data-act="shopCopy" ${all.length?'':'disabled'}>${I('copy',16)}Salin untuk WA</button><button class="btn" data-act="shopPrint" ${all.length?'':'disabled'}>${I('printer',16)}Print</button><button class="btn pri" data-act="shopExp">${I('wallet',16)}Catat pengeluaran</button></div></div>
+  const rangeTxt=from===to?fmtD(from):rangeLabel(from,to);
+  const row=it=>`<div class="shrow${chk[it.key]?' done':''}">
+      <label class="shl"><input type="checkbox" data-act="shopTog" data-k="${esc(it.key)}"${chk[it.key]?' checked':''} aria-label="Sudah dibeli: ${esc(it.name)}"><span class="shn"><b>${esc(it.name)}</b><span class="hint">${esc(it.src.join(' · '))}${it.edited?` · dihitung ${esc(it.auto)}`:''}</span></span></label>
+      <b class="shq num">${esc(it.qtyTxt||'–')}</b>
+      <span class="shp"><span>Rp</span><input class="inp num" type="number" inputmode="numeric" min="0" step="500" id="${domId(it.key)}" data-shopprice="${esc(it.key)}" value="${Number(pr[it.key])||''}" placeholder="harga" aria-label="Harga dibayar ${esc(it.name)}"></span>
+      <span class="sha"><button type="button" class="iconbtn" data-act="shopEdit" data-k="${esc(it.key)}" aria-label="Ubah ${esc(it.name)}">${I('edit',15)}</button><button type="button" class="iconbtn" data-act="shopDel" data-k="${esc(it.key)}" aria-label="Hapus ${esc(it.name)}">${I('trash',15)}</button></span></div>`;
+  return`<div class="vh"><div><h1>Daftar Belanja Pasar</h1><p>Dihitung dari jadwal ${esc(rangeTxt)}. Isi harga yang dibayar, total otomatis tercatat di pengeluaran.</p></div>
+    <div class="row"><button class="btn" data-act="shopCopy" ${all.length?'':'disabled'}>${I('copy',16)}Salin untuk WA</button><button class="btn" data-act="shopPrint" ${all.length?'':'disabled'}>${I('printer',16)}Print</button></div></div>
   <div class="card pad" style="margin-bottom:14px"><div class="tool" style="margin:0;align-items:flex-end">
     <div class="daychips" role="group" aria-label="Pilih periode">${quick.map(([l,a,b])=>`<button type="button" class="${from===a&&to===b?'on':''}" data-act="shopQuick" data-a="${a}" data-b="${b}">${l}</button>`).join('')}</div>
     <label class="f">Dari<input type="date" class="inp" id="sFrom" data-bind="sFrom" value="${from}"></label>
@@ -951,31 +977,64 @@ VIEWS.belanja=()=>{
   <div class="lsum">
     <div class="lsc1"><b class="num">${porsi}</b><span>porsi · ${R.days.length} hari</span></div>
     <div class="lsc2 t-mnt"><b class="num">${done}/${all.length}</b><span>item sudah dibeli</span></div>
-    ${R.missing.length?`<div class="lsc2 t-pnk"><b class="num">${R.missing.length}</b><span>menu belum ada bahan</span></div>`:''}
+    <div class="lsc2 t-btr"><b class="num">${rp(total)}</b><span>total belanja · ${priced} item berharga</span></div>
   </div>
+  <div class="expl${ex?' on':''}">${I('wallet',18)}<span>${ex?`Tersambung ke pengeluaran <b>${esc(shortD(ex.date))}</b> · ${esc(ex.category)} · <b class="num">${rp(ex.amount)}</b>. Berubah otomatis saat harga diubah atau item dihapus.`:'Belum ada harga. Isi kolom harga di setiap item; totalnya otomatis dicatat sebagai pengeluaran Bahan Baku Makanan.'}</span>${ex?`<button type="button" class="btn sm" data-act="expEdit" data-x="${xid}">${I('edit',14)}Ubah pengeluaran</button><button type="button" class="btn sm" data-act="shopGoExp" data-m="${ex.date.slice(0,7)}">Lihat di Keuangan</button>`:''}</div>
   ${R.missing.length?`<div class="banner warn" style="flex-wrap:wrap">${I('alert')}<span style="flex:1;min-width:200px">Bahan belum diisi untuk: ${R.missing.map(x=>`<b>${esc(dishParts(x.name).slice(0,2).join(' + ')||x.name)}</b>`).join(', ')}. Isi sekali di menu, berikutnya otomatis terhitung.</span>${R.missing.filter(x=>x.mid&&S.menus[x.mid]).map(x=>`<button class="btn sm" data-act="menuEdit" data-m="${x.mid}">Isi bahan · ${esc((dishParts(x.name)[1]||dishParts(x.name)[0]||'').slice(0,24))}</button>`).join('')}</div>`:''}
   <div class="grid shopg">
-    <div class="card">${all.length?order.filter(c=>groups[c]).map(c=>`<div class="grp"><div class="grp-h"><span class="ghn">${esc(c)}<span class="gcount num">${groups[c].length}</span></span><span class="muted" style="font-size:12.5px">${groups[c].filter(it=>chk[it.key]).length} dibeli</span></div>
-      ${groups[c].sort((a,b)=>cmpN(a.name,b.name)).map(it=>`<label class="shrow${chk[it.key]?' done':''}"><input type="checkbox" data-act="shopTog" data-k="${esc(it.key)}"${chk[it.key]?' checked':''}><span class="shn"><b>${esc(it.name)}</b><span class="hint">${esc(it.src.join(' · '))}</span></span><b class="shq num">${esc(it.qtyTxt)}</b>${it.xi!=null?`<button type="button" class="iconbtn" data-act="shopXDel" data-i="${it.xi}" aria-label="Hapus item">${I('x',15)}</button>`:''}</label>`).join('')}</div>`).join('')
-      :empty(R.days.length?'Belum ada bahan yang bisa dihitung':'Tidak ada jadwal di periode ini',R.days.length?'Isi bahan per porsi di menu yang dijadwalkan, atau tambah item manual di bawah.':'Pilih tanggal lain, atau buat jadwal dulu di Jadwal & Pengiriman.')}
-      <div class="shadd"><input class="inp" id="sxName" placeholder="Item lain, mis. Gas 3 kg" aria-label="Nama item"><input class="inp" id="sxQty" placeholder="Jumlah" style="max-width:120px" aria-label="Jumlah"><select class="inp" id="sxCat" style="width:auto" aria-label="Kategori">${ICATS.map(c=>`<option${c==='Lainnya'?' selected':''}>${c}</option>`).join('')}</select><button type="button" class="btn sm" data-act="shopXAdd">${I('plus',14)}Tambah</button></div>
+    <div class="card">${all.length?order.filter(c=>groups[c]).map(c=>{const g=groups[c];const gt=g.reduce((a,it)=>a+(Number(pr[it.key])||0),0);return`<div class="grp"><div class="grp-h"><span class="ghn">${esc(c)}<span class="gcount num">${g.length}</span></span><span class="muted" style="font-size:12.5px">${g.filter(it=>chk[it.key]).length} dibeli${gt?' · '+rp(gt):''}</span></div>
+      ${g.sort((a,b)=>cmpN(a.name,b.name)).map(row).join('')}</div>`}).join('')
+      :empty(R.days.length?'Belum ada bahan yang bisa dihitung':'Tidak ada jadwal di periode ini',R.days.length?'Isi bahan per porsi di menu yang dijadwalkan, atau tambah item manual di bawah.':'Pilih tanggal lain, atau tambah item manual di bawah.')}
+      ${hiddenN?`<div class="shhid">${hiddenN} item dihapus dari daftar ini · <a href="javascript:void 0" data-act="shopUnhide">Kembalikan semua</a></div>`:''}
+      <div class="shadd"><input class="inp" id="sxName" placeholder="Item lain, mis. Gas 3 kg" aria-label="Nama item"><input class="inp" id="sxQty" placeholder="Jumlah" style="max-width:110px" aria-label="Jumlah"><input class="inp" id="sxPrice" type="number" inputmode="numeric" min="0" step="500" placeholder="Harga Rp" style="max-width:120px" aria-label="Harga"><select class="inp" id="sxCat" style="width:auto" aria-label="Kategori">${ICATS.map(c=>`<option${c==='Lainnya'?' selected':''}>${c}</option>`).join('')}</select><button type="button" class="btn sm" data-act="shopXAdd">${I('plus',14)}Tambah</button></div>
     </div>
     <div class="card pad"><div class="sec-h"><h2>Jadwal yang dihitung</h2></div>
       ${R.days.length?R.days.map(d=>`<div class="li"><div class="t"><b>${esc(fmtD(d.dt))}</b>${d.ms.map(m=>`<span style="display:block">${m.ok?'':'⚠ '}${esc(dishParts(m.name).slice(0,3).join(' + '))} · ${m.n} porsi</span>`).join('')}</div><b class="num">${d.tot}</b></div>`).join(''):empty('Tidak ada jadwal','Periode ini belum punya porsi terjadwal.')}
     </div>
   </div>`;
 };
-function shopText(){const[from,to]=shopRange();const R=shopCalc(from,to);const doc=shopDoc();
-  const all=[...R.items.map(it=>({...it,qtyTxt:fmtQty(it.qty,it.unit)})),...(doc.extra||[]).map(x=>({name:x.name,qtyTxt:x.qty||'',cat:x.cat||'Lainnya'}))];
+function shopText(){const{R,doc,all,from,to}=shopItems();const pr=doc.prices||{};
   const g={};all.forEach(it=>(g[it.cat]=g[it.cat]||[]).push(it));
   let t=`*Belanja ${S.cfg.name}*\n${from===to?fmtD(from):fmtD(from)+' – '+fmtD(to)}\n${R.days.reduce((a,d)=>a+d.tot,0)} porsi${Number(UI.sBuf)?` (dilebihkan ${UI.sBuf}%)`:''}\n`;
-  [...ICATS,...Object.keys(g).filter(c=>!ICATS.includes(c))].filter(c=>g[c]).forEach(c=>{t+=`\n*${c}*\n`+g[c].sort((a,b)=>cmpN(a.name,b.name)).map(it=>`- ${it.name}: ${it.qtyTxt}`).join('\n')+'\n'});
+  [...ICATS,...Object.keys(g).filter(c=>!ICATS.includes(c))].filter(c=>g[c]).forEach(c=>{t+=`\n*${c}*\n`+g[c].sort((a,b)=>cmpN(a.name,b.name)).map(it=>`- ${it.name}: ${it.qtyTxt||'-'}${Number(pr[it.key])?' — '+rp(pr[it.key]):''}`).join('\n')+'\n'});
+  const tot=shopTotal(doc,all);if(tot)t+=`\n*Total: ${rp(tot)}*`;
   return t.trim()}
-function shopPrint(){const[from,to]=shopRange();const t=shopText();
+function shopPrint(){const t=shopText();
   $('#printArea').innerHTML=`<div class="shopprint"><pre>${esc(t.replace(/\*/g,''))}</pre></div>`;
   $('#pageStyle').textContent='@page{size:auto;margin:12mm}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body::before{display:none!important}}';
   setTimeout(()=>window.print(),60)}
-async function shopSave(mut){const id=shopId();const d=clone(shopDoc());d.checked=d.checked||{};d.extra=d.extra||[];mut(d);d.from=UI.sFrom;d.to=UI.sTo;await put('shop',id,d)}
+/* simpan daftar + sinkron ke pengeluaran */
+async function syncShopExp(id,d){
+  const{all}=(id===shopId())?shopItems():{all:null};
+  const keys=all?new Set(all.map(it=>it.key)):null;const hid=d.hidden||{};
+  const prices=Object.entries(d.prices||{}).filter(([k,v])=>Number(v)>0&&!hid[k]&&(!keys||keys.has(k)));
+  const total=prices.reduce((a,[,v])=>a+Number(v),0);const xid=shopXid(id);const ex=S.exps[xid];
+  const[a,b]=id.split('_');
+  if(total>0){const data={...(ex||{created:Date.now(),date:TODAY,category:'Bahan Baku Makanan',type:'out'}),type:'out',amount:total,shopId:id,desc:(ex&&ex.desc&&!ex.desc.startsWith('Belanja pasar'))?ex.desc:`Belanja pasar ${rangeLabel(a,b)} · ${prices.length} item`};
+    if(!ex||ex.amount!==data.amount||ex.desc!==data.desc)await put('exps',xid,data)}
+  else if(ex)await del('exps',xid);
+}
+async function shopSave(mut,id){id=id||shopId();const d=clone(shopDocOf(id));['checked','prices','qty','hidden'].forEach(k=>d[k]=d[k]||{});d.extra=d.extra||[];mut(d);if(!d.from){const[a,b]=id.split('_');d.from=a;d.to=b}
+  if(!(await put('shop',id,d)))return false;await syncShopExp(id,d);return true}
+function shopEditForm(key){
+  const{all}=shopItems();const it=all.find(x=>x.key===key);if(!it)return;const doc=shopDoc();
+  openM({title:'Ubah item belanja',
+    left:`<button type="button" class="btn ghost" style="color:var(--bad)" data-act="shopDel" data-k="${esc(key)}">${I('trash',16)}Hapus dari daftar</button>`,
+    body:()=>`<div class="fg">
+      ${it.xi!=null?`<label class="f full">Nama item<input class="inp" name="name" value="${esc(it.name)}" required autofocus></label>
+      <label class="f full">Kategori<select class="inp" name="cat">${ICATS.map(c=>`<option${c===it.cat?' selected':''}>${esc(c)}</option>`).join('')}</select></label>`:`<div class="f full"><span>Item</span><b style="font-size:16px;color:var(--ink)">${esc(it.name)}</b><span class="hint">${esc(it.src.join(' · '))}</span></div>`}
+      <label class="f">Jumlah dibeli<input class="inp" name="qty" value="${esc(it.qtyTxt||'')}" placeholder="${esc(it.auto||'mis. 2 kg')}"${it.xi==null?'':''}>${it.xi==null?`<span class="hint">Hitungan resep: ${esc(it.auto)}. Kosongkan untuk kembali ke hitungan.</span>`:''}</label>
+      <label class="f">Harga dibayar (Rp)<input class="inp" type="number" inputmode="numeric" min="0" step="500" name="price" value="${Number((doc.prices||{})[key])||''}" placeholder="0"${it.xi==null?' autofocus':''}></label>
+      <label class="chk full"><input type="checkbox" name="bought"${(doc.checked||{})[key]?' checked':''}>Sudah dibeli</label></div>`,
+    submit:async o=>{const p=Math.max(0,Number(o.price)||0);const ok=await shopSave(d=>{
+        if(it.xi!=null){const x=d.extra[it.xi];if(x){x.name=(o.name||x.name).trim();x.cat=o.cat||x.cat;x.qty=(o.qty||'').trim()}}
+        else{const q=(o.qty||'').trim();if(q&&q!==it.auto)d.qty[key]=q;else delete d.qty[key]}
+        const k2=it.xi!=null&&d.extra[it.xi]&&!d.extra[it.xi].id?('x'+it.xi+'|'+d.extra[it.xi].name):key;
+        if(k2!==key){if(d.prices[key]!=null){d.prices[k2]=d.prices[key];delete d.prices[key]}if(d.checked[key]){d.checked[k2]=true;delete d.checked[key]}}
+        if(p)d.prices[k2]=p;else delete d.prices[k2];
+        if(o.bought==='on')d.checked[k2]=true;else delete d.checked[k2]});
+      if(ok)toast('Item disimpan','ok');return ok}});
+}
 
 /* ----- Keuangan ----- */
 function monthStats(mo){
@@ -1007,7 +1066,7 @@ VIEWS.keuangan=()=>{
     inner=`<div class="row" style="justify-content:space-between;padding:14px 18px 0"><span class="muted">${xs.length} transaksi · total pengeluaran <b style="color:var(--ink)">${rp(ms.out)}</b>${ms.inc?' · pemasukan lain '+rp(ms.inc):''}</span><button class="btn pri sm" data-act="expNew">${I('plus',14)}Catat pengeluaran</button></div>
     ${cats.length?`<div class="bars" style="padding:14px 18px 4px">${cats.map(([c,v])=>`<div class="bar" style="grid-template-columns:minmax(110px,190px) minmax(0,1fr) 110px"><span>${esc(c)}</span><span class="tr"><span class="fl" style="width:${Math.max(3,v/mx*100)}%"></span></span><b class="num" style="text-align:right">${rp(v)}</b></div>`).join('')}</div>`:''}
     ${xs.length?`<div class="tw"><table class="t"><thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th class="r">Jumlah</th><th></th></tr></thead><tbody>
-      ${xs.map(x=>`<tr><td style="white-space:nowrap">${shortD(x.date)}</td><td>${x.type==='in'?'<span class="pill ok">Pemasukan</span> ':''}${esc(x.category||'-')}</td><td>${esc(x.desc||'')}</td><td class="r"><b class="${x.type==='in'?'pos':'neg'}">${x.type==='in'?'+':'-'}${rp(x.amount)}</b></td><td><div class="acts"><button class="btn sm" data-act="expEdit" data-x="${x.id}" aria-label="Ubah">${I('edit',14)}</button><button class="btn sm" data-act="expDel" data-x="${x.id}" aria-label="Hapus">${I('trash',14)}</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('Belum ada pengeluaran di '+mlabel,'Catat belanja bahan, kemasan, driver, dan biaya lain untuk melihat laba.',`<button class="btn pri" data-act="expNew">${I('plus',16)}Catat pengeluaran</button>`)}`;
+      ${xs.map(x=>`<tr><td style="white-space:nowrap">${shortD(x.date)}</td><td>${x.type==='in'?'<span class="pill ok">Pemasukan</span> ':''}${esc(x.category||'-')}</td><td>${esc(x.desc||'')}${x.shopId?` <a href="javascript:void 0" class="pill info" data-act="shopOpen" data-s="${esc(x.shopId)}" style="text-decoration:none">${I('cart',12)} dari Belanja</a>`:''}</td><td class="r"><b class="${x.type==='in'?'pos':'neg'}">${x.type==='in'?'+':'-'}${rp(x.amount)}</b></td><td><div class="acts"><button class="btn sm" data-act="expEdit" data-x="${x.id}" aria-label="Ubah">${I('edit',14)}</button><button class="btn sm" data-act="expDel" data-x="${x.id}" aria-label="Hapus">${I('trash',14)}</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('Belum ada pengeluaran di '+mlabel,'Catat belanja bahan, kemasan, driver, dan biaya lain untuk melihat laba.',`<button class="btn pri" data-act="expNew">${I('plus',16)}Catat pengeluaran</button>`)}`;
   }else{
     const ps=Object.entries(S.pays).map(([id,p])=>({id,...p})).filter(p=>(p.date||'').startsWith(mo)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0));
     inner=ps.length?`<div class="tw"><table class="t"><thead><tr><th>Tanggal</th><th>Anak</th><th>Jenis</th><th>Metode</th><th>Catatan</th><th class="r">Jumlah</th><th></th></tr></thead><tbody>
@@ -1482,7 +1541,7 @@ function csvExport(){
 /* ----- expenses ----- */
 const EXPCAT=['Bahan Baku Makanan','Kemasan / Box Bento','Gaji / Driver Pengiriman','Gas & Utilitas','Peralatan Dapur','Lain-lain'];
 function expForm(id){
-  const x=id?S.exps[id]:{date:TODAY,type:'out',category:'Bahan Baku Makanan'};
+  const x=id?S.exps[id]:{date:TODAY,type:'out',category:'Bahan Baku Makanan'};const linked=!!(x&&x.shopId);
   const cats=[...new Set([...EXPCAT,...Object.values(S.exps).map(e=>e.category).filter(Boolean)])];
   openM({title:id?'Ubah transaksi':'Catat pengeluaran',
     left:id?`<button type="button" class="btn ghost" style="color:var(--bad)" data-act="expDel" data-x="${id}">${I('trash',16)}Hapus</button>`:'',
@@ -1490,10 +1549,11 @@ function expForm(id){
       <label class="f">Tipe<select class="inp" name="type"><option value="out"${x.type!=='in'?' selected':''}>Pengeluaran</option><option value="in"${x.type==='in'?' selected':''}>Pemasukan lain</option></select></label>
       <div class="f full"><span>Kategori</span><div class="quick">${EXPCAT.map(c=>`<button type="button" class="btn sm${(x.category||'')===c?' pri':''}" data-act="expCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div><input class="inp" name="category" id="expCatIn" list="dlCats" value="${esc(x.category||'')}" aria-label="Kategori"></div>
       <label class="f full">Deskripsi<input class="inp" name="desc" value="${esc(x.desc||'')}" placeholder="Daging ayam 5,5 kg; bihun; sayuran" autofocus></label>
-      <label class="f">Jumlah (Rp) *<input class="inp" type="number" name="amount" inputmode="numeric" min="0" step="500" value="${x.amount||''}" required></label></div>
+      <label class="f">Jumlah (Rp) *<input class="inp" type="number" name="amount" inputmode="numeric" min="0" step="500" value="${x.amount||''}" required${linked?' readonly':''}></label>
+      ${linked?`<div class="banner info full" style="margin:0">${I('cart',16)}<span style="flex:1">Jumlah mengikuti total harga di daftar belanja. Ubah harga per item di sana.</span><button type="button" class="btn sm" data-act="shopOpen" data-s="${esc(x.shopId)}">Buka daftar belanja</button></div>`:''}</div>
       <datalist id="dlCats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`,
     submit:async o=>{const a=Number(o.amount);if(!a||a<0){toast('Isi jumlah','err');return false}
-      const ok=await put('exps',id||uid('x'),{...(id?S.exps[id]:{created:Date.now()}),date:o.date||TODAY,type:o.type,category:(o.category||'Lain-lain').trim(),desc:(o.desc||'').trim(),amount:a});
+      const ok=await put('exps',id||uid('x'),{...(id?S.exps[id]:{created:Date.now()}),date:o.date||TODAY,type:o.type,category:(o.category||'Lain-lain').trim(),desc:(o.desc||'').trim(),amount:linked?x.amount:a});
       if(ok){toast('Transaksi disimpan','ok');UI.kMonth=(o.date||TODAY).slice(0,7);UI.kTab='exps'}return ok}});
 }
 
@@ -1542,11 +1602,17 @@ const ACT={
   ingCopy:()=>{const v=$('#ingCopy')&&$('#ingCopy').value;const m=S.menus[v];if(!m){toast('Pilih menu dulu','err');return}const keep=M.st.ing.filter(x=>x.name.trim());M.st.ing=[...keep,...clone(m.ingredients).map(x=>({name:x.name,qty:x.qty,unit:x.unit||'g',cat:x.cat||'',per:x.per||'porsi'}))];drawM();toast(m.ingredients.length+' bahan disalin, sesuaikan jumlahnya','ok')},
   shopQuick:d=>{UI.sFrom=d.a;UI.sTo=d.b;schedule()},
   shopTog:(d,t)=>shopSave(x=>{if(t.checked)x.checked[d.k]=true;else delete x.checked[d.k]}),
-  shopXAdd:()=>{const n=($('#sxName').value||'').trim();if(!n){toast('Isi nama item','err');return}const q=($('#sxQty').value||'').trim(),c=$('#sxCat').value;shopSave(x=>x.extra.push({name:n,qty:q,cat:c}))},
-  shopXDel:(d,t,e)=>{e.preventDefault();shopSave(x=>{const it=x.extra[Number(d.i)];if(it)delete x.checked['x'+d.i+'|'+it.name];x.extra.splice(Number(d.i),1)})},
+  shopXAdd:()=>{const n=($('#sxName').value||'').trim();if(!n){toast('Isi nama item','err');return}const q=($('#sxQty').value||'').trim(),c=$('#sxCat').value,pr=Math.max(0,Number($('#sxPrice').value)||0);const id=uid('i');
+    shopSave(x=>{x.extra.push({id,name:n,qty:q,cat:c});if(pr){x.prices['x:'+id]=pr;x.checked['x:'+id]=true}}).then(ok=>ok&&toast(n+' ditambahkan','ok'))},
+  shopEdit:d=>shopEditForm(d.k),
+  shopDel:d=>{const{all}=shopItems();const it=all.find(x=>x.key===d.k);if(!it)return;const doc=shopDoc();const p=Number((doc.prices||{})[d.k])||0;
+    const go=async()=>{const ok=await shopSave(x=>{delete x.prices[d.k];delete x.checked[d.k];delete x.qty[d.k];if(it.xi!=null)x.extra.splice(it.xi,1);else x.hidden[d.k]=true});if(ok){if(M)closeM();toast(it.name+' dihapus dari daftar'+(p?' · pengeluaran diperbarui':''),'ok')}};
+    if(p||it.xi!=null)ask('Hapus item?',`<b>${esc(it.name)}</b> dihapus dari daftar belanja ini${p?` dan harga ${rp(p)} dikurangi dari pengeluaran`:''}.${it.xi==null?' Item hasil hitungan resep bisa dikembalikan lewat "Kembalikan semua".':''}`,'Hapus',go);else go()},
+  shopUnhide:()=>shopSave(x=>{x.hidden={}}).then(ok=>ok&&toast('Item dikembalikan','ok')),
+  shopGoExp:d=>{UI.kMonth=d.m;UI.kTab='exps';go('keuangan')},
+  shopOpen:d=>{const[a,b]=String(d.s).split('_');UI.sFrom=a;UI.sTo=b||a;closeM();go('belanja')},
   shopCopy:()=>copyText(shopText(),'Daftar belanja'),
   shopPrint:()=>shopPrint(),
-  shopExp:()=>{const[a,b]=shopRange();expForm(null);setTimeout(()=>{const i=$('#expCatIn');if(i)i.value='Bahan Baku Makanan';const ds=document.querySelector('#dlg-b [name=desc]');if(ds)ds.value='Belanja pasar '+(a===b?shortD(a):shortD(a)+' – '+shortD(b));document.querySelectorAll('[data-act=expCat]').forEach(x=>x.classList.toggle('pri',x.dataset.v==='Bahan Baku Makanan'));const am=document.querySelector('#dlg-b [name=amount]');am&&am.focus()},60)},
   jPack:d=>{UI.jPack=UI.jPack===d.v?'':d.v;schedule()},
   ePack:async d=>{const dd=dayClone(d.d);const e=dd.entries[d.k];if(!e)return;e.pack=(e.pack||'Plastic Box')==='Lunch Box'?'Plastic Box':'Lunch Box';if(await put('days',d.d,dd))toast('Kemasan '+(e.name||'')+' hari ini: '+e.pack,'ok')},
   eDel:d=>{const x=info(d.k,S.days[d.d].entries[d.k]);ask('Hapus dari jadwal?',`<b>${esc(x.name)}</b> dihapus dari jadwal ${esc(fmtD(d.d))} dan saldonya tidak dipotong. Gunakan status <b>Batal</b> jika ingin tetap tercatat.`,'Hapus',async()=>{const dd=dayClone(d.d);delete dd.entries[d.k];if(Object.keys(dd.entries).length)await put('days',d.d,dd);else await del('days',d.d)})},
@@ -1561,7 +1627,7 @@ const ACT={
   kTab:d=>{UI.kTab=d.v;schedule()},
   expNew:()=>expForm(null),
   expCat:(d,t)=>{const i=$('#expCatIn');if(i)i.value=d.v;t.parentElement.querySelectorAll('.btn').forEach(b=>b.classList.toggle('pri',b===t))}, expEdit:d=>expForm(d.x),
-  expDel:d=>{const x=S.exps[d.x];ask('Hapus transaksi?',`${esc(x.category||'')} ${rp(x.amount)} pada ${shortD(x.date)} dihapus.`,'Hapus',async()=>{await del('exps',d.x);toast('Transaksi dihapus','ok')})},
+  expDel:d=>{const x=S.exps[d.x];if(!x)return;ask('Hapus transaksi?',`${esc(x.category||'')} ${rp(x.amount)} pada ${shortD(x.date)} dihapus.${x.shopId?' Harga di daftar belanja terkait juga dikosongkan.':''}`,'Hapus',async()=>{if(x.shopId){const sid=x.shopId;const dd=clone(shopDocOf(sid));dd.prices={};await put('shop',sid,dd)}await del('exps',d.x);toast('Transaksi dihapus','ok')})},
   payNew:d=>payForm(d.k), payEdit:d=>payForm(null,d.p),
   payDel:d=>{const p=S.pays[d.p];ask('Hapus pembayaran?',`${PAYT[p.type]} ${rp(p.amount)} untuk <b>${esc((S.kids[p.kidId]||{}).name||'')}</b> pada ${shortD(p.date)} dihapus dan saldo dihitung ulang.`,'Hapus',async()=>{await del('pays',d.p);toast('Pembayaran dihapus','ok')})},
   payQuick:d=>{const a=$('#pAmt');if(a){a.value=d.v;a.focus()}},
@@ -1589,6 +1655,7 @@ function onField(e){
 }
 document.addEventListener('input',e=>{const t=e.target;if(t.type==='checkbox'||t.tagName==='SELECT'||t.type==='date'||t.type==='month')return;onField(e)});
 document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.shopprice!==undefined){const k=t.dataset.shopprice,v=Math.max(0,Number(t.value)||0);shopSave(x=>{if(v){x.prices[k]=v;x.checked[k]=true}else delete x.prices[k]});return}
   if(t.dataset.chg==='dayMenu'){const dd=dayClone(t.dataset.d);const m=S.menus[t.value];dd.menuId=t.value;dd.menuName=m?m.name:'';put('days',t.dataset.d,dd).then(ok=>ok&&toast('Menu diganti','ok'));return}
   if(t.type==='checkbox'&&t.dataset.act)return;
   onField(e)});
