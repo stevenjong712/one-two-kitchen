@@ -481,6 +481,14 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .exlist{display:grid;gap:6px;flex-basis:100%}
 .exi{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;color:var(--ink)}
 .exi .hint{display:block;word-break:break-word}
+.impdrop{display:grid;justify-items:center;gap:6px;text-align:center;padding:30px 18px;border:2px dashed var(--brand2);border-radius:18px;background:var(--brand-soft);color:var(--brand-ink);cursor:pointer}
+.impdrop:hover{border-color:var(--brand)}.impdrop b{font-size:16px}
+.impmap{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--sunk)}.impmap summary{cursor:pointer;font-weight:700}
+.imptw{max-height:min(380px,45vh);overflow:auto;border:1px solid var(--line);border-radius:12px}
+.impt th{position:sticky;top:0;z-index:1}
+.impt td{padding:7px 10px}.impt tr.bad td{background:var(--bad-soft);opacity:.75}.impt tr.dup td{background:var(--butter-soft)}
+.inp.sm{min-height:30px;padding:3px 7px;font-size:12.5px;border-radius:8px}
+.impt select[data-impf=type]{min-width:92px}.impt select[data-impf=cat]{min-width:200px}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -1071,17 +1079,17 @@ VIEWS.keuangan=()=>{
   }else if(UI.kTab==='exps'){
     const xs=Object.entries(S.exps).map(([id,x])=>({id,...x})).filter(x=>(x.date||'').startsWith(mo)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0));
     const cats=Object.entries(ms.cat).sort((a,b)=>b[1]-a[1]);const mx=Math.max(1,...cats.map(c=>c[1]));
-    inner=`<div class="row" style="justify-content:space-between;padding:14px 18px 0"><span class="muted">${xs.length} transaksi · total pengeluaran <b style="color:var(--ink)">${rp(ms.out)}</b>${ms.inc?' · pemasukan lain '+rp(ms.inc):''}</span><button class="btn pri sm" data-act="expNew">${I('plus',14)}Catat pengeluaran</button></div>
+    inner=`<div class="row" style="justify-content:space-between;padding:14px 18px 0"><span class="muted">${xs.length} transaksi · total pengeluaran <b style="color:var(--ink)">${rp(ms.out)}</b>${ms.inc?' · pemasukan lain '+rp(ms.inc):''}</span><div class="row"><button class="btn sm" data-act="impOpen">${I('upload',14)}Impor Excel</button><button class="btn pri sm" data-act="expNew">${I('plus',14)}Catat pengeluaran</button></div></div>${(()=>{let li=null;try{li=JSON.parse(localStorage.getItem('otk-lastimp')||'null')}catch(e){}if(!li)return'';const n=Object.values(S.exps).filter(x=>x.importBatch===li.batch).length;if(!n)return'';return`<div class="banner info" style="margin:12px 18px 0;flex-wrap:wrap">${I('upload',16)}<span style="flex:1;min-width:200px">Impor terakhir: <b>${esc(li.file)}</b> · tab ${esc(li.sheet)} · ${n} transaksi</span><button class="btn sm" data-act="impUndo" data-b="${esc(li.batch)}">Batalkan impor ini</button></div>`})()}
     ${cats.length?`<div class="bars" style="padding:14px 18px 4px">${cats.map(([c,v])=>`<div class="bar" style="grid-template-columns:minmax(110px,190px) minmax(0,1fr) 110px"><span>${esc(c)}</span><span class="tr"><span class="fl" style="width:${Math.max(3,v/mx*100)}%"></span></span><b class="num" style="text-align:right">${rp(v)}</b></div>`).join('')}</div>`:''}
     ${xs.length?`<div class="tw"><table class="t"><thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th class="r">Jumlah</th><th></th></tr></thead><tbody>
-      ${xs.map(x=>`<tr><td style="white-space:nowrap">${shortD(x.date)}</td><td>${x.type==='in'?'<span class="pill ok">Pemasukan</span> ':''}${esc(x.category||'-')}</td><td>${esc(x.desc||'')}${x.shopId?` <a href="javascript:void 0" class="pill info" data-act="shopOpen" data-s="${esc(x.shopId)}" style="text-decoration:none">${I('cart',12)} dari Belanja</a>`:''}</td><td class="r"><b class="${x.type==='in'?'pos':'neg'}">${x.type==='in'?'+':'-'}${rp(x.amount)}</b></td><td><div class="acts"><button class="btn sm" data-act="expEdit" data-x="${x.id}" aria-label="Ubah">${I('edit',14)}</button><button class="btn sm" data-act="expDel" data-x="${x.id}" aria-label="Hapus">${I('trash',14)}</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('Belum ada pengeluaran di '+mlabel,'Catat belanja bahan, kemasan, driver, dan biaya lain untuk melihat laba.',`<button class="btn pri" data-act="expNew">${I('plus',16)}Catat pengeluaran</button>`)}`;
+      ${xs.map(x=>`<tr><td style="white-space:nowrap">${shortD(x.date)}</td><td>${x.type==='in'?'<span class="pill ok">Pemasukan</span> ':''}${esc(x.category||'-')}</td><td>${esc(x.desc||'')}${x.importBatch?' <span class="pill" title="'+esc(x.importFile||'')+'">impor</span>':''}${x.shopId?` <a href="javascript:void 0" class="pill info" data-act="shopOpen" data-s="${esc(x.shopId)}" style="text-decoration:none">${I('cart',12)} dari Belanja</a>`:''}</td><td class="r"><b class="${x.type==='in'?'pos':'neg'}">${x.type==='in'?'+':'-'}${rp(x.amount)}</b></td><td><div class="acts"><button class="btn sm" data-act="expEdit" data-x="${x.id}" aria-label="Ubah">${I('edit',14)}</button><button class="btn sm" data-act="expDel" data-x="${x.id}" aria-label="Hapus">${I('trash',14)}</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('Belum ada pengeluaran di '+mlabel,'Catat belanja bahan, kemasan, driver, dan biaya lain untuk melihat laba.',`<button class="btn pri" data-act="expNew">${I('plus',16)}Catat pengeluaran</button>`)}`;
   }else{
     const ps=Object.entries(S.pays).map(([id,p])=>({id,...p})).filter(p=>(p.date||'').startsWith(mo)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0));
     inner=ps.length?`<div class="tw"><table class="t"><thead><tr><th>Tanggal</th><th>Anak</th><th>Jenis</th><th>Metode</th><th>Catatan</th><th class="r">Jumlah</th><th></th></tr></thead><tbody>
       ${ps.map(p=>{const k=S.kids[p.kidId];const v=payVal(p);return`<tr><td style="white-space:nowrap">${shortD(p.date)}</td><td><b>${esc(k?k.name:'(anak dihapus)')}</b></td><td>${PAYT[p.type]||esc(p.type)}</td><td>${esc(p.method||'-')}</td><td class="muted">${esc(p.note||'')}</td><td class="r"><b class="${v<0?'neg':'pos'}">${v<0?'-':'+'}${rp(Math.abs(v))}</b></td><td><div class="acts"><button class="btn sm" data-act="payEdit" data-p="${p.id}" aria-label="Ubah">${I('edit',14)}</button><button class="btn sm" data-act="payDel" data-p="${p.id}" aria-label="Hapus">${I('trash',14)}</button></div></td></tr>`}).join('')}</tbody></table></div>`:empty('Belum ada pembayaran di '+mlabel,'Catat DP atau pelunasan dengan tombol Catat Pembayaran.');
   }
   return`<div class="vh"><div><h1>Laporan Keuangan & Pelunasan</h1><p>Saldo = total DP − porsi terkirim. Porsi terjadwal belum memotong saldo; porsi Batal tidak dihitung.</p></div>
-    <div class="row"><input type="month" class="inp" id="kMonth" data-bind="kMonth" value="${mo}" style="width:auto" aria-label="Bulan"><button class="btn" data-act="csv">${I('download',16)}Export CSV</button><button class="btn exp" data-act="expNew">${I('minus',16)}Catat pengeluaran</button><button class="btn pri" data-act="payNew">${I('plus',16)}Catat pembayaran</button></div></div>
+    <div class="row"><input type="month" class="inp" id="kMonth" data-bind="kMonth" value="${mo}" style="width:auto" aria-label="Bulan"><button class="btn" data-act="csv">${I('download',16)}Export CSV</button><button class="btn" data-act="impOpen">${I('upload',16)}Impor Excel</button><button class="btn exp" data-act="expNew">${I('minus',16)}Catat pengeluaran</button><button class="btn pri" data-act="payNew">${I('plus',16)}Catat pembayaran</button></div></div>
   <div class="grid g3" style="margin-bottom:14px">
     <div class="card kpi"><span class="ki ok">${I('money',22)}</span><div><small>Uang masuk · ${MON[m-1]}</small><b class="num">${rp(ms.cash-ms.refund)}</b><span class="s">${ms.refund?'Refund '+rp(ms.refund):'DP & pelunasan'}</span></div></div>
     <div class="card kpi"><span class="ki brand">${I('box',22)}</span><div><small>Nilai porsi · ${MON[m-1]}</small><b class="num">${rp(ms.charge)}</b><span class="s">${ms.porsi} porsi (tidak termasuk batal)</span></div></div>
@@ -1180,12 +1188,12 @@ let M=null;
 function openM(cfg){M=cfg;M.st=M.st||{};$('#ov').hidden=false;document.body.classList.add('modal-open');drawM(true)}
 function drawM(first){
   if(!M)return;const a=document.activeElement;const fid=!first&&a&&a.id&&$('#dlg').contains(a)?a.id:null;let ss=null;try{ss=fid?a.selectionStart:null}catch(e){}
-  const sc=$('#dlg-b').scrollTop;const ls=[...$('#dlg-b').querySelectorAll('.picklist')].map(e=>e.scrollTop);
+  const sc=$('#dlg-b').scrollTop;const ls=[...$('#dlg-b').querySelectorAll('.picklist,.imptw')].map(e=>e.scrollTop);
   $('#dlg-t').textContent=M.title;$('#dlg').className='dlg'+(M.wide?' wide':'');
   $('#dlg-b').innerHTML=M.body();
   $('#dlg-f').innerHTML=M.foot?M.foot():`${M.left||''}<span style="flex:1"></span><button type="button" class="btn ghost" data-act="closeM">Batal</button><button class="btn ${M.danger?'danger':'pri'}" type="submit">${M.ok||'Simpan'}</button>`;
   if(first){$('#dlg-b').scrollTop=0;setTimeout(()=>{const f=$('#dlg-b [autofocus]')||$('#dlg-b input,#dlg-b select');f&&f.focus()},30)}
-  else{$('#dlg-b').scrollTop=sc;$('#dlg-b').querySelectorAll('.picklist').forEach((e,i)=>{if(ls[i]!=null)e.scrollTop=ls[i]});if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}}
+  else{$('#dlg-b').scrollTop=sc;$('#dlg-b').querySelectorAll('.picklist,.imptw').forEach((e,i)=>{if(ls[i]!=null)e.scrollTop=ls[i]});if(fid){const e=document.getElementById(fid);if(e){e.focus();if(ss!=null)try{e.setSelectionRange(ss,ss)}catch(x){}}}}
 }
 function closeM(){M=null;$('#ov').hidden=true;document.body.classList.remove('modal-open')}
 $('#dlgf').addEventListener('submit',async e=>{e.preventDefault();if(!M||!M.submit)return;const fd=new FormData(e.target);const o={};for(const[k,v]of fd.entries())o[k]=v;const btn=$('#dlg-f [type=submit]');if(btn)btn.disabled=true;let r;try{r=await M.submit(o,fd)}finally{if(btn)btn.disabled=false}if(r!==false)closeM()});
@@ -1569,6 +1577,96 @@ function expForm(id){
       if(ok){toast('Transaksi disimpan','ok');UI.kMonth=(o.date||TODAY).slice(0,7);UI.kTab='exps'}return ok}});
 }
 
+/* ----- impor pengeluaran dari Excel ----- */
+let XLSXP=null;
+function loadXLSX(){if(window.XLSX)return Promise.resolve(window.XLSX);if(XLSXP)return XLSXP;
+  XLSXP=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';sc.onload=()=>res(window.XLSX);sc.onerror=()=>{XLSXP=null;rej(new Error('load'))};document.head.append(sc)});return XLSXP}
+const MONIDX={jan:1,januari:1,january:1,feb:2,februari:2,february:2,mar:3,maret:3,march:3,apr:4,april:4,mei:5,may:5,jun:6,juni:6,june:6,jul:7,juli:7,july:7,agu:8,agt:8,ags:8,agustus:8,aug:8,august:8,sep:9,sept:9,september:9,okt:10,oktober:10,oct:10,october:10,nov:11,nopember:11,november:11,des:12,desember:12,dec:12,december:12};
+function parseAnyDate(v){
+  const ok=(y,m,d)=>y>1990&&y<2100&&m>=1&&m<=12&&d>=1&&d<=31?y+'-'+pad(m)+'-'+pad(d):'';
+  if(typeof v==='number'&&v>20000&&v<80000&&window.XLSX){const c=XLSX.SSF.parse_date_code(v);return c?ok(c.y,c.m,c.d):''}
+  if(v instanceof Date&&!isNaN(v))return ok(v.getFullYear(),v.getMonth()+1,v.getDate());
+  let s=String(v||'').trim().toLowerCase();if(!s)return'';s=s.replace(/^(senin|selasa|rabu|kamis|jumat|jum'at|sabtu|minggu|mon|tue|wed|thu|fri|sat|sun)[a-z]*,?\s*/,'');
+  let m=/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/.exec(s);if(m)return ok(+m[1],+m[2],+m[3]);
+  m=/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/.exec(s);if(m){let y=+m[3];if(y<100)y+=2000;return ok(y,+m[2],+m[1])}
+  m=/^(\d{1,2})\s*[- ]?\s*([a-z]+)\.?\s*[- ]?\s*(\d{2,4})/.exec(s);if(m&&MONIDX[m[2]]){let y=+m[3];if(y<100)y+=2000;return ok(y,MONIDX[m[2]],+m[1])}
+  return''}
+function parseAmount(v){if(typeof v==='number')return v;let s=String(v||'').trim();if(!s)return NaN;const neg=/^-|^\(.*\)$/.test(s)||/-\s*rp/i.test(s);
+  s=s.replace(/rp\.?|idr|\s|\(|\)|-/gi,'');if(/,\d{1,2}$/.test(s))s=s.replace(/,\d{1,2}$/,'');if(/\.\d{1,2}$/.test(s)&&!/\.\d{3}/.test(s))s=s.replace(/\.\d{1,2}$/,'');s=s.replace(/[.,]/g,'');const n=Number(s);return isNaN(n)?NaN:(neg?-n:n)}
+const IMP_FIELDS=[['date','Tanggal',/tanggal|tgl|date|hari/],['amount','Jumlah',/jumlah|nominal|amount|total|harga|biaya|nilai|pengeluaran|debit|rp/],['desc','Deskripsi',/deskripsi|keterangan|description|ket\b|item|uraian|catatan|detail|barang|nama/],['cat','Kategori',/kategori|category|kat\b|jenis biaya|akun/],['type','Tipe',/tipe|type|jenis|transaksi/]];
+function impMapGuess(h){const map={};const used=new Set();IMP_FIELDS.forEach(([f,,re])=>{const i=h.findIndex((x,j)=>!used.has(j)&&re.test(String(x).toLowerCase()));if(i>=0){map[f]=i;used.add(i)}});return map}
+function impCatOf(raw,desc){const r=String(raw||'').toLowerCase().trim();
+  const hit=EXPCAT.find(c=>c.toLowerCase()===r);if(hit)return hit;
+  if(/bahan|makan|food|sayur|daging|ayam|beras|bumbu/.test(r))return'Bahan Baku Makanan';
+  if(/kemas|box|packag|plastik/.test(r))return'Kemasan / Box Bento';
+  if(/gaji|driver|kurir|ongkir|kirim|upah|tips/.test(r))return'Gaji / Driver Pengiriman';
+  if(/gas|listrik|air|utilit|toll|bensin|parkir/.test(r))return'Gas & Utilitas';
+  if(/alat|peralatan|equipment/.test(r))return'Peralatan Dapur';
+  if(r)return String(raw).trim();
+  return desc?EXP_OF(guessCat(desc)):'Lain-lain'}
+function impBuild(st){
+  const rows=st.rows,hi=st.hdr,map=st.map;const out=[];
+  const have=new Set(Object.values(S.exps).map(x=>[x.date,Number(x.amount),String(x.desc||'').trim().toLowerCase()].join('|')));const seen=new Set();
+  for(let r=hi+1;r<rows.length;r++){const row=rows[r]||[];if(!row.some(c=>String(c).trim()!==''))continue;
+    const get=f=>map[f]!=null&&map[f]!==''?row[map[f]]:'';
+    const date=parseAnyDate(get('date'));let amt=parseAmount(get('amount'));const desc=String(get('desc')||'').trim();
+    const tRaw=String(get('type')||'').toLowerCase();let type=/masuk|income|pemasukan|kredit|credit|\bin\b/.test(tRaw)?'in':'out';
+    if(!isNaN(amt)&&amt<0){amt=-amt;type='out'}
+    const err=!date?'Tanggal tidak terbaca':(isNaN(amt)||!(amt>0))?'Jumlah kosong/tidak terbaca':'';
+    if(!date&&/^(sub\s*)?total|^grand|^jumlah|^saldo/i.test(desc))continue;
+    const key=[date,amt,desc.toLowerCase()].join('|');const dup=!err&&(have.has(key)||seen.has(key));seen.add(key);
+    out.push({r:r+1,date,amt:isNaN(amt)?0:amt,desc,type,cat:impCatOf(get('cat'),desc),err,dup,sel:!err&&!dup});
+  }
+  return out}
+function impHeaderGuess(rows){let best=0,score=-1;for(let i=0;i<Math.min(rows.length,12);i++){const r=rows[i]||[];const sc=IMP_FIELDS.reduce((a,[,,re])=>a+(r.some(c=>typeof c==='string'&&re.test(c.toLowerCase()))?1:0),0);if(sc>score){score=sc;best=i}}return best}
+function impUseSheet(st,name){const ws=st.wb.Sheets[name];st.sheet=name;st.rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});st.hdr=impHeaderGuess(st.rows);st.map=impMapGuess((st.rows[st.hdr]||[]).map(String));st.items=impBuild(st)}
+function importForm(){
+  openM({title:'Impor pengeluaran dari Excel',wide:true,st:{step:'pick'},
+    body:()=>{const st=M.st;
+      if(st.step==='pick')return`<p class="lead">Pilih file Excel (.xlsx, .xls) atau CSV berisi pengeluaran harian. Anda akan memilih tab dan memeriksa semua baris dulu sebelum masuk ke laporan.</p>
+        <label class="impdrop" for="impFile">${I('upload',26)}<b>Pilih file Excel</b><span class="hint">Kolom yang dikenali: Tanggal, Kategori, Deskripsi/Keterangan, Jumlah, Tipe (opsional)</span></label><input type="file" id="impFile" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden>
+        ${st.loading?`<p class="hint">Membaca file…</p>`:''}${st.error?`<div class="banner warn">${I('alert')}${esc(st.error)}</div>`:''}`;
+      const it=st.items;const ok=it.filter(x=>!x.err),sel=it.filter(x=>x.sel),dup=it.filter(x=>x.dup),bad=it.filter(x=>x.err);
+      const hdr=(st.rows[st.hdr]||[]).map((h,i)=>({i,h:String(h||'').trim()||('Kolom '+(i+1))}));
+      const cats=[...new Set([...EXPCAT,...it.map(x=>x.cat)])];
+      return`<div class="fg">
+        <label class="f">File<input class="inp" value="${esc(st.file)}" readonly></label>
+        <label class="f">Tab / sheet<select class="inp" id="impSheet">${st.wb.SheetNames.map(n=>`<option${n===st.sheet?' selected':''}>${esc(n)}</option>`).join('')}</select></label></div>
+        <details class="impmap"${Object.keys(st.map).length<3?' open':''}><summary>Pencocokan kolom · baris judul ${st.hdr+1}</summary><div class="fg" style="margin-top:10px">
+          <label class="f">Baris judul<select class="inp" data-impm="hdr">${st.rows.slice(0,15).map((r,i)=>`<option value="${i}"${i===st.hdr?' selected':''}>Baris ${i+1}: ${esc((r||[]).filter(String).slice(0,4).join(' · ').slice(0,50))}</option>`).join('')}</select></label>
+          ${IMP_FIELDS.map(([f,l])=>`<label class="f">${l}${f==='date'||f==='amount'?' *':''}<select class="inp" data-impm="${f}"><option value="">— tidak ada —</option>${hdr.map(h=>`<option value="${h.i}"${st.map[f]===h.i?' selected':''}>${esc(h.h)}</option>`).join('')}</select></label>`).join('')}
+        </div></details>
+        <div class="lsum" style="margin:0">
+          <div class="lsc1"><b class="num">${sel.length}</b><span>akan diimpor · ${rp(sel.filter(x=>x.type==='out').reduce((a,x)=>a+x.amt,0))}</span></div>
+          ${dup.length?`<div class="lsc2 t-btr"><b class="num">${dup.length}</b><span>mungkin duplikat (tidak dicentang)</span></div>`:''}
+          ${bad.length?`<div class="lsc2 t-pnk"><b class="num">${bad.length}</b><span>baris bermasalah, dilewati</span></div>`:''}
+        </div>
+        ${it.length?`<div class="tw imptw"><table class="t impt"><thead><tr><th><input type="checkbox" id="impAll" aria-label="Pilih semua"${ok.length&&ok.every(x=>x.sel)?' checked':''}></th><th>Baris</th><th>Tanggal</th><th>Tipe</th><th>Kategori</th><th>Deskripsi</th><th class="r">Jumlah</th><th>Status</th></tr></thead><tbody>
+          ${it.map((x,i)=>`<tr class="${x.err?'bad':x.dup?'dup':''}"><td><input type="checkbox" data-impsel="${i}"${x.sel?' checked':''}${x.err?' disabled':''} aria-label="Impor baris ${x.r}"></td><td class="muted">${x.r}</td><td style="white-space:nowrap">${x.date?shortD(x.date)+' '+x.date.slice(0,4):'–'}</td>
+          <td><select class="inp sm" data-impf="type" data-i="${i}"${x.err?' disabled':''}><option value="out"${x.type==='out'?' selected':''}>Keluar</option><option value="in"${x.type==='in'?' selected':''}>Masuk</option></select></td>
+          <td><select class="inp sm" data-impf="cat" data-i="${i}"${x.err?' disabled':''}>${cats.map(c=>`<option${c===x.cat?' selected':''}>${esc(c)}</option>`).join('')}</select></td>
+          <td>${esc(x.desc||'–')}</td><td class="r"><b>${x.amt?rp(x.amt):'–'}</b></td><td>${x.err?`<span class="pill bad">${esc(x.err)}</span>`:x.dup?'<span class="pill warn">Sudah ada?</span>':'<span class="pill ok">Siap</span>'}</td></tr>`).join('')}
+        </tbody></table></div>`:empty('Tidak ada baris data di tab ini','Pilih tab lain atau ubah baris judul.')}`},
+    foot:()=>M.st.step==='pick'?`<span style="flex:1"></span><button type="button" class="btn ghost" data-act="closeM">Batal</button>`:`<button type="button" class="btn ghost" data-act="impBack">${I('left',16)}Pilih file lain</button><span style="flex:1"></span><button type="button" class="btn ghost" data-act="closeM">Batal</button><button type="button" class="btn pri" data-act="impGo"${M.st.items.some(x=>x.sel)?'':' disabled'}>Impor ${M.st.items.filter(x=>x.sel).length} transaksi</button>`});
+}
+async function impReadFile(f){
+  M.st.loading=true;M.st.error='';drawM();
+  try{await loadXLSX();const buf=await f.arrayBuffer();const wb=XLSX.read(buf,{type:'array',cellDates:false});
+    const scoreOf=n=>{const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''});const h=impHeaderGuess(rows);const m=impMapGuess((rows[h]||[]).map(String));return(m.date!=null?3:0)+(m.amount!=null?3:0)+Object.keys(m).length+(/pengeluaran|expense|biaya|belanja|keuangan|\bkas\b/i.test(n)?2:0)+Math.min(rows.length,50)/100};
+    const pick=wb.SheetNames.map(n=>[n,scoreOf(n)]).sort((a,b)=>b[1]-a[1])[0][0];
+    Object.assign(M.st,{step:'review',wb,file:f.name,loading:false});impUseSheet(M.st,pick);drawM();
+  }catch(e){M.st.loading=false;M.st.error=e&&e.message==='load'?'Pembaca Excel gagal dimuat. Periksa koneksi internet lalu coba lagi.':'File tidak bisa dibaca. Pastikan formatnya .xlsx, .xls, atau .csv.';drawM()}
+}
+async function impCommit(){
+  const st=M.st;const rows=st.items.filter(x=>x.sel&&!x.err);if(!rows.length)return;
+  const batch=uid('b');const now=Date.now();
+  const list=rows.map((x,i)=>['exps','imp_'+batch+'_'+i,{date:x.date,type:x.type,category:x.cat,desc:x.desc||x.cat,amount:x.amt,created:now+i,importBatch:batch,importFile:st.file,importSheet:st.sheet}]);
+  const ok=await putMany(list);if(!ok)return;
+  try{localStorage.setItem('otk-lastimp',JSON.stringify({batch,file:st.file,sheet:st.sheet,n:list.length,at:now}))}catch(e){}
+  closeM();const months=[...new Set(rows.map(x=>x.date.slice(0,7)))].sort();UI.kMonth=months[months.length-1];UI.kTab='exps';go('keuangan');
+  toast(list.length+' transaksi diimpor'+(months.length>1?` (${months.length} bulan)`:''),'ok');
+}
+
 /* ----- settings ----- */
 async function loadTeam(){try{return await sbq(sb.from('otk_members').select('email,role,created_at').order('created_at'))}catch(e){return null}}
 async function settingsForm(){
@@ -1593,7 +1691,9 @@ async function settingsForm(){
 
 /* ---------- actions ---------- */
 const ACT={
-  closeM, settings:settingsForm, go:d=>go(d.t),
+  closeM, settings:settingsForm,
+  impOpen:()=>importForm(), impBack:()=>{M.st={step:'pick'};drawM()}, impGo:()=>impCommit(),
+  impUndo:d=>{const ids=Object.entries(S.exps).filter(([,x])=>x.importBatch===d.b).map(([id])=>id);ask('Batalkan impor?',`${ids.length} transaksi hasil impor ini akan dihapus dari laporan.`,'Hapus '+ids.length+' transaksi',async()=>{for(const id of ids)await del('exps',id);try{localStorage.removeItem('otk-lastimp')}catch(e){}toast(ids.length+' transaksi impor dihapus','ok')})}, go:d=>go(d.t),
   goDay:d=>{UI.jDate=d.d;go('jadwal');schedule()},
   goLabel:d=>{UI.lDate=d.d;go('label');schedule()},
   jSel:d=>{UI.jDate=d.d;schedule()},
@@ -1676,6 +1776,12 @@ function onField(e){
 }
 document.addEventListener('input',e=>{const t=e.target;if(t.type==='checkbox'||t.tagName==='SELECT'||t.type==='date'||t.type==='month')return;onField(e)});
 document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='impFile'){const f=t.files&&t.files[0];t.value='';if(f&&M)impReadFile(f);return}
+  if(t.id==='impSheet'&&M){impUseSheet(M.st,t.value);drawM();return}
+  if(t.dataset.impm!==undefined&&M){const f=t.dataset.impm;if(f==='hdr'){M.st.hdr=Number(t.value);M.st.map=impMapGuess((M.st.rows[M.st.hdr]||[]).map(String))}else{if(t.value==='')delete M.st.map[f];else M.st.map[f]=Number(t.value)}M.st.items=impBuild(M.st);drawM();return}
+  if(t.dataset.impsel!==undefined&&M){M.st.items[Number(t.dataset.impsel)].sel=t.checked;drawM();return}
+  if(t.id==='impAll'&&M){M.st.items.forEach(x=>{if(!x.err)x.sel=t.checked});drawM();return}
+  if(t.dataset.impf&&M){const x=M.st.items[Number(t.dataset.i)];if(x){x[t.dataset.impf]=t.value}drawM();return}
   if(t.dataset.shopprice!==undefined){const k=t.dataset.shopprice,v=Math.max(0,Number(t.value)||0);shopSave(x=>{if(v){x.prices[k]=v;x.checked[k]=true}else delete x.prices[k]});return}
   if(t.dataset.chg==='dayMenu'){const dd=dayClone(t.dataset.d);const m=S.menus[t.value];dd.menuId=t.value;dd.menuName=m?m.name:'';put('days',t.dataset.d,dd).then(ok=>ok&&toast('Menu diganti','ok'));return}
   if(t.type==='checkbox'&&t.dataset.act)return;
