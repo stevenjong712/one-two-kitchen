@@ -1639,7 +1639,16 @@ const ACT={
   kTab:d=>{UI.kTab=d.v;schedule()},
   expNew:()=>expForm(null),
   expCat:(d,t)=>{const i=$('#expCatIn');if(i)i.value=d.v;t.parentElement.querySelectorAll('.btn').forEach(b=>b.classList.toggle('pri',b===t))}, expEdit:d=>expForm(d.x),
-  expDel:d=>{const x=S.exps[d.x];if(!x)return;ask('Hapus transaksi?',`${esc(x.category||'')} ${rp(x.amount)} pada ${shortD(x.date)} dihapus.${x.shopId?' Harga barang terkait di daftar belanja juga dikosongkan.':''}`,'Hapus',async()=>{if(x.shopId){const sid=x.shopId;const{all}=shopItems(sid);const dd=clone(shopDocOf(sid));dd.prices=dd.prices||{};all.forEach(it=>{if(!x.shopCat||EXP_OF(it.cat)===x.shopCat)delete dd.prices[it.key]});await put('shop',sid,dd)}await del('exps',d.x);toast('Transaksi dihapus','ok')})},
+  expDel:d=>{const x=S.exps[d.x];if(!x)return;
+    let names=[];if(x.shopId){const{all,doc}=shopItems(x.shopId);const pr=doc.prices||{};names=all.filter(it=>Number(pr[it.key])>0&&(!x.shopCat||EXP_OF(it.cat)===x.shopCat)).map(it=>it.name)}
+    ask('Hapus transaksi?',`${esc(x.category||'')} ${rp(x.amount)} pada ${shortD(x.date)} dihapus.${x.shopId&&names.length?` Barang terkait juga dihapus dari daftar belanja: <b>${names.map(esc).join(', ')}</b>.`:''}`,'Hapus',async()=>{
+      if(x.shopId){const sid=x.shopId;const{all}=shopItems(sid);const dd=clone(shopDocOf(sid));['prices','checked','qty','hidden'].forEach(k=>dd[k]=dd[k]||{});dd.extra=dd.extra||[];
+        const pr=dd.prices;const hit=all.filter(it=>Number(pr[it.key])>0&&(!x.shopCat||EXP_OF(it.cat)===x.shopCat));
+        const drop=new Set(hit.filter(it=>it.xi!=null).map(it=>it.xi));
+        hit.forEach(it=>{delete dd.prices[it.key];delete dd.checked[it.key];delete dd.qty[it.key];if(it.xi==null)dd.hidden[it.key]=true});
+        dd.extra=dd.extra.filter((_,i)=>!drop.has(i));
+        await put('shop',sid,dd)}
+      await del('exps',d.x);if(M)closeM();toast('Transaksi dihapus'+(names.length?' · '+names.length+' barang dihapus dari daftar belanja':''),'ok')})},
   payNew:d=>payForm(d.k), payEdit:d=>payForm(null,d.p),
   payDel:d=>{const p=S.pays[d.p];ask('Hapus pembayaran?',`${PAYT[p.type]} ${rp(p.amount)} untuk <b>${esc((S.kids[p.kidId]||{}).name||'')}</b> pada ${shortD(p.date)} dihapus dan saldo dihitung ulang.`,'Hapus',async()=>{await del('pays',d.p);toast('Pembayaran dihapus','ok')})},
   payQuick:d=>{const a=$('#pAmt');if(a){a.value=d.v;a.focus()}},
