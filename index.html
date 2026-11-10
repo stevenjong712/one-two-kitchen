@@ -420,7 +420,7 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 @media (max-width:999.98px){
   .side .top .wrap{padding-block:10px}
   .side .tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:30;background:var(--surface);border-top:1px solid var(--line);border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -8px 22px -16px rgba(90,70,200,.4)}
-  .side .tabs .wrap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding-block:6px;overflow:visible}
+  .side .tabs .wrap{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding-block:6px;overflow:visible}
   .side .tab{flex-direction:column;gap:3px;padding:7px 2px;font-size:11px;border-radius:14px;justify-content:center;color:var(--muted)}
   .side .tab .tl{display:none}.side .tab .ts{display:block}
   .side .tab.on{background:var(--brand-soft);color:var(--brand-ink)}
@@ -451,6 +451,25 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .prc .prc-own{display:none}
 .prc:has(input[value=own]:checked) .prc-own{display:flex}
 .pill.pcust{background:var(--butter-soft);color:var(--butter-ink)}
+.ingbox{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--sunk)}
+.ingbox h2{display:flex;align-items:center;gap:6px;font-size:15px}
+.ingt{display:grid;gap:6px;overflow-x:auto}
+.ingr{display:grid;grid-template-columns:minmax(150px,2fr) 80px 90px 110px minmax(130px,1.3fr) 36px;gap:6px;align-items:center;min-width:620px}
+.ingh{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.ingr .inp{min-height:36px;padding:6px 9px}
+.ming{display:flex;gap:6px;align-items:center;margin:6px 16px 0;font-size:12.5px;font-weight:600;color:var(--mint-ink)}
+.ming.none{color:var(--faint)}
+.shopg{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start}
+@media (max-width:900px){.shopg{grid-template-columns:minmax(0,1fr)}}
+.shrow{display:flex;align-items:center;gap:12px;padding:11px 18px;border-top:1px solid var(--line);cursor:pointer}
+.grp-h+.shrow{border-top:0}
+.shrow input{width:20px;height:20px;accent-color:var(--brand);flex:none}
+.shn{flex:1;min-width:0;display:grid;gap:1px}.shn b{font-size:14.5px}
+.shq{font-family:var(--fd);font-size:17px;white-space:nowrap}
+.shrow.done .shn b,.shrow.done .shq{text-decoration:line-through;color:var(--faint)}
+.shadd{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-top:1px dashed var(--line);background:var(--sunk);border-radius:0 0 var(--r) var(--r)}
+.shadd .inp{flex:1;min-width:140px}
+#printArea .shopprint pre{font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;margin:0;color:#000}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -591,6 +610,7 @@ const ICONS={
  upload:'<path d="M12 21V9M7 14l5-5 5 5M4 3h16"/>',
  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ cart:'<path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/>',
  food:'<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 1-3 4-3 8h3v10"/>',
  send:'<path d="M21 3 3 11l7 3 3 7z"/><path d="M10 14 21 3"/>',
  hist:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
@@ -602,9 +622,9 @@ const I=(n,s=18)=>P.replace(/%s/g,s)+(ICONS[n]||'')+'</svg>';
 
 /* ---------- state ---------- */
 const DEFAULT_CFG={name:'One Two Kitchen',tagline:'Daily Kid Catering Management System',price:60000,lowPorsi:3,labelFooter:'',labelSize:'80x50',labelSizes:[]};
-const S={kids:{},menus:{},days:{},pays:{},exps:{},cfg:{...DEFAULT_CFG},mode:'connecting',canWrite:true,fresh:false,stale:false};
-const COLS=['kids','menus','days','pays','exps'];
-const UI={jPack:'',tab:'dashboard',jDate:TODAY,aQ:'',aSchool:'',aPack:'',aShow:'active',mDay:'',mQ:'',kMonth:TODAY.slice(0,7),kTab:'saldo',kQ:'',kFilter:'',lDate:TODAY,lSize:'58x40',lSchool:'',lSort:'school',lMenu:true,lSkip:{}};
+const S={kids:{},menus:{},days:{},pays:{},exps:{},shop:{},cfg:{...DEFAULT_CFG},mode:'connecting',canWrite:true,fresh:false,stale:false};
+const COLS=['kids','menus','days','pays','exps','shop'];
+const UI={sFrom:'',sTo:'',sBuf:0,jPack:'',tab:'dashboard',jDate:TODAY,aQ:'',aSchool:'',aPack:'',aShow:'active',mDay:'',mQ:'',kMonth:TODAY.slice(0,7),kTab:'saldo',kQ:'',kFilter:'',lDate:TODAY,lSize:'58x40',lSchool:'',lSort:'school',lMenu:true,lSkip:{}};
 if([0,6].includes(parseD(TODAY).getDay())){ /* weekend: jump schedule & labels to next Monday */
   const nm=addDays(mondayOf(TODAY),7); UI.jDate=nm; UI.lDate=nm;
 }
@@ -717,7 +737,7 @@ function menuOptions(sel){
 
 /* ---------- render ---------- */
 let rq=0;function schedule(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;render()})}
-const TABS=[['dashboard','Dashboard','dash','Home'],['jadwal','Jadwal & Pengiriman','truck','Jadwal'],['anak','Database Anak','users','Anak'],['menu','Ide Menu & Assign','book','Menu'],['keuangan','Keuangan','wallet','Uang'],['label','Cetak Label Stiker','printer','Label']];
+const TABS=[['dashboard','Dashboard','dash','Home'],['jadwal','Jadwal & Pengiriman','truck','Jadwal'],['belanja','Belanja Pasar','cart','Belanja'],['anak','Database Anak','users','Anak'],['menu','Ide Menu & Assign','book','Menu'],['keuangan','Keuangan','wallet','Uang'],['label','Cetak Label Stiker','printer','Label']];
 function renderChrome(){
   $('#bn').textContent=S.cfg.name||DEFAULT_CFG.name;$('#bt').textContent=S.cfg.tagline||'';
   document.title=S.cfg.name||DEFAULT_CFG.name;
@@ -879,6 +899,7 @@ VIEWS.menu=()=>{
     return`<article class="mcard"><header class="mh t-${tone}"><span class="md">${esc(m.day||'Bebas')}</span>${m.week?`<span class="mw">M${m.week}</span>`:''}</header>
     <ul class="mlist">${parts.map((p,i)=>`<li${i===mi?' class="main"':''}>${esc(p)}</li>`).join('')}</ul>
     ${m.notes?`<p class="mnote">${I('alert',13)}<span>${esc(m.notes)}</span></p>`:''}
+    <p class="ming${ingCount(m)?'':' none'}">${I('cart',13)}<span>${ingCount(m)?ingCount(m)+' bahan untuk belanja':'Bahan belanja belum diisi'}</span></p>
     <footer class="mf"><div class="mfi"><b class="num">${rp(m.price||S.cfg.price)}</b><span class="hint">${x?`Dipakai ${x.n}× · ${shortD(x.last)}`:'Belum dipakai'}</span></div>
     <div class="mfb"><button class="btn sm" data-act="menuEdit" data-m="${m.id}" aria-label="Ubah menu">${I('edit',14)}</button><button class="btn sm pri" data-act="menuAssign" data-m="${m.id}">${I('cal',14)}Assign</button></div></footer></article>`};
   const body=!ms.length?`<div class="card">${tot?empty('Tidak ada menu yang cocok','Pilih hari lain atau ubah pencarian.'):empty('Belum ada ide menu','Tambahkan menu per hari. Nomor minggu membantu rotasi menu.',`<button class="btn pri" data-act="menuNew">${I('plus',16)}Tambah menu</button>`)}</div>`
@@ -888,6 +909,73 @@ VIEWS.menu=()=>{
   <div class="search">${I('search',16)}<input class="inp" id="mQ" data-bind="mQ" value="${esc(UI.mQ)}" placeholder="Cari menu atau bahan…" aria-label="Cari menu"></div></div>
   ${body}`;
 };
+
+/* ----- Belanja Pasar ----- */
+function nextWorkDay(d){let x=addDays(d,1);while([0,6].includes(parseD(x).getDay())&&!S.days[x])x=addDays(x,1);return x}
+function shopDefault(){const fut=Object.keys(S.days).filter(d=>d>TODAY&&dayCount(S.days[d])).sort()[0];return fut||nextWorkDay(TODAY)}
+function shopRange(){if(!UI.sFrom){const d=shopDefault();UI.sFrom=d;UI.sTo=d}if(UI.sTo<UI.sFrom)UI.sTo=UI.sFrom;return[UI.sFrom,UI.sTo]}
+function shopCalc(from,to){
+  const buf=1+(Number(UI.sBuf)||0)/100;const items={},days=[],missing={};
+  Object.keys(S.days).filter(d=>d>=from&&d<=to).sort().forEach(dt=>{const d=S.days[dt];const cnt={};
+    Object.values(d.entries||{}).forEach(e=>{if(e.status==='cancelled')return;const mid=e.menuId||d.menuId||'';cnt[mid]=(cnt[mid]||0)+1});
+    const tot=Object.values(cnt).reduce((a,b)=>a+b,0);if(!tot)return;
+    const ms=[];
+    Object.entries(cnt).forEach(([mid,n])=>{const m=S.menus[mid];const nm=(m&&m.name)||d.menuName||'Menu belum dipilih';ms.push({mid,name:nm,n,ok:!!ingCount(m)});
+      if(!ingCount(m)){missing[mid||'none']={mid,name:nm};return}
+      m.ingredients.forEach(x=>{if(!x.name||!(Number(x.qty)>0))return;const[q,u]=toBase(Number(x.qty),x.unit);const amt=(x.per==='hari'?q:q*n);
+        const key=x.name.trim().toLowerCase()+'|'+u;const it=items[key]||(items[key]={key,name:x.name.trim(),unit:u,cat:x.cat||guessCat(x.name),qty:0,src:[]});
+        it.qty+=amt;it.src.push(shortD(dt)+(x.per==='hari'?'':' ('+n+')'))})});
+    days.push({dt,tot,ms})});
+  Object.values(items).forEach(it=>it.qty*=buf);
+  return{items:Object.values(items),days,missing:Object.values(missing)};
+}
+const shopId=()=>{const[a,b]=shopRange();return a+'_'+b};
+const shopDoc=()=>S.shop[shopId()]||{checked:{},extra:[]};
+VIEWS.belanja=()=>{
+  const[from,to]=shopRange();const R=shopCalc(from,to);const doc=shopDoc();const chk=doc.checked||{};
+  const extra=(doc.extra||[]).map((x,i)=>({key:'x'+i+'|'+x.name,name:x.name,unit:'',qtyTxt:x.qty||'',cat:x.cat||'Lainnya',src:['tambahan'],xi:i}));
+  const all=[...R.items.map(it=>({...it,qtyTxt:fmtQty(it.qty,it.unit)})),...extra];
+  const groups={};all.forEach(it=>(groups[it.cat]=groups[it.cat]||[]).push(it));
+  const order=[...ICATS,...Object.keys(groups).filter(c=>!ICATS.includes(c))];
+  const done=all.filter(it=>chk[it.key]).length;const porsi=R.days.reduce((a,d)=>a+d.tot,0);
+  const mon=mondayOf(TODAY);const quick=[['Hari ini',TODAY,TODAY],['Besok',nextWorkDay(TODAY),nextWorkDay(TODAY)],['Minggu ini',TODAY,addDays(mon,5)],['Minggu depan',addDays(mon,7),addDays(mon,12)]];
+  const rangeTxt=from===to?fmtD(from):shortD(from)+' – '+shortD(to)+' '+parseD(to).getFullYear();
+  return`<div class="vh"><div><h1>Daftar Belanja Pasar</h1><p>Dihitung dari jadwal ${esc(rangeTxt)}: jumlah porsi tiap menu × bahan per porsi.</p></div>
+    <div class="row"><button class="btn" data-act="shopCopy" ${all.length?'':'disabled'}>${I('copy',16)}Salin untuk WA</button><button class="btn" data-act="shopPrint" ${all.length?'':'disabled'}>${I('printer',16)}Print</button><button class="btn pri" data-act="shopExp">${I('wallet',16)}Catat pengeluaran</button></div></div>
+  <div class="card pad" style="margin-bottom:14px"><div class="tool" style="margin:0;align-items:flex-end">
+    <div class="daychips" role="group" aria-label="Pilih periode">${quick.map(([l,a,b])=>`<button type="button" class="${from===a&&to===b?'on':''}" data-act="shopQuick" data-a="${a}" data-b="${b}">${l}</button>`).join('')}</div>
+    <label class="f">Dari<input type="date" class="inp" id="sFrom" data-bind="sFrom" value="${from}"></label>
+    <label class="f">Sampai<input type="date" class="inp" id="sTo" data-bind="sTo" value="${to}"></label>
+    <label class="f">Lebihkan<select class="inp" id="sBuf" data-bind="sBuf">${[0,5,10,15,20].map(v=>`<option value="${v}"${Number(UI.sBuf||0)===v?' selected':''}>${v?'+'+v+'%':'Pas'}</option>`).join('')}</select></label>
+  </div></div>
+  <div class="lsum">
+    <div class="lsc1"><b class="num">${porsi}</b><span>porsi · ${R.days.length} hari</span></div>
+    <div class="lsc2 t-mnt"><b class="num">${done}/${all.length}</b><span>item sudah dibeli</span></div>
+    ${R.missing.length?`<div class="lsc2 t-pnk"><b class="num">${R.missing.length}</b><span>menu belum ada bahan</span></div>`:''}
+  </div>
+  ${R.missing.length?`<div class="banner warn" style="flex-wrap:wrap">${I('alert')}<span style="flex:1;min-width:200px">Bahan belum diisi untuk: ${R.missing.map(x=>`<b>${esc(dishParts(x.name).slice(0,2).join(' + ')||x.name)}</b>`).join(', ')}. Isi sekali di menu, berikutnya otomatis terhitung.</span>${R.missing.filter(x=>x.mid&&S.menus[x.mid]).map(x=>`<button class="btn sm" data-act="menuEdit" data-m="${x.mid}">Isi bahan · ${esc((dishParts(x.name)[1]||dishParts(x.name)[0]||'').slice(0,24))}</button>`).join('')}</div>`:''}
+  <div class="grid shopg">
+    <div class="card">${all.length?order.filter(c=>groups[c]).map(c=>`<div class="grp"><div class="grp-h"><span class="ghn">${esc(c)}<span class="gcount num">${groups[c].length}</span></span><span class="muted" style="font-size:12.5px">${groups[c].filter(it=>chk[it.key]).length} dibeli</span></div>
+      ${groups[c].sort((a,b)=>cmpN(a.name,b.name)).map(it=>`<label class="shrow${chk[it.key]?' done':''}"><input type="checkbox" data-act="shopTog" data-k="${esc(it.key)}"${chk[it.key]?' checked':''}><span class="shn"><b>${esc(it.name)}</b><span class="hint">${esc(it.src.join(' · '))}</span></span><b class="shq num">${esc(it.qtyTxt)}</b>${it.xi!=null?`<button type="button" class="iconbtn" data-act="shopXDel" data-i="${it.xi}" aria-label="Hapus item">${I('x',15)}</button>`:''}</label>`).join('')}</div>`).join('')
+      :empty(R.days.length?'Belum ada bahan yang bisa dihitung':'Tidak ada jadwal di periode ini',R.days.length?'Isi bahan per porsi di menu yang dijadwalkan, atau tambah item manual di bawah.':'Pilih tanggal lain, atau buat jadwal dulu di Jadwal & Pengiriman.')}
+      <div class="shadd"><input class="inp" id="sxName" placeholder="Item lain, mis. Gas 3 kg" aria-label="Nama item"><input class="inp" id="sxQty" placeholder="Jumlah" style="max-width:120px" aria-label="Jumlah"><select class="inp" id="sxCat" style="width:auto" aria-label="Kategori">${ICATS.map(c=>`<option${c==='Lainnya'?' selected':''}>${c}</option>`).join('')}</select><button type="button" class="btn sm" data-act="shopXAdd">${I('plus',14)}Tambah</button></div>
+    </div>
+    <div class="card pad"><div class="sec-h"><h2>Jadwal yang dihitung</h2></div>
+      ${R.days.length?R.days.map(d=>`<div class="li"><div class="t"><b>${esc(fmtD(d.dt))}</b>${d.ms.map(m=>`<span style="display:block">${m.ok?'':'⚠ '}${esc(dishParts(m.name).slice(0,3).join(' + '))} · ${m.n} porsi</span>`).join('')}</div><b class="num">${d.tot}</b></div>`).join(''):empty('Tidak ada jadwal','Periode ini belum punya porsi terjadwal.')}
+    </div>
+  </div>`;
+};
+function shopText(){const[from,to]=shopRange();const R=shopCalc(from,to);const doc=shopDoc();
+  const all=[...R.items.map(it=>({...it,qtyTxt:fmtQty(it.qty,it.unit)})),...(doc.extra||[]).map(x=>({name:x.name,qtyTxt:x.qty||'',cat:x.cat||'Lainnya'}))];
+  const g={};all.forEach(it=>(g[it.cat]=g[it.cat]||[]).push(it));
+  let t=`*Belanja ${S.cfg.name}*\n${from===to?fmtD(from):fmtD(from)+' – '+fmtD(to)}\n${R.days.reduce((a,d)=>a+d.tot,0)} porsi${Number(UI.sBuf)?` (dilebihkan ${UI.sBuf}%)`:''}\n`;
+  [...ICATS,...Object.keys(g).filter(c=>!ICATS.includes(c))].filter(c=>g[c]).forEach(c=>{t+=`\n*${c}*\n`+g[c].sort((a,b)=>cmpN(a.name,b.name)).map(it=>`- ${it.name}: ${it.qtyTxt}`).join('\n')+'\n'});
+  return t.trim()}
+function shopPrint(){const[from,to]=shopRange();const t=shopText();
+  $('#printArea').innerHTML=`<div class="shopprint"><pre>${esc(t.replace(/\*/g,''))}</pre></div>`;
+  $('#pageStyle').textContent='@page{size:auto;margin:12mm}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body::before{display:none!important}}';
+  setTimeout(()=>window.print(),60)}
+async function shopSave(mut){const id=shopId();const d=clone(shopDoc());d.checked=d.checked||{};d.extra=d.extra||[];mut(d);d.from=UI.sFrom;d.to=UI.sTo;await put('shop',id,d)}
 
 /* ----- Keuangan ----- */
 function monthStats(mo){
@@ -1096,20 +1184,62 @@ function parseImport(t){
 }
 
 /* ----- menu form ----- */
+/* ----- bahan / ingredients ----- */
+const UNITS=['g','kg','ml','L','butir','pcs','buah','siung','ikat','lembar','bungkus','botol','pack','sdm','sdt'];
+const COUNT_UNITS=['butir','pcs','buah','siung','ikat','lembar','bungkus','botol','pack'];
+const ICATS=['Daging & Ayam','Seafood','Sayur & Buah','Bumbu & Rempah','Sembako','Tahu, Tempe & Telur','Kemasan','Lainnya'];
+function guessCat(n){n=String(n||'').toLowerCase();
+  if(/ayam|daging|sapi|babi|bacon|sosis|sausage|beef|pork|chicken|bebek|kambing/.test(n))return'Daging & Ayam';
+  if(/udang|ikan|dori|salmon|cumi|kepiting|kerang|tuna|shrimp|fish/.test(n))return'Seafood';
+  if(/telur|telor|egg|tahu|tempe/.test(n))return'Tahu, Tempe & Telur';
+  if(/bawang|jahe|kunyit|lengkuas|serai|sereh|cabai|cabe|ketumbar|lada|merica|garam|gula|kecap|saus|saos|minyak wijen|kaldu|penyedap|daun salam|daun jeruk|pala|kayu manis|wijen|furikake|mentega|butter|margarin/.test(n))return'Bumbu & Rempah';
+  if(/beras|nasi|minyak|tepung|mie|mi |bihun|udon|spaghetti|pasta|roti|susu|keju|cheese|yogurt|santan|maizena/.test(n))return'Sembako';
+  if(/box|plastik|sendok|spork|label|wrap|tisu/.test(n))return'Kemasan';
+  if(/sayur|bayam|kangkung|buncis|brokoli|wortel|kentang|jagung|corn|edamame|kol|sawi|tomat|timun|selada|buah|pisang|apel|mangga|melon|semangka|jeruk|pepaya|labu|terong|pakcoy|kacang/.test(n))return'Sayur & Buah';
+  return'Lainnya'}
+const toBase=(q,u)=>u==='kg'?[q*1000,'g']:u==='L'?[q*1000,'ml']:[q,u||'pcs'];
+const trimNum=v=>String(Math.round(v*100)/100).replace('.',',');
+function fmtQty(v,u){
+  if(u==='g')return v>=1000?trimNum(v/1000)+' kg':Math.ceil(v)+' g';
+  if(u==='ml')return v>=1000?trimNum(v/1000)+' L':Math.ceil(v)+' ml';
+  if(COUNT_UNITS.includes(u))return Math.ceil(v-1e-9)+' '+u;
+  return trimNum(v)+' '+u;
+}
+const ingCount=m=>((m&&m.ingredients)||[]).filter(x=>x&&x.name&&Number(x.qty)>0).length;
+
 function menuForm(id){
   const m=id?S.menus[id]:{day:'Senin',price:S.cfg.price};
-  openM({title:id?'Ubah menu':'Tambah menu',
+  const f={day:m.day||'',week:m.week||'',name:m.name||'',notes:m.notes||'',price:m.price||''};
+  const ing=clone(m.ingredients||[]).map(x=>({name:x.name||'',qty:x.qty??'',unit:x.unit||'g',cat:x.cat||'',per:x.per||'porsi'}));
+  if(!ing.length)ing.push({name:'',qty:'',unit:'g',cat:'',per:'porsi'});
+  openM({title:id?'Ubah menu':'Tambah menu',wide:true,st:{f,ing},
     left:id?`<button type="button" class="btn ghost" style="color:var(--bad)" data-act="menuDel" data-m="${id}">${I('trash',16)}Hapus</button>`:'',
-    body:()=>`<div class="fg">
-      <label class="f">Hari<select class="inp" name="day">${['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu',''].map(d=>`<option value="${d}"${(m.day||'')===d?' selected':''}>${d||'Bebas (semua hari)'}</option>`).join('')}</select></label>
-      <label class="f">Minggu ke (rotasi)<input class="inp" type="number" name="week" min="0" max="12" value="${m.week||''}" placeholder="1"></label>
-      <label class="f full">Nama menu *<textarea class="inp" name="name" rows="2" required autofocus placeholder="Nasi + Ayam Goreng Ketumbar + …">${esc(m.name||'')}</textarea></label>
-      <label class="f full">Notes<input class="inp" name="notes" value="${esc(m.notes||'')}" placeholder="Chilli powder tersedia untuk Grade 5 ke atas"></label>
-      <label class="f">Harga / porsi<input class="inp" type="number" name="price" inputmode="numeric" min="0" step="1000" value="${m.price||''}"></label>
-    </div>`,
-    submit:async o=>{if(!o.name||!o.name.trim()){toast('Nama menu wajib diisi','err');return false}
-      const ok=await put('menus',id||uid('m'),{...(id?S.menus[id]:{created:Date.now()}),day:o.day,week:Number(o.week)||0,name:o.name.trim().replace(/\s+/g,' '),notes:(o.notes||'').trim(),price:Number(o.price)||0});
-      if(ok)toast('Menu disimpan','ok');return ok}});
+    body:()=>{const F=M.st.f;return`<div class="fg">
+      <label class="f">Hari<select class="inp" data-m="f.day">${['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu',''].map(d=>`<option value="${d}"${F.day===d?' selected':''}>${d||'Bebas (semua hari)'}</option>`).join('')}</select></label>
+      <label class="f">Minggu ke (rotasi)<input class="inp" type="number" data-m="f.week" min="0" max="12" value="${esc(F.week)}" placeholder="1"></label>
+      <label class="f full">Nama menu *<textarea class="inp" data-m="f.name" id="mfName" rows="2" autofocus placeholder="Nasi + Ayam Goreng Ketumbar + …">${esc(F.name)}</textarea></label>
+      <label class="f full">Notes<input class="inp" data-m="f.notes" value="${esc(F.notes)}" placeholder="Chilli powder tersedia untuk Grade 5 ke atas"></label>
+      <label class="f">Harga / porsi<input class="inp" type="number" data-m="f.price" inputmode="numeric" min="0" step="1000" value="${esc(F.price)}"></label>
+    </div>
+    <div class="ingbox"><div class="sec-h" style="margin-bottom:6px"><h2>${I('cart',16)} Bahan untuk belanja</h2><span class="hint">Jumlah per 1 porsi, atau per hari untuk bahan tetap</span></div>
+      <div class="ingt" role="table">
+        <div class="ingr ingh" role="row"><span>Bahan</span><span>Jumlah</span><span>Satuan</span><span>Dihitung</span><span>Kategori</span><span></span></div>
+        ${M.st.ing.map((x,i)=>`<div class="ingr" role="row">
+          <input class="inp" data-m="ing.${i}.name" value="${esc(x.name)}" placeholder="mis. Daging ayam fillet" aria-label="Nama bahan">
+          <input class="inp" type="number" step="any" min="0" data-m="ing.${i}.qty" value="${esc(x.qty)}" placeholder="120" aria-label="Jumlah">
+          <select class="inp" data-m="ing.${i}.unit" aria-label="Satuan">${UNITS.map(u=>`<option${u===x.unit?' selected':''}>${u}</option>`).join('')}</select>
+          <select class="inp" data-m="ing.${i}.per" aria-label="Dihitung"><option value="porsi"${x.per!=='hari'?' selected':''}>per porsi</option><option value="hari"${x.per==='hari'?' selected':''}>per hari</option></select>
+          <select class="inp" data-m="ing.${i}.cat" aria-label="Kategori"><option value="">Otomatis</option>${ICATS.map(c=>`<option${c===x.cat?' selected':''}>${c}</option>`).join('')}</select>
+          <button type="button" class="iconbtn" data-act="ingDel" data-i="${i}" aria-label="Hapus bahan">${I('x',16)}</button></div>`).join('')}
+      </div>
+      <div class="row" style="margin-top:8px"><button type="button" class="btn sm" data-act="ingAdd">${I('plus',14)}Tambah bahan</button>
+      ${menusArr().filter(x=>x.id!==id&&ingCount(x)).length?`<select class="inp" id="ingCopy" style="width:auto;max-width:280px" aria-label="Salin bahan dari menu lain"><option value="">Salin bahan dari menu lain…</option>${menusArr().filter(x=>x.id!==id&&ingCount(x)).map(x=>`<option value="${x.id}">${esc(x.name.slice(0,60))}</option>`).join('')}</select><button type="button" class="btn sm" data-act="ingCopy">Salin</button>`:''}</div>
+      <p class="hint" style="margin-top:6px">Contoh: Daging ayam 120 g per porsi, Beras 80 g per porsi, Minyak goreng 1 L per hari.</p>
+    </div>`},
+    submit:async()=>{const F=M.st.f;if(!F.name||!F.name.trim()){toast('Nama menu wajib diisi','err');return false}
+      const ingredients=M.st.ing.filter(x=>x.name.trim()&&Number(x.qty)>0).map(x=>({name:x.name.trim(),qty:Number(x.qty),unit:x.unit||'g',per:x.per==='hari'?'hari':'porsi',cat:x.cat||guessCat(x.name)}));
+      const ok=await put('menus',id||uid('m'),{...(id?S.menus[id]:{created:Date.now()}),day:F.day,week:Number(F.week)||0,name:F.name.trim().replace(/\s+/g,' '),notes:(F.notes||'').trim(),price:Number(F.price)||0,ingredients});
+      if(ok)toast('Menu disimpan'+(ingredients.length?` · ${ingredients.length} bahan`:''),'ok');return ok}});
 }
 
 /* ----- assign (one date) ----- */
@@ -1407,6 +1537,16 @@ const ACT={
   setDefSize:async()=>{const k=sizeKeyNow();const list=[...new Set([...(S.cfg.labelSizes||[]),...(SIZES[k]?[]:[k])])];if(await put('config','main',{...S.cfg,labelSize:k,labelSizes:list})){UI.lSize='';toast('Ukuran default: '+k.replace('x',' × ')+' mm','ok')}},
   delSize:async d=>{const list=(S.cfg.labelSizes||[]).filter(k=>k!==d.k);const def=S.cfg.labelSize===d.k?'80x50':S.cfg.labelSize;if(await put('config','main',{...S.cfg,labelSizes:list,labelSize:def})){M&&drawM();toast('Ukuran '+d.k.replace('x',' × ')+' dihapus','ok')}},
   addSize:async()=>{const w=clampN($('#nsW').value,20,150,0),h=clampN($('#nsH').value,15,150,0);if(!w||!h){toast('Isi lebar dan tinggi (mm)','err');return}const k=w+'x'+h;if(SIZES[k]||(S.cfg.labelSizes||[]).includes(k)){toast('Ukuran itu sudah ada','err');return}if(await put('config','main',{...S.cfg,labelSizes:[...(S.cfg.labelSizes||[]),k]})){M&&drawM();toast('Ukuran '+w+' × '+h+' mm ditambahkan','ok')}},
+  ingAdd:()=>{M.st.ing.push({name:'',qty:'',unit:'g',cat:'',per:'porsi'});drawM();setTimeout(()=>{const xs=document.querySelectorAll('[data-m$=".name"][data-m^="ing."]');xs.length&&xs[xs.length-1].focus()},20)},
+  ingDel:d=>{M.st.ing.splice(Number(d.i),1);if(!M.st.ing.length)M.st.ing.push({name:'',qty:'',unit:'g',cat:'',per:'porsi'});drawM()},
+  ingCopy:()=>{const v=$('#ingCopy')&&$('#ingCopy').value;const m=S.menus[v];if(!m){toast('Pilih menu dulu','err');return}const keep=M.st.ing.filter(x=>x.name.trim());M.st.ing=[...keep,...clone(m.ingredients).map(x=>({name:x.name,qty:x.qty,unit:x.unit||'g',cat:x.cat||'',per:x.per||'porsi'}))];drawM();toast(m.ingredients.length+' bahan disalin, sesuaikan jumlahnya','ok')},
+  shopQuick:d=>{UI.sFrom=d.a;UI.sTo=d.b;schedule()},
+  shopTog:(d,t)=>shopSave(x=>{if(t.checked)x.checked[d.k]=true;else delete x.checked[d.k]}),
+  shopXAdd:()=>{const n=($('#sxName').value||'').trim();if(!n){toast('Isi nama item','err');return}const q=($('#sxQty').value||'').trim(),c=$('#sxCat').value;shopSave(x=>x.extra.push({name:n,qty:q,cat:c}))},
+  shopXDel:(d,t,e)=>{e.preventDefault();shopSave(x=>{const it=x.extra[Number(d.i)];if(it)delete x.checked['x'+d.i+'|'+it.name];x.extra.splice(Number(d.i),1)})},
+  shopCopy:()=>copyText(shopText(),'Daftar belanja'),
+  shopPrint:()=>shopPrint(),
+  shopExp:()=>{const[a,b]=shopRange();expForm(null);setTimeout(()=>{const i=$('#expCatIn');if(i)i.value='Bahan Baku Makanan';const ds=document.querySelector('#dlg-b [name=desc]');if(ds)ds.value='Belanja pasar '+(a===b?shortD(a):shortD(a)+' – '+shortD(b));document.querySelectorAll('[data-act=expCat]').forEach(x=>x.classList.toggle('pri',x.dataset.v==='Bahan Baku Makanan'));const am=document.querySelector('#dlg-b [name=amount]');am&&am.focus()},60)},
   jPack:d=>{UI.jPack=UI.jPack===d.v?'':d.v;schedule()},
   ePack:async d=>{const dd=dayClone(d.d);const e=dd.entries[d.k];if(!e)return;e.pack=(e.pack||'Plastic Box')==='Lunch Box'?'Plastic Box':'Lunch Box';if(await put('days',d.d,dd))toast('Kemasan '+(e.name||'')+' hari ini: '+e.pack,'ok')},
   eDel:d=>{const x=info(d.k,S.days[d.d].entries[d.k]);ask('Hapus dari jadwal?',`<b>${esc(x.name)}</b> dihapus dari jadwal ${esc(fmtD(d.d))} dan saldonya tidak dipotong. Gunakan status <b>Batal</b> jika ingin tetap tercatat.`,'Hapus',async()=>{const dd=dayClone(d.d);delete dd.entries[d.k];if(Object.keys(dd.entries).length)await put('days',d.d,dd);else await del('days',d.d)})},
