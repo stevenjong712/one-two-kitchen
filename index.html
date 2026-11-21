@@ -627,6 +627,18 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .wapre{white-space:pre-wrap;font:inherit;font-size:13.5px;background:var(--sunk);border-radius:10px;padding:10px 12px;margin:8px 0 0;max-height:260px;overflow:auto}
 .okt{color:var(--ok,#1e8e5a);font-weight:700}
 @media (max-width:640px){.vplans{grid-template-columns:1fr;padding:10px}.pdh{padding:12px}.pdacts{width:100%}.pdacts .btn{flex:1}.vplan .pacts .btn{flex:1 1 auto}.vform{padding:12px}.waih .btn{flex:1}}
+.dshop .sec-h h2{display:flex;align-items:center;gap:8px}.dshop .sec-h h2 svg{display:inline-block;flex:none;color:var(--brand)}
+.dpls{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.dpl{border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.dplh{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--brand-soft)}
+.dpd{display:flex;flex-direction:column;align-items:center;min-width:48px;padding:4px 6px;border-radius:12px;background:var(--surface);line-height:1.1}.dpd span{font-size:11px;color:var(--muted);font-weight:700}.dpd b{font-size:22px}
+.dpi{flex:1;min-width:0;display:grid}.dpi b{font-size:15.5px}.dpi span{font-size:13px;color:var(--muted)}
+.dpv{display:grid}
+.dpr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.dpr .t{flex:1;min-width:0;display:grid}.dpr .t b{font-size:15px}.dpr .t span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dlate{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:12px;padding:10px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--bad,#c0392b) 35%,transparent);background:color-mix(in srgb,var(--bad,#c0392b) 8%,transparent);color:var(--ink);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.dlate span{flex:1}.dlate svg:first-child{color:var(--bad,#c0392b)}
+@media (max-width:640px){.dpls{grid-template-columns:1fr}.dshop .sec-h{flex-wrap:wrap;gap:8px}.dplh{flex-wrap:wrap}.dplh>.btn{width:100%;justify-content:center}}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -967,6 +979,17 @@ VIEWS.dashboard=()=>{
   const up=[];let d=TODAY;while(up.length<10){const w=parseD(d).getDay();if(w!==0&&(w!==6||S.days[d]))up.push(d);d=addDays(d,1)}
   const upCard=`<div class="card pad"><div class="sec-h"><h2>Jadwal 2 minggu ke depan</h2><a class="btn sm" data-act="go" data-t="jadwal" href="javascript:void 0">Buka jadwal</a></div>
     <div class="upd">${up.map(x=>{const dd=S.days[x],n=dayCount(dd),w=parseD(x).getDay();return`<button type="button" class="upc t-${DAYC[DAYN[w]]||'lav'}${x===TODAY?' now':''}${n?'':' none'}" data-act="goDay" data-d="${x}"><span class="ud">${DAYN[w].slice(0,3)}</span><b class="num">${parseD(x).getDate()}</b><span class="um">${MON[parseD(x).getMonth()]}</span><span class="un num">${n?n+' porsi':'—'}</span><span class="umn">${esc(dishParts(menuName(dd))[0]||'')}</span></button>`}).join('')}</div></div>`;
+  /* rencana belanja */
+  const pAll=planList().filter(p=>p.status!=='done');const pLate=pAll.filter(p=>p.date<TODAY);
+  const pDates=[...new Set(pAll.filter(p=>p.date>=TODAY).map(p=>p.date))].sort().slice(0,2);
+  const pDay=dt=>{const ps=pAll.filter(p=>p.date===dt).sort((a,b)=>String(a.vendor||'').localeCompare(String(b.vendor||'')));const est=ps.reduce((a,p)=>a+planTotal(p),0);const d=parseD(dt);
+    return`<div class="dpl"><div class="dplh"><div class="dpd"><span>${DAYN[d.getDay()].slice(0,3)}</span><b>${d.getDate()}</b><span>${MON[d.getMonth()]}</span></div>
+      <div class="dpi"><b>${dt===TODAY?'Hari ini':dt===addDays(TODAY,1)?'Besok':esc(DAYN[d.getDay()])}, ${esc(dateLbl(dt))}</b><span>${ps.length} vendor · ${ps.reduce((a,p)=>a+(p.items||[]).length,0)} barang${est?' · perkiraan '+rp(est):''}</span></div>
+      <button type="button" class="btn sm" data-act="planDayWA" data-d="${dt}">${I('send',14)}Kirim WA</button></div>
+      <div class="dpv">${ps.map(p=>`<div class="dpr"><span class="vic">${I('cart',16)}</span><div class="t"><b>${esc(p.vendor||'-')}</b><span>${esc((p.items||[]).slice(0,4).map(planItemTxt).join(', '))}${(p.items||[]).length>4?' +'+((p.items||[]).length-4):''}</span></div><button type="button" class="btn sm pri" data-act="planFinish" data-p="${p.id}">${I('check',14)}Selesai</button></div>`).join('')}</div></div>`};
+  const shopCard=`<div class="card pad dshop"><div class="sec-h"><h2>${I('cart',20)} Rencana belanja</h2><div class="row"><button type="button" class="btn sm" data-act="goPlans">Semua rencana</button><button type="button" class="btn sm pri" data-act="planNew">${I('plus',14)}Rencana baru</button></div></div>
+    ${pLate.length?`<button type="button" class="dlate" data-act="goPlans">${I('alert',16)}<span><b>${pLate.length} belanja</b> sudah lewat tanggalnya tapi belum diselesaikan</span>${I('right',16)}</button>`:''}
+    ${pDates.length?`<div class="dpls">${pDates.map(pDay).join('')}</div>`:empty('Belum ada rencana belanja ke depan','Tulis daftar belanja per vendor, pilih tanggalnya, lalu kirim lewat WhatsApp.',`<button type="button" class="btn pri" data-act="planNew" style="margin-top:10px">${I('plus',16)}Buat rencana belanja</button>`)}</div>`;
   const recent=Object.entries(S.pays).map(([id,p])=>({id,...p})).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0)).slice(0,5);
   return`<section class="hero hero2">${hero}</section>
   <div class="grid g4" style="margin-bottom:16px">
@@ -975,6 +998,7 @@ VIEWS.dashboard=()=>{
     <div class="card kpi"><span class="ki ok">${I('cal',22)}</span><div><small>Porsi minggu ini</small><b>${wk}</b><span class="s">Senin–Minggu</span></div></div>
     <div class="card kpi"><span class="ki bad">${I('wallet',22)}</span><div><small>Perlu ditagih</small><b class="num">${rp(owe)}</b><span class="s">${flagged.length} anak</span></div></div>
   </div>
+  <div style="margin-bottom:16px">${shopCard}</div>
   <div class="grid g2" style="margin-bottom:16px">${schoolCard}${reqCard}</div>
   <div style="margin-bottom:16px">${upCard}</div>
   <div class="grid g2">
@@ -2192,6 +2216,7 @@ const ACT={
   shopOpen:d=>{const[a,b]=String(d.s).split('_');UI.sFrom=a;UI.sTo=b||a;closeM();go('belanja')},
   shopCopy:()=>copyText(shopText(),'Daftar belanja'),
   bTab:d=>{UI.bTab=d.v;try{localStorage.setItem('otk-btab',d.v)}catch(e){}render()},
+  goPlans:()=>{UI.bTab='plan';UI.pFilter=planList().some(p=>p.status!=='done')?'up':'all';go('belanja')},
   bTabGo:()=>{UI.bTab='plan';UI.pFilter='done';go('belanja')},
   pFilter:d=>{UI.pFilter=d.v;render()},
   planNew:()=>planForm(),
