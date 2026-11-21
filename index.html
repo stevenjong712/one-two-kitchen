@@ -559,6 +559,44 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .xdh{flex-wrap:nowrap;gap:10px;padding:12px}.xdh .xd{font-size:15px;white-space:nowrap}.xdh .muted{font-size:12.5px;white-space:nowrap}.xdh b{font-size:15px;white-space:nowrap}
 .xr{padding:12px;gap:8px 10px}.xr>input{grid-column:1;grid-row:1;align-self:start;margin-top:2px}.xr .xm{grid-column:2;grid-row:1}.xr .xa{grid-column:3;grid-row:1;align-self:start;font-size:16px}.xr .acts{grid-column:2/4;grid-row:2;display:flex;justify-self:end}
 .bulk-a .inp,.xbulk .bulk-a .inp{width:0!important;flex:1 1 0;min-width:0}}
+.subtabs button svg{vertical-align:-3px;margin-right:4px}
+.plans{display:grid;gap:14px}
+.plan{display:grid;grid-template-columns:96px minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.plan .pdate{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:14px 8px;background:var(--brand-soft);color:var(--ink);text-align:center}
+.plan .pdate .pdn{font-size:13px;font-weight:800;color:var(--brand)}.plan .pdate b{font-size:34px;line-height:1.05;font-weight:800}.plan .pdate span{font-size:12.5px;color:var(--muted)}
+.plan .pdate em{margin-top:6px;font-style:normal;font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--surface);color:var(--brand)}.plan .pdate em.late{color:var(--bad,#c0392b)}
+.plan.done .pdate{background:var(--sunk)}.plan.done .pdate .pdn{color:var(--muted)}
+.plan .pbody{padding:14px 16px;display:grid;gap:8px;min-width:0}
+.plan .phead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.plan h3{margin:0;font-size:19px;font-weight:800;word-break:break-word}
+.plan .pmeta{font-size:14px;color:var(--muted)}.plan .pmeta b{color:var(--ink)}
+.plan .pitems{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.plan .pitems li{font-size:14px;padding:5px 10px;border-radius:999px;background:var(--sunk);border:1px solid var(--line)}.plan .pitems li.no{text-decoration:line-through;opacity:.55}.plan .pitems li.more{background:none;border-style:dashed;color:var(--muted)}
+.plan .pnote{margin:0;font-size:13.5px;color:var(--muted);font-style:italic}
+.plan .pacts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px}
+.pday{min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:12px;background:var(--sunk);font-size:15px}
+.pdays{flex-wrap:wrap}.pdays button{display:inline-flex;flex-direction:column;align-items:center;line-height:1.15;padding:6px 12px}.pdays button small{font-size:11px;font-weight:600;opacity:.75}
+.plhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.plhead b{font-size:16px}
+.plpaste{border:1px dashed var(--line);border-radius:12px;padding:12px;background:var(--sunk)}
+.plitems{display:grid;gap:8px}
+.pli{display:grid;grid-template-columns:24px minmax(0,2.2fr) minmax(0,1fr) minmax(0,1.2fr) 38px;gap:8px;align-items:center}
+.pli.hd{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.pli .inp{min-height:44px;font-size:15px}
+.pfl{display:grid;gap:8px}
+.pfr{display:grid;grid-template-columns:22px minmax(0,1fr) 210px 170px;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.pfr.off{opacity:.55}.pfr .pfn b{font-size:16px}.pfr input[type=checkbox]{width:20px;height:20px}
+.pfp{display:flex;align-items:center;gap:6px}.pfp span{color:var(--muted);font-weight:700}.pfp .inp{min-height:44px;font-size:16px;font-weight:700;text-align:right}
+.pfr select.inp{min-height:44px}
+.pfsum{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--brand-soft)}
+.pft{text-align:right}.pft small{display:block;color:var(--muted)}.pft b{font-size:24px}
+.warn-t{color:var(--bad,#c0392b);font-size:13px;font-weight:600;margin-top:2px}
+@media (max-width:640px){
+.plan{grid-template-columns:72px minmax(0,1fr)}.plan .pdate b{font-size:28px}.plan .pbody{padding:12px}.plan h3{font-size:17px}
+.plan .pacts .btn{flex:1 1 auto}
+.pli{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 38px;grid-template-areas:"n n x" "q p x"}.pli>span:first-child{display:none}.pli.hd{display:none}
+.pli>input[data-f=name]{grid-area:n}.pli>input[data-f=qty]{grid-area:q}.pli>input[data-f=price]{grid-area:p}.pli>button{grid-area:x;align-self:center}
+.pli{padding-bottom:10px;border-bottom:1px solid var(--line)}
+.pfr{grid-template-columns:22px minmax(0,1fr);grid-template-areas:"c n" ". s" ". p"}.pfr>input{grid-area:c}.pfr .pfn{grid-area:n}.pfr select{grid-area:s}.pfr .pfp{grid-area:p}
+}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -713,8 +751,8 @@ const I=(n,s=18)=>P.replace(/%s/g,s)+(ICONS[n]||'')+'</svg>';
 /* ---------- state ---------- */
 const DEFAULT_CFG={name:'One Two Kitchen',tagline:'Daily Kid Catering Management System',price:60000,lowPorsi:3,labelFooter:'',labelSize:'80x50',labelSizes:[]};
 const S={kids:{},menus:{},days:{},pays:{},exps:{},shop:{},cfg:{...DEFAULT_CFG},mode:'connecting',canWrite:true,fresh:false,stale:false};
-const COLS=['kids','menus','days','pays','exps','shop'];
-const UI={sFrom:'',sTo:'',sBuf:0,jPack:'',tab:'dashboard',jDate:TODAY,aQ:'',aSchool:'',aPack:'',aShow:'active',mDay:'',mQ:'',kMonth:TODAY.slice(0,7),kTab:'saldo',kQ:'',kFilter:'',lDate:TODAY,lSize:'58x40',lSchool:'',lSort:'school',lMenu:true,lSkip:{}};
+const COLS=['kids','menus','days','pays','exps','shop','plans'];
+const UI={bTab:(()=>{try{return localStorage.getItem('otk-btab')||'menu'}catch(e){return'menu'}})(),pFilter:'up',sFrom:'',sTo:'',sBuf:0,jPack:'',tab:'dashboard',jDate:TODAY,aQ:'',aSchool:'',aPack:'',aShow:'active',mDay:'',mQ:'',kMonth:TODAY.slice(0,7),kTab:'saldo',kQ:'',kFilter:'',lDate:TODAY,lSize:'58x40',lSchool:'',lSort:'school',lMenu:true,lSkip:{}};
 if([0,6].includes(parseD(TODAY).getDay())){ /* weekend: jump schedule & labels to next Monday */
   const nm=addDays(mondayOf(TODAY),7); UI.jDate=nm; UI.lDate=nm;
 }
@@ -1035,7 +1073,144 @@ function shopItems(id){
 }
 const shopTotal=(doc,all)=>all.reduce((a,it)=>a+(Number((doc.prices||{})[it.key])||0),0);
 const domId=k=>'sp'+Array.from(String(k)).reduce((h,c)=>(h*31+c.charCodeAt(0))|0,7).toString(36).replace('-','m');
+/* ===== Rencana Belanja (vendor, tanggal, WA, catat ke pengeluaran) ===== */
+const slug=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'x';
+const planList=()=>Object.entries(S.plans||{}).map(([id,p])=>({id,...p}));
+const planVendors=()=>{const m={};planList().sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(p=>{const v=String(p.vendor||'').trim();if(v)m[v.toLowerCase()]={name:v,wa:p.wa||((m[v.toLowerCase()]||{}).wa)||''}});return Object.values(m).sort((a,b)=>a.name.localeCompare(b.name))};
+const planTotal=(p,actual)=>(p.items||[]).reduce((a,it)=>a+(actual?(it.bought===false?0:Number(it.paid)||0):(Number(it.price)||0)),0);
+const planItemTxt=it=>[it.name,it.qty].filter(x=>String(x||'').trim()).join(' ');
+const planGuessCat=n=>impCatOf('',n);
+const subtabsBelanja=()=>`<div class="card" style="margin-bottom:14px"><div class="subtabs" role="tablist"><button type="button" role="tab" class="${UI.bTab!=='plan'?'on':''}" data-act="bTab" data-v="menu" aria-selected="${UI.bTab!=='plan'}">${I('food',16)} Dari jadwal menu</button><button type="button" role="tab" class="${UI.bTab==='plan'?'on':''}" data-act="bTab" data-v="plan" aria-selected="${UI.bTab==='plan'}">${I('cart',16)} Rencana belanja vendor</button></div></div>`;
+
+VIEWS.plans=()=>{
+  const f=UI.pFilter||'up';const all=planList();
+  const upN=all.filter(p=>p.status!=='done').length,doneN=all.length-upN;
+  let xs=all.filter(p=>f==='all'?true:f==='done'?p.status==='done':p.status!=='done');
+  xs.sort((a,b)=>f==='done'?String(b.date).localeCompare(String(a.date)):String(a.date).localeCompare(String(b.date)));
+  const card=p=>{const n=(p.items||[]).length,est=planTotal(p),act=planTotal(p,true);const done=p.status==='done';const late=!done&&p.date<TODAY;
+    const rel=p.date===TODAY?'Hari ini':p.date===addDays(TODAY,1)?'Besok':late?'Lewat':'';
+    return`<article class="plan${done?' done':''}">
+      <div class="pdate"><span class="pdn">${esc(dowName(p.date))}</span><b>${parseD(p.date).getDate()}</b><span>${MON[parseD(p.date).getMonth()]} ${parseD(p.date).getFullYear()}</span>${rel?`<em class="${late?'late':''}">${rel}</em>`:''}</div>
+      <div class="pbody">
+        <div class="phead"><h3>${esc(p.vendor||'Tanpa vendor')}</h3>${done?`<span class="pill ok">${I('check',13)} Selesai${(p.expIds||[]).length?' · tercatat':''}</span>`:`<span class="pill info">Rencana</span>`}</div>
+        <div class="pmeta">${n} barang${est&&!done?` · perkiraan <b>${rp(est)}</b>`:''}${done&&act?` · dibayar <b>${rp(act)}</b>`:''}${p.wa?` · WA ${esc(p.wa)}`:''}</div>
+        <ul class="pitems">${(p.items||[]).slice(0,6).map(it=>`<li class="${done&&it.bought===false?'no':''}">${esc(planItemTxt(it))}</li>`).join('')}${n>6?`<li class="more">+${n-6} lainnya</li>`:''}</ul>
+        ${p.note?`<p class="pnote">${esc(p.note)}</p>`:''}
+        <div class="pacts">
+          <button type="button" class="btn" data-act="planWA" data-p="${p.id}">${I('send',16)}Kirim WA</button>
+          ${done?`<button type="button" class="btn" data-act="planFinish" data-p="${p.id}">${I('money',16)}${(p.expIds||[]).length?'Ubah pengeluaran':'Catat ke pengeluaran'}</button>`:`<button type="button" class="btn pri" data-act="planFinish" data-p="${p.id}">${I('check',16)}Selesai belanja</button>`}
+          <span style="flex:1"></span>
+          <button type="button" class="iconbtn" data-act="planEdit" data-p="${p.id}" aria-label="Ubah rencana">${I('edit',16)}</button>
+          <button type="button" class="iconbtn" data-act="planCopy" data-p="${p.id}" aria-label="Duplikat rencana" title="Duplikat ke tanggal lain">${I('copy',16)}</button>
+          <button type="button" class="iconbtn" data-act="planDel" data-p="${p.id}" aria-label="Hapus rencana">${I('trash',16)}</button>
+        </div>
+      </div></article>`};
+  return`<div class="vh"><div><h1>Belanja</h1><p>Rencanakan belanja per vendor, kirim daftarnya lewat WhatsApp, lalu catat ke pengeluaran setelah selesai.</p></div>
+    <div class="row"><button class="btn pri" data-act="planNew">${I('plus',16)}Rencana baru</button></div></div>
+  ${subtabsBelanja()}
+  <div class="daychips" role="group" aria-label="Filter rencana" style="margin-bottom:14px">${[['up','Akan datang',upN],['done','Selesai',doneN],['all','Semua',all.length]].map(([v,l,c])=>`<button type="button" class="${f===v?'on':''}" data-act="pFilter" data-v="${v}">${l} · ${c}</button>`).join('')}</div>
+  ${xs.length?`<div class="plans">${xs.map(card).join('')}</div>`:`<div class="card pad">${empty(f==='done'?'Belum ada belanja yang selesai':'Belum ada rencana belanja','Tekan "Rencana baru" untuk menulis daftar belanja ke vendor, pilih tanggal dan harinya, lalu kirim lewat WhatsApp.')}<div style="text-align:center;margin-top:12px"><button class="btn pri" data-act="planNew">${I('plus',16)}Rencana baru</button></div></div>`}`;
+};
+
+/* --- form rencana --- */
+function planForm(id,copyFrom){
+  const src=id?S.plans[id]:copyFrom?S.plans[copyFrom]:null;
+  const st={planId:id||null,date:id&&src?src.date:addDays(TODAY,1),vendor:src?src.vendor||'':'',wa:src?src.wa||'':'',note:src?src.note||'':'',
+    items:src?(src.items||[]).map(it=>({id:uid('i'),name:it.name||'',qty:it.qty||'',price:it.price||''})):[],paste:'',showPaste:false};
+  if(!st.items.length)st.items=[{id:uid('i'),name:'',qty:'',price:''}];
+  const vs=planVendors();
+  openM({title:id?'Ubah rencana belanja':copyFrom?'Duplikat rencana belanja':'Rencana belanja baru',wide:true,st,
+    body:()=>{const s=M.st;const est=s.items.reduce((a,it)=>a+(Number(it.price)||0),0);const days=Array.from({length:8},(_,i)=>addDays(TODAY,i));
+      return`<div class="fg">
+        <label class="f">Tanggal belanja<input type="date" class="inp" id="plDate" value="${esc(s.date)}" required></label>
+        <div class="f"><span>Hari</span><div class="pday">${s.date?`<b>${esc(dowName(s.date))}</b>, ${esc(dateLbl(s.date))}`:'—'}</div></div>
+      </div>
+      <div class="daychips pdays" role="group" aria-label="Pilih hari">${days.map(d=>`<button type="button" class="${s.date===d?'on':''}" data-act="plDay" data-d="${d}"><small>${d===TODAY?'Hari ini':d===addDays(TODAY,1)?'Besok':DAYN[parseD(d).getDay()]}</small>${shortD(d)}</button>`).join('')}</div>
+      <div class="fg">
+        <label class="f">Nama vendor<input class="inp" id="plVendor" list="plVendors" value="${esc(s.vendor)}" placeholder="mis. Pasar Mayestik – Bu Ani" autocomplete="off" required><datalist id="plVendors">${vs.map(v=>`<option value="${esc(v.name)}">`).join('')}</datalist></label>
+        <label class="f">No. WhatsApp vendor <span class="hint">(opsional)</span><input class="inp" id="plWa" type="tel" inputmode="tel" value="${esc(s.wa)}" placeholder="08xx…"></label>
+      </div>
+      <div class="plhead"><b>Daftar belanja</b><span class="hint">${s.items.filter(it=>it.name.trim()).length} barang${est?' · perkiraan '+rp(est):''}</span><span style="flex:1"></span><button type="button" class="btn sm" data-act="plPasteTog">${s.showPaste?'Tutup':'Tempel banyak sekaligus'}</button></div>
+      ${s.showPaste?`<div class="plpaste"><textarea class="inp" id="plPaste" rows="5" placeholder="Satu barang per baris, mis.&#10;Ayam fillet 5 kg&#10;Beras 10 kg 140000&#10;Telur 3 kg">${esc(s.paste)}</textarea><div class="row" style="justify-content:flex-end;margin-top:8px"><button type="button" class="btn pri sm" data-act="plPasteGo">${I('plus',14)}Masukkan ke daftar</button></div></div>`:''}
+      <div class="plitems">
+        <div class="pli hd"><span>#</span><span>Nama barang</span><span>Jumlah</span><span>Perkiraan harga</span><span></span></div>
+        ${s.items.map((it,i)=>`<div class="pli"><span class="muted num">${i+1}</span>
+          <input class="inp" data-pli="${i}" data-f="name" value="${esc(it.name)}" placeholder="Nama barang" aria-label="Nama barang ${i+1}">
+          <input class="inp" data-pli="${i}" data-f="qty" value="${esc(it.qty)}" placeholder="mis. 5 kg" aria-label="Jumlah barang ${i+1}">
+          <input class="inp num" data-pli="${i}" data-f="price" type="number" inputmode="numeric" min="0" step="500" value="${esc(it.price)}" placeholder="Rp (opsional)" aria-label="Perkiraan harga barang ${i+1}">
+          <button type="button" class="iconbtn" data-act="plDelItem" data-i="${i}" aria-label="Hapus barang ${i+1}">${I('x',16)}</button></div>`).join('')}
+      </div>
+      <button type="button" class="btn" data-act="plAddItem" style="justify-self:start">${I('plus',16)}Tambah barang</button>
+      <label class="f">Catatan untuk vendor <span class="hint">(opsional)</span><textarea class="inp" id="plNote" rows="2" placeholder="mis. Tolong diantar sebelum jam 7 pagi">${esc(s.note)}</textarea></label>`},
+    foot:()=>`<button type="button" class="btn" data-act="closeM">Batal</button><span style="flex:1"></span><button type="button" class="btn" data-act="plSave" data-wa="1">${I('send',16)}Simpan & kirim WA</button><button type="button" class="btn pri" data-act="plSave">Simpan rencana</button>`});
+}
+function plParseLine(l){l=String(l).replace(/^\s*(\d{1,3}[.)]|[-•*·>])\s*/,'').trim();if(!l)return null;
+  let price='';const mon=[...l.matchAll(OCR_MONEY)].map(m=>({s:m[0],v:ocrAmt(m[0])})).filter(x=>!isNaN(x.v)&&x.v>=500);
+  if(mon.length){price=mon[mon.length-1].v;l=l.replace(mon[mon.length-1].s,' ').replace(/\b(rp|idr)\.?\s*$/i,'').trim()}
+  const q=/((?:\d+\s*\/\s*\d+|[½¼¾]|\d+(?:[.,]\d+)?)\s*(?:kg|kilo|g|gr|gram|ons|l|lt|liter|ml|pcs|pc|buah|bh|ikat|iket|pack|pak|bks|bungkus|dus|karton|box|krat|sak|karung|butir|ekor|papan|lusin|rim|botol|btl|kaleng|sisir|tray|ikt|potong|ptg)\b\.?|\d+(?:[.,]\d+)?\s*(?:x)\b|\b\d+(?:[.,]\d+)?)\s*$/i.exec(l);
+  let qty='';if(q&&q.index>0){qty=q[1].trim();l=l.slice(0,q.index).trim()}
+  else{const q2=/^((?:\d+\s*\/\s*\d+|[½¼¾]|\d+(?:[.,]\d+)?)\s*(?:kg|kilo|g|gr|gram|ons|l|lt|liter|ml|pcs|buah|ikat|pack|bks|dus|box|sak|butir|ekor|papan|lusin|botol|kaleng)\b\.?)\s+/i.exec(l);if(q2){qty=q2[1].trim();l=l.slice(q2[0].length).trim()}}
+  l=l.replace(/[=:;,\-–]+\s*$/,'').trim();return l?{id:uid('i'),name:l,qty,price}:null}
+function plCollect(){const s=M.st;const g=id=>document.getElementById(id);if(g('plDate'))s.date=g('plDate').value||s.date;if(g('plVendor'))s.vendor=g('plVendor').value;if(g('plWa'))s.wa=g('plWa').value;if(g('plNote'))s.note=g('plNote').value;if(g('plPaste'))s.paste=g('plPaste').value;
+  document.querySelectorAll('[data-pli]').forEach(x=>{const it=s.items[Number(x.dataset.pli)];if(it)it[x.dataset.f]=x.value})}
+
+/* --- teks WhatsApp --- */
+function planText(p,opt){opt=opt||{};const items=(p.items||[]).filter(it=>String(it.name||'').trim());
+  let t=`*DAFTAR BELANJA — ${(S.cfg.name||'One Two Kitchen').toUpperCase()}*\n\n`;
+  t+=`📅 Hari/Tanggal: *${fmtD(p.date)}*\n🏪 Vendor: *${p.vendor||'-'}*\n\n`;
+  t+=`🛒 *Daftar belanja (${items.length} barang):*\n`;
+  items.forEach((it,i)=>{t+=`${i+1}. ${it.name}${it.qty?` — ${it.qty}`:''}${opt.price&&Number(it.price)>0?` (${rp(it.price)})`:''}\n`});
+  const est=planTotal(p);if(opt.price&&est)t+=`\nPerkiraan total: *${rp(est)}*\n`;
+  if(p.note)t+=`\n📝 Catatan: ${p.note}\n`;
+  t+=`\nMohon dikonfirmasi ketersediaannya ya. Terima kasih 🙏`;return t}
+function planWA(id){const p=S.plans[id];if(!p)return;const hasP=(p.items||[]).some(it=>Number(it.price)>0);
+  openM({title:'Kirim daftar belanja · '+(p.vendor||''),st:{txt:planText(p),price:false,id,hasP},
+    body:()=>{const s=M.st;const wa=waNum(p.wa);return`${s.hasP?`<label class="chk"><input type="checkbox" id="plWaPrice"${s.price?' checked':''}> Tampilkan perkiraan harga</label>`:''}
+      <textarea class="inp" id="billTxt" data-m="txt" rows="16">${esc(s.txt)}</textarea>
+      <p class="hint">${wa?`Akan dibuka ke WhatsApp vendor <b>${esc(p.wa)}</b>. Teks bisa diubah dulu sebelum dikirim.`:'Nomor WA vendor belum diisi — WhatsApp akan meminta Anda memilih kontak. Tambahkan nomornya di "Ubah rencana" supaya langsung ke chat vendor.'}</p>`},
+    foot:()=>{const wa=waNum(p.wa);return`<button type="button" class="btn" data-act="closeM">Tutup</button><span style="flex:1"></span><button type="button" class="btn" data-act="copyM">${I('copy',16)}Salin</button><a class="btn pri" href="${wa?'https://wa.me/'+wa:'https://wa.me/'}?text=${encodeURIComponent(M.st.txt)}" target="_blank" rel="noopener" id="waLink">${I('send',16)}Buka WhatsApp</a>`}});
+}
+
+/* --- selesai belanja → pengeluaran --- */
+function planFinish(id){const p=S.plans[id];if(!p)return;
+  const st={id,date:p.paidDate||p.date,mode:p.expMode||'cat',items:(p.items||[]).filter(it=>String(it.name||'').trim()).map(it=>({...it,bought:it.bought!==false,paid:it.paid!=null&&it.paid!==''?it.paid:(it.price||''),cat:it.cat||planGuessCat(it.name)}))};
+  openM({title:'Selesai belanja · '+(p.vendor||''),wide:true,cls:'xl',st,
+    body:()=>{const s=M.st;const tot=s.items.reduce((a,it)=>a+(it.bought?Number(it.paid)||0:0),0);const nb=s.items.filter(it=>it.bought).length;const miss=s.items.filter(it=>it.bought&&!(Number(it.paid)>0)).length;
+      const groups={};s.items.filter(it=>it.bought&&Number(it.paid)>0).forEach(it=>{groups[it.cat]=(groups[it.cat]||0)+Number(it.paid)});
+      return`<p class="lead">Centang barang yang jadi dibeli dan isi harga yang dibayar. Setelah disimpan, belanja ini masuk ke laporan pengeluaran.</p>
+      <div class="fg"><label class="f">Tanggal bayar<input type="date" class="inp" id="pfDate" value="${esc(s.date)}"></label>
+        <label class="f">Catat sebagai<select class="inp" id="pfMode"><option value="cat"${s.mode==='cat'?' selected':''}>1 transaksi per kategori (disarankan)</option><option value="item"${s.mode==='item'?' selected':''}>1 transaksi per barang</option><option value="one"${s.mode==='one'?' selected':''}>1 transaksi total</option></select></label></div>
+      <div class="pfl">${s.items.map((it,i)=>`<div class="pfr${it.bought?'':' off'}">
+          <input type="checkbox" data-pfb="${i}"${it.bought?' checked':''} aria-label="Dibeli: ${esc(it.name)}">
+          <div class="pfn"><b>${esc(it.name)}</b>${it.qty?`<span class="muted"> · ${esc(it.qty)}</span>`:''}${Number(it.price)>0?`<div class="hint">perkiraan ${rp(it.price)}</div>`:''}</div>
+          <select class="inp" data-pfc="${i}" aria-label="Kategori ${esc(it.name)}"${it.bought?'':' disabled'}>${EXPCAT.map(c=>`<option${c===it.cat?' selected':''}>${esc(c)}</option>`).join('')}</select>
+          <label class="pfp"><span>Rp</span><input class="inp num" type="number" inputmode="numeric" min="0" step="500" data-pfp="${i}" value="${esc(it.paid)}" placeholder="dibayar"${it.bought?'':' disabled'} aria-label="Harga dibayar ${esc(it.name)}"></label></div>`).join('')}</div>
+      <div class="pfsum"><div><span class="muted">${nb} dari ${s.items.length} barang dibeli</span>${miss?`<div class="warn-t">${miss} barang belum ada harganya</div>`:''}</div><div class="pft"><small>Total dibayar</small><b class="num">${rp(tot)}</b></div></div>
+      ${Object.keys(groups).length&&s.mode==='cat'?`<div class="hint">Akan tercatat: ${Object.entries(groups).map(([c,v])=>`${esc(c)} <b>${rp(v)}</b>`).join(' · ')}</div>`:''}`},
+    foot:()=>`<button type="button" class="btn" data-act="closeM">Batal</button><span style="flex:1"></span><button type="button" class="btn" data-act="pfSave" data-k="only">Tandai selesai saja</button><button type="button" class="btn pri" data-act="pfSave" data-k="exp">${I('money',16)}Tambah ke pengeluaran</button>`});
+}
+function pfCollect(){const s=M.st;const g=id=>document.getElementById(id);if(g('pfDate')&&g('pfDate').value)s.date=g('pfDate').value;if(g('pfMode'))s.mode=g('pfMode').value;
+  document.querySelectorAll('[data-pfp]').forEach(x=>{const it=s.items[Number(x.dataset.pfp)];if(it)it.paid=x.value===''?'':Number(x.value)})}
+async function pfSave(kind){pfCollect();const s=M.st;const p=S.plans[s.id];if(!p)return;
+  const bought=s.items.filter(it=>it.bought);const withP=bought.filter(it=>Number(it.paid)>0);
+  if(kind==='exp'){if(!/^20\d\d-\d\d-\d\d$/.test(s.date||'')){toast('Isi tanggal bayar dulu','err');return}if(!withP.length){toast('Isi harga yang dibayar minimal satu barang','err');return}}
+  const vendor=p.vendor||'vendor';const ops=[];const newIds=[];
+  if(kind==='exp'){
+    const mk=(key,cat,list)=>{const id='plan_'+s.id+'__'+key;newIds.push(id);const amt=list.reduce((a,it)=>a+Number(it.paid),0);
+      const desc=`Belanja ${vendor}: `+list.map(planItemTxt).join(', ');ops.push(['exps',id,{date:s.date,type:'out',category:cat,desc:desc.length>180?desc.slice(0,177)+'…':desc,amount:amt,planId:s.id,vendor}])};
+    if(s.mode==='item')withP.forEach((it,i)=>mk('i'+(i+1)+'_'+slug(it.name).slice(0,24),it.cat,[it]));
+    else if(s.mode==='one'){const cats={};withP.forEach(it=>cats[it.cat]=(cats[it.cat]||0)+Number(it.paid));const main=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0][0];mk('all',main,withP)}
+    else{const g={};withP.forEach(it=>(g[it.cat]=g[it.cat]||[]).push(it));Object.entries(g).forEach(([c,l])=>mk(slug(c),c,l))}
+  }
+  const keep=new Set(newIds);const stale=(p.expIds||[]).filter(id=>!keep.has(id)&&S.exps[id]);
+  const items=(p.items||[]).map(it=>{const m=s.items.find(x=>x.id===it.id&&x.name===it.name)||s.items.find(x=>x.name===it.name);return m?{...it,bought:m.bought,paid:m.paid,cat:m.cat}:it});
+  ops.push(['plans',s.id,{...p,items,status:'done',paidDate:s.date,expMode:s.mode,expIds:kind==='exp'?newIds:(p.expIds||[]).filter(id=>S.exps[id]),doneAt:new Date().toISOString()}]);
+  if(!await putMany(ops))return;for(const id of stale)await del('exps',id);
+  closeM();toast(kind==='exp'?`${rp(withP.reduce((a,it)=>a+Number(it.paid),0))} dicatat ke pengeluaran ${dateLbl(s.date)}`:'Belanja ditandai selesai','ok');
+}
+
 VIEWS.belanja=()=>{
+  if(UI.bTab==='plan')return VIEWS.plans();
   const{R,doc,all,hiddenN,from,to}=shopItems();const chk=doc.checked||{},pr=doc.prices||{};
   const groups={};all.forEach(it=>(groups[it.cat]=groups[it.cat]||[]).push(it));
   const order=[...ICATS,...Object.keys(groups).filter(c=>!ICATS.includes(c))];
@@ -1049,7 +1224,7 @@ VIEWS.belanja=()=>{
       <b class="shq num">${esc(it.qtyTxt||'–')}</b>
       <span class="shp"><span>Rp</span><input class="inp num" type="number" inputmode="numeric" min="0" step="500" id="${domId(it.key)}" data-shopprice="${esc(it.key)}" value="${Number(pr[it.key])||''}" placeholder="harga" aria-label="Harga dibayar ${esc(it.name)}"></span>
       <span class="sha"><button type="button" class="iconbtn" data-act="shopEdit" data-k="${esc(it.key)}" aria-label="Ubah ${esc(it.name)}">${I('edit',15)}</button><button type="button" class="iconbtn" data-act="shopDel" data-k="${esc(it.key)}" aria-label="Hapus ${esc(it.name)}">${I('trash',15)}</button></span></div>`;
-  return`<div class="vh"><div><h1>Daftar Belanja Pasar</h1><p>Dihitung dari jadwal ${esc(rangeTxt)}. Isi harga yang dibayar, total otomatis tercatat di pengeluaran.</p></div>
+  return`${subtabsBelanja()}<div class="vh"><div><h1>Daftar Belanja Pasar</h1><p>Dihitung dari jadwal ${esc(rangeTxt)}. Isi harga yang dibayar, total otomatis tercatat di pengeluaran.</p></div>
     <div class="row"><button class="btn" data-act="shopCopy" ${all.length?'':'disabled'}>${I('copy',16)}Salin untuk WA</button><button class="btn" data-act="shopPrint" ${all.length?'':'disabled'}>${I('printer',16)}Print</button></div></div>
   <div class="card pad" style="margin-bottom:14px"><div class="tool" style="margin:0;align-items:flex-end">
     <div class="daychips" role="group" aria-label="Pilih periode">${quick.map(([l,a,b])=>`<button type="button" class="${from===a&&to===b?'on':''}" data-act="shopQuick" data-a="${a}" data-b="${b}">${l}</button>`).join('')}</div>
@@ -1162,7 +1337,7 @@ VIEWS.keuangan=()=>{
         <button class="btn danger-ghost" data-act="xBulk" data-k="del">${I('trash',16)}Hapus</button><button class="btn ghost" data-act="xBulk" data-k="none">Batal pilih</button></div>`:''}
       <div class="xlist">${Object.keys(g).sort((a,b)=>b.localeCompare(a)).map(dt=>{const ys=g[dt];const all=ys.every(x=>sel.has(x.id));const tot=ys.reduce((a,x)=>a+(x.type==='in'?0:Number(x.amount)||0),0);
         return`<div class="xday"><label class="xdh"><input type="checkbox" data-xday="${esc(dt)}"${all?' checked':''} aria-label="Pilih semua ${esc(shortD(dt))}"><span class="xd">${esc(dt?dateLbl(dt):'Tanpa tanggal')}</span><span class="muted">${ys.length} transaksi</span><b class="num neg">-${rp(tot)}</b></label>
-        ${ys.map(x=>`<div class="xr${sel.has(x.id)?' on':''}"><input type="checkbox" data-xsel="${x.id}"${sel.has(x.id)?' checked':''} aria-label="Pilih ${esc(x.desc||x.category||'')}"><div class="xm"><div class="xt">${esc(x.desc||x.category||'-')}</div><div class="xc">${x.type==='in'?'<span class="pill ok">Pemasukan</span> ':''}${esc(x.category||'-')}${x.importBatch?' · <span class="pill" title="'+esc(x.importFile||'')+'">impor</span>':''}${x.shopId?` · <a href="javascript:void 0" class="pill info" data-act="shopOpen" data-s="${esc(x.shopId)}" style="text-decoration:none">${I('cart',12)} dari Belanja</a>`:''}</div></div><b class="xa num ${x.type==='in'?'pos':'neg'}">${x.type==='in'?'+':'-'}${rp(x.amount)}</b><div class="acts"><button class="btn sm" data-act="expEdit" data-x="${x.id}" aria-label="Ubah">${I('edit',16)}</button><button class="btn sm" data-act="expDel" data-x="${x.id}" aria-label="Hapus">${I('trash',16)}</button></div></div>`).join('')}</div>`}).join('')}</div>`})():empty('Belum ada pengeluaran di '+mlabel,'Catat belanja bahan, kemasan, driver, dan biaya lain untuk melihat laba.',`<button class="btn pri" data-act="expNew">${I('plus',16)}Catat pengeluaran</button>`)}`;
+        ${ys.map(x=>`<div class="xr${sel.has(x.id)?' on':''}"><input type="checkbox" data-xsel="${x.id}"${sel.has(x.id)?' checked':''} aria-label="Pilih ${esc(x.desc||x.category||'')}"><div class="xm"><div class="xt">${esc(x.desc||x.category||'-')}</div><div class="xc">${x.type==='in'?'<span class="pill ok">Pemasukan</span> ':''}${esc(x.category||'-')}${x.importBatch?' · <span class="pill" title="'+esc(x.importFile||'')+'">impor</span>':''}${x.planId?` · <a href="javascript:void 0" class="pill info" data-act="bTabGo" style="text-decoration:none">${I('cart',12)} ${esc(x.vendor||'Rencana belanja')}</a>`:''}${x.shopId?` · <a href="javascript:void 0" class="pill info" data-act="shopOpen" data-s="${esc(x.shopId)}" style="text-decoration:none">${I('cart',12)} dari Belanja</a>`:''}</div></div><b class="xa num ${x.type==='in'?'pos':'neg'}">${x.type==='in'?'+':'-'}${rp(x.amount)}</b><div class="acts"><button class="btn sm" data-act="expEdit" data-x="${x.id}" aria-label="Ubah">${I('edit',16)}</button><button class="btn sm" data-act="expDel" data-x="${x.id}" aria-label="Hapus">${I('trash',16)}</button></div></div>`).join('')}</div>`}).join('')}</div>`})():empty('Belum ada pengeluaran di '+mlabel,'Catat belanja bahan, kemasan, driver, dan biaya lain untuk melihat laba.',`<button class="btn pri" data-act="expNew">${I('plus',16)}Catat pengeluaran</button>`)}`;
   }else{
     const ps=Object.entries(S.pays).map(([id,p])=>({id,...p})).filter(p=>(p.date||'').startsWith(mo)).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0));
     inner=ps.length?`<div class="tw"><table class="t"><thead><tr><th>Tanggal</th><th>Anak</th><th>Jenis</th><th>Metode</th><th>Catatan</th><th class="r">Jumlah</th><th></th></tr></thead><tbody>
@@ -1277,7 +1452,7 @@ function drawM(first){
 }
 function closeM(){M=null;$('#ov').hidden=true;document.body.classList.remove('modal-open')}
 $('#dlgf').addEventListener('submit',async e=>{e.preventDefault();if(!M||!M.submit)return;const fd=new FormData(e.target);const o={};for(const[k,v]of fd.entries())o[k]=v;const btn=$('#dlg-f [type=submit]');if(btn)btn.disabled=true;let r;try{r=await M.submit(o,fd)}finally{if(btn)btn.disabled=false}if(r!==false)closeM()});
-document.addEventListener('keydown',e=>{const t=e.target;if(t.type!=='date')return;t._kt=Date.now();if(e.key==='Enter'){e.preventDefault();t.blur();return}
+document.addEventListener('keydown',e=>{const t=e.target;if(t.dataset&&t.dataset.pli!==undefined&&e.key==='Enter'){e.preventDefault();const i=Number(t.dataset.pli);if(i===M.st.items.length-1)ACT.plAddItem();else{plCollect();const n=document.querySelector(`[data-pli="${i+1}"][data-f=name]`);if(n)n.focus()}return}if(t.type!=='date')return;t._kt=Date.now();if(e.key==='Enter'){e.preventDefault();t.blur();return}
   clearTimeout(t._tm);t._tm=setTimeout(()=>{if(t._pend&&t.isConnected&&Date.now()-t._kt>=1700){t._pend=false;t._kt=0;t.dispatchEvent(new Event('change',{bubbles:true}))}},1800)},true);/* selesai mengetik → simpan */
 document.addEventListener('focusout',e=>{const t=e.target;if(t.type!=='date')return;let go=!!t._pend;t._pend=false;t._kt=0;
   if(t.value){const y=Number(t.value.slice(0,4));if(y>0&&y<100){t.value=String(2000+y)+t.value.slice(4);go=true}}
@@ -1865,6 +2040,7 @@ async function expRemove(id){const x=S.exps[id];if(!x)return 0;let n=0;
     hit.forEach(it=>{delete dd.prices[it.key];delete dd.checked[it.key];delete dd.qty[it.key];if(it.xi==null)dd.hidden[it.key]=true});
     dd.extra=dd.extra.filter((_,i)=>!drop.has(i));
     await put('shop',sid,dd)}
+  if(x.planId&&S.plans[x.planId]){const pl=S.plans[x.planId];await put('plans',x.planId,{...pl,expIds:(pl.expIds||[]).filter(e=>e!==id)})}
   await del('exps',id);(UI.xSel||new Set()).delete(id);return n}
 async function impCommit(){
   const st=M.st;const rows=st.items.filter(x=>x.sel&&!x.err);if(!rows.length)return;
@@ -1948,6 +2124,31 @@ const ACT={
   shopGoExp:d=>{UI.kMonth=d.m;UI.kTab='exps';go('keuangan')},
   shopOpen:d=>{const[a,b]=String(d.s).split('_');UI.sFrom=a;UI.sTo=b||a;closeM();go('belanja')},
   shopCopy:()=>copyText(shopText(),'Daftar belanja'),
+  bTab:d=>{UI.bTab=d.v;try{localStorage.setItem('otk-btab',d.v)}catch(e){}render()},
+  bTabGo:()=>{UI.bTab='plan';UI.pFilter='done';go('belanja')},
+  pFilter:d=>{UI.pFilter=d.v;render()},
+  planNew:()=>planForm(),
+  planEdit:d=>planForm(d.p),
+  planCopy:d=>planForm(null,d.p),
+  planWA:d=>planWA(d.p),
+  planFinish:d=>planFinish(d.p),
+  pfSave:d=>pfSave(d.k),
+  planDel:d=>{const p=S.plans[d.p];if(!p)return;const ex=(p.expIds||[]).filter(id=>S.exps[id]);const amt=ex.reduce((a,id)=>a+(Number(S.exps[id].amount)||0),0);
+    ask('Hapus rencana belanja?',`Rencana belanja <b>${esc(p.vendor||'')}</b> tanggal ${esc(fmtD(p.date))} akan dihapus.${ex.length?` Pengeluaran yang sudah tercatat dari belanja ini (<b>${rp(amt)}</b>) juga ikut dihapus dari laporan.`:''}`,'Hapus',async()=>{for(const id of ex)await del('exps',id);await del('plans',d.p);toast('Rencana dihapus','ok')})},
+  plDay:d=>{plCollect();M.st.date=d.d;drawM()},
+  plAddItem:()=>{plCollect();M.st.items.push({id:uid('i'),name:'',qty:'',price:''});drawM();const xs=document.querySelectorAll('[data-pli][data-f=name]');if(xs.length)xs[xs.length-1].focus()},
+  plDelItem:d=>{plCollect();M.st.items.splice(Number(d.i),1);if(!M.st.items.length)M.st.items.push({id:uid('i'),name:'',qty:'',price:''});drawM()},
+  plPasteTog:()=>{plCollect();M.st.showPaste=!M.st.showPaste;drawM();const t=document.getElementById('plPaste');if(t)t.focus()},
+  plPasteGo:()=>{plCollect();const s=M.st;const add=String(s.paste||'').split(/\n+/).map(plParseLine).filter(Boolean);if(!add.length){toast('Tidak ada barang yang terbaca','err');return}
+    s.items=s.items.filter(it=>String(it.name).trim()).concat(add);s.paste='';s.showPaste=false;drawM();toast(add.length+' barang ditambahkan','ok')},
+  plSave:async d=>{plCollect();const s=M.st;const items=s.items.filter(it=>String(it.name).trim()).map(it=>({id:it.id,name:String(it.name).trim(),qty:String(it.qty||'').trim(),price:Number(it.price)||''}));
+    if(!/^20\d\d-\d\d-\d\d$/.test(s.date||'')){toast('Pilih tanggal belanja','err');return}
+    if(!String(s.vendor).trim()){toast('Isi nama vendor','err');document.getElementById('plVendor')?.focus();return}
+    if(!items.length){toast('Tambahkan minimal satu barang','err');return}
+    const id=s.planId||uid('pl');const old=S.plans[id]||{};
+    const doc={...old,date:s.date,vendor:String(s.vendor).trim(),wa:String(s.wa||'').trim(),note:String(s.note||'').trim(),items,status:old.status||'plan',createdAt:old.createdAt||new Date().toISOString()};
+    if(!await put('plans',id,doc))return;closeM();toast(s.planId?'Rencana diperbarui':'Rencana belanja disimpan','ok');if(UI.tab!=='belanja'||UI.bTab!=='plan'){UI.bTab='plan'}if(d.wa)planWA(id)},
+
   shopPrint:()=>shopPrint(),
   jPack:d=>{UI.jPack=UI.jPack===d.v?'':d.v;schedule()},
   ePack:async d=>{const dd=dayClone(d.d);const e=dd.entries[d.k];if(!e)return;e.pack=(e.pack||'Plastic Box')==='Lunch Box'?'Plastic Box':'Lunch Box';if(await put('days',d.d,dd))toast('Kemasan '+(e.name||'')+' hari ini: '+e.pack,'ok')},
@@ -2004,6 +2205,12 @@ document.addEventListener('change',e=>{const t=e.target;
   if(t.type==='date'&&t.value&&Number(t.value.slice(0,4))<1900)return;/* tahun masih diketik (mis. 0002 → 2026) */
   if(t.type==='date'&&t.isConnected&&Date.now()-(t._kt||0)<2500){t._pend=true;return}/* sedang mengetik: simpan saat keluar kolom */
   if(t.dataset.impb&&M){M.st[t.dataset.impb]=t.value;return}
+  if(t.id==='plDate'&&M){plCollect();drawM();return}
+  if(t.id==='plVendor'&&M&&!String(M.st.wa||'').trim()){const v=planVendors().find(x=>x.name.toLowerCase()===t.value.trim().toLowerCase());if(v&&v.wa){plCollect();M.st.wa=v.wa;drawM()}return}
+  if(t.id==='plWaPrice'&&M){M.st.price=t.checked;M.st.txt=planText(S.plans[M.st.id],{price:t.checked});drawM();return}
+  if(t.dataset.pfb!==undefined&&M){pfCollect();M.st.items[Number(t.dataset.pfb)].bought=t.checked;drawM();return}
+  if(t.dataset.pfc!==undefined&&M){pfCollect();M.st.items[Number(t.dataset.pfc)].cat=t.value;drawM();return}
+  if((t.id==='pfMode'||t.dataset.pfp!==undefined)&&M){pfCollect();drawM();return}
   if(t.dataset.xsel){const S2=UI.xSel||(UI.xSel=new Set());t.checked?S2.add(t.dataset.xsel):S2.delete(t.dataset.xsel);render();return}
   if(t.dataset.xday!==undefined){const S2=UI.xSel||(UI.xSel=new Set());const mo=UI.kMonth;Object.entries(S.exps).filter(([,x])=>x.date===t.dataset.xday).forEach(([id])=>t.checked?S2.add(id):S2.delete(id));render();return}
   if(t.id==='xbDate'){UI.xbDate=t.value;return}
