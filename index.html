@@ -597,6 +597,36 @@ h1,h2,h3,.brand b,.kpi b,.hero h1,.schc b,.daybtn .dd,.cnt b,.empty b,.authc h1{
 .pli{padding-bottom:10px;border-bottom:1px solid var(--line)}
 .pfr{grid-template-columns:22px minmax(0,1fr);grid-template-areas:"c n" ". s" ". p"}.pfr>input{grid-area:c}.pfr .pfn{grid-area:n}.pfr select{grid-area:s}.pfr .pfp{grid-area:p}
 }
+.pday-g{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+.pday-g.done{opacity:.85}
+.pdh{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--brand-soft);flex-wrap:wrap}
+.pdh .pdate{display:flex;flex-direction:column;align-items:center;min-width:64px;padding:6px 8px;border-radius:14px;background:var(--surface)}
+.pdh .pdate .pdn{font-size:12px;font-weight:800;color:var(--brand)}.pdh .pdate b{font-size:28px;line-height:1.05;font-weight:800}.pdh .pdate span{font-size:11.5px;color:var(--muted)}
+.pdh .pdi{flex:1;min-width:180px}.pdh h2{margin:0;font-size:18px;font-weight:800}.pdh h2 em{font-style:normal;font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px;background:var(--surface);color:var(--brand);vertical-align:2px}.pdh h2 em.late{color:var(--bad,#c0392b)}
+.pdh p{margin:2px 0 0;font-size:14px;color:var(--muted)}.pdh p b{color:var(--ink)}
+.pdacts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vplans{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;padding:14px}
+.vplan{border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:8px;align-content:start;background:var(--surface)}
+.vplan.done{background:var(--sunk)}
+.vplan .phead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.vplan h3{margin:0;font-size:18px;font-weight:800;word-break:break-word}
+.vic{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--brand-soft);color:var(--brand);flex:none}
+.vplan .pmeta{font-size:14px;color:var(--muted)}.vplan .pmeta b{color:var(--ink)}
+.vplan .pitems{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.vplan .pitems li{font-size:14px;padding:5px 10px;border-radius:999px;background:var(--sunk);border:1px solid var(--line)}.vplan .pitems li.no{text-decoration:line-through;opacity:.55}.vplan .pitems li.more{background:none;border-style:dashed;color:var(--muted)}
+.vplan .pnote{margin:0;font-size:13.5px;color:var(--muted);font-style:italic}
+.vplan .pacts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px}
+.vforms{display:grid;gap:14px}
+.vform{border:2px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:12px;background:var(--surface);scroll-margin-top:8px}
+.vform:focus-within{border-color:var(--brand)}
+.vfh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.vfh b{font-size:17px}
+.vno{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;font-size:14px}
+.btn.addv{justify-content:center;min-height:52px;border-style:dashed;border-width:2px;font-size:15px}
+.wal{display:grid;gap:10px}
+.wai{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:8px}.wai.sum{background:var(--sunk);margin-top:6px}
+.waih{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.waih b{font-size:16px}
+.wapre{white-space:pre-wrap;font:inherit;font-size:13.5px;background:var(--sunk);border-radius:10px;padding:10px 12px;margin:8px 0 0;max-height:260px;overflow:auto}
+.okt{color:var(--ok,#1e8e5a);font-weight:700}
+@media (max-width:640px){.vplans{grid-template-columns:1fr;padding:10px}.pdh{padding:12px}.pdacts{width:100%}.pdacts .btn{flex:1}.vplan .pacts .btn{flex:1 1 auto}.vform{padding:12px}.waih .btn{flex:1}}
 /* ===== dashboard & menu layout ===== */
 .tone-vars{}
 .t-lav{--tb:var(--brand-soft);--tf:var(--brand2);--ti:var(--brand-ink)}
@@ -1085,75 +1115,93 @@ const subtabsBelanja=()=>`<div class="card" style="margin-bottom:14px"><div clas
 VIEWS.plans=()=>{
   const f=UI.pFilter||'up';const all=planList();
   const upN=all.filter(p=>p.status!=='done').length,doneN=all.length-upN;
-  let xs=all.filter(p=>f==='all'?true:f==='done'?p.status==='done':p.status!=='done');
-  xs.sort((a,b)=>f==='done'?String(b.date).localeCompare(String(a.date)):String(a.date).localeCompare(String(b.date)));
-  const card=p=>{const n=(p.items||[]).length,est=planTotal(p),act=planTotal(p,true);const done=p.status==='done';const late=!done&&p.date<TODAY;
-    const rel=p.date===TODAY?'Hari ini':p.date===addDays(TODAY,1)?'Besok':late?'Lewat':'';
-    return`<article class="plan${done?' done':''}">
-      <div class="pdate"><span class="pdn">${esc(dowName(p.date))}</span><b>${parseD(p.date).getDate()}</b><span>${MON[parseD(p.date).getMonth()]} ${parseD(p.date).getFullYear()}</span>${rel?`<em class="${late?'late':''}">${rel}</em>`:''}</div>
-      <div class="pbody">
-        <div class="phead"><h3>${esc(p.vendor||'Tanpa vendor')}</h3>${done?`<span class="pill ok">${I('check',13)} Selesai${(p.expIds||[]).length?' · tercatat':''}</span>`:`<span class="pill info">Rencana</span>`}</div>
-        <div class="pmeta">${n} barang${est&&!done?` · perkiraan <b>${rp(est)}</b>`:''}${done&&act?` · dibayar <b>${rp(act)}</b>`:''}${p.wa?` · WA ${esc(p.wa)}`:''}</div>
-        <ul class="pitems">${(p.items||[]).slice(0,6).map(it=>`<li class="${done&&it.bought===false?'no':''}">${esc(planItemTxt(it))}</li>`).join('')}${n>6?`<li class="more">+${n-6} lainnya</li>`:''}</ul>
-        ${p.note?`<p class="pnote">${esc(p.note)}</p>`:''}
-        <div class="pacts">
-          <button type="button" class="btn" data-act="planWA" data-p="${p.id}">${I('send',16)}Kirim WA</button>
-          ${done?`<button type="button" class="btn" data-act="planFinish" data-p="${p.id}">${I('money',16)}${(p.expIds||[]).length?'Ubah pengeluaran':'Catat ke pengeluaran'}</button>`:`<button type="button" class="btn pri" data-act="planFinish" data-p="${p.id}">${I('check',16)}Selesai belanja</button>`}
-          <span style="flex:1"></span>
-          <button type="button" class="iconbtn" data-act="planEdit" data-p="${p.id}" aria-label="Ubah rencana">${I('edit',16)}</button>
-          <button type="button" class="iconbtn" data-act="planCopy" data-p="${p.id}" aria-label="Duplikat rencana" title="Duplikat ke tanggal lain">${I('copy',16)}</button>
-          <button type="button" class="iconbtn" data-act="planDel" data-p="${p.id}" aria-label="Hapus rencana">${I('trash',16)}</button>
-        </div>
+  const xs=all.filter(p=>f==='all'?true:f==='done'?p.status==='done':p.status!=='done');
+  const byDate={};xs.forEach(p=>(byDate[p.date]=byDate[p.date]||[]).push(p));
+  const dates=Object.keys(byDate).sort((a,b)=>f==='done'?b.localeCompare(a):a.localeCompare(b));
+  const vcard=p=>{const n=(p.items||[]).length,est=planTotal(p),act=planTotal(p,true);const done=p.status==='done';
+    return`<article class="vplan${done?' done':''}">
+      <div class="phead"><span class="vic">${I('cart',18)}</span><h3>${esc(p.vendor||'Tanpa vendor')}</h3>${done?`<span class="pill ok">${I('check',13)} Selesai${(p.expIds||[]).length?' · tercatat':''}</span>`:`<span class="pill info">Rencana</span>`}</div>
+      <div class="pmeta">${n} barang${est&&!done?` · perkiraan <b>${rp(est)}</b>`:''}${done&&act?` · dibayar <b>${rp(act)}</b>`:''}${p.wa?` · WA ${esc(p.wa)}`:''}</div>
+      <ul class="pitems">${(p.items||[]).slice(0,8).map(it=>`<li class="${done&&it.bought===false?'no':''}">${esc(planItemTxt(it))}</li>`).join('')}${n>8?`<li class="more">+${n-8} lainnya</li>`:''}</ul>
+      ${p.note?`<p class="pnote">${esc(p.note)}</p>`:''}
+      <div class="pacts">
+        <button type="button" class="btn" data-act="planWA" data-p="${p.id}">${I('send',16)}Kirim WA</button>
+        ${done?`<button type="button" class="btn" data-act="planFinish" data-p="${p.id}">${I('money',16)}${(p.expIds||[]).length?'Ubah pengeluaran':'Catat ke pengeluaran'}</button>`:`<button type="button" class="btn pri" data-act="planFinish" data-p="${p.id}">${I('check',16)}Selesai belanja</button>`}
+        <span style="flex:1"></span>
+        <button type="button" class="iconbtn" data-act="planEdit" data-p="${p.id}" aria-label="Ubah daftar ${esc(p.vendor||'')}">${I('edit',16)}</button>
+        <button type="button" class="iconbtn" data-act="planCopy" data-p="${p.id}" aria-label="Duplikat ${esc(p.vendor||'')}" title="Duplikat vendor ini ke tanggal lain">${I('copy',16)}</button>
+        <button type="button" class="iconbtn" data-act="planDel" data-p="${p.id}" aria-label="Hapus ${esc(p.vendor||'')}">${I('trash',16)}</button>
       </div></article>`};
-  return`<div class="vh"><div><h1>Belanja</h1><p>Rencanakan belanja per vendor, kirim daftarnya lewat WhatsApp, lalu catat ke pengeluaran setelah selesai.</p></div>
+  const day=dt=>{const ps=byDate[dt].sort((a,b)=>String(a.vendor||'').localeCompare(String(b.vendor||'')));const dayAll=all.filter(p=>p.date===dt);
+    const est=dayAll.reduce((a,p)=>a+(p.status==='done'?planTotal(p,true):planTotal(p)),0);const nDone=dayAll.filter(p=>p.status==='done').length;
+    const late=nDone<dayAll.length&&dt<TODAY;const rel=dt===TODAY?'Hari ini':dt===addDays(TODAY,1)?'Besok':late?'Lewat':'';const d=parseD(dt);
+    return`<section class="pday-g${nDone===dayAll.length?' done':''}">
+      <header class="pdh"><div class="pdate"><span class="pdn">${esc(DAYN[d.getDay()])}</span><b>${d.getDate()}</b><span>${MON[d.getMonth()]} ${d.getFullYear()}</span></div>
+        <div class="pdi"><h2>${esc(fmtD(dt))}${rel?` <em class="${late?'late':''}">${rel}</em>`:''}</h2><p>${dayAll.length} vendor · ${dayAll.reduce((a,p)=>a+(p.items||[]).length,0)} barang${est?` · ${nDone===dayAll.length?'dibayar':'perkiraan'} <b>${rp(est)}</b>`:''}${nDone&&nDone<dayAll.length?` · ${nDone} selesai`:''}</p></div>
+        <div class="pdacts"><button type="button" class="btn" data-act="planDayWA" data-d="${dt}">${I('send',16)}Kirim WA semua</button><button type="button" class="btn" data-act="planAddVendor" data-d="${dt}">${I('plus',16)}Vendor</button><button type="button" class="iconbtn" data-act="planCopyDay" data-d="${dt}" aria-label="Duplikat semua vendor hari ini" title="Duplikat semua vendor ke tanggal lain">${I('copy',16)}</button></div>
+      </header>
+      <div class="vplans">${ps.map(vcard).join('')}</div></section>`};
+  return`<div class="vh"><div><h1>Belanja</h1><p>Satu hari bisa beberapa vendor, masing-masing dengan daftar belanjanya sendiri. Kirim daftarnya lewat WhatsApp, lalu catat ke pengeluaran setelah selesai.</p></div>
     <div class="row"><button class="btn pri" data-act="planNew">${I('plus',16)}Rencana baru</button></div></div>
   ${subtabsBelanja()}
   <div class="daychips" role="group" aria-label="Filter rencana" style="margin-bottom:14px">${[['up','Akan datang',upN],['done','Selesai',doneN],['all','Semua',all.length]].map(([v,l,c])=>`<button type="button" class="${f===v?'on':''}" data-act="pFilter" data-v="${v}">${l} · ${c}</button>`).join('')}</div>
-  ${xs.length?`<div class="plans">${xs.map(card).join('')}</div>`:`<div class="card pad">${empty(f==='done'?'Belum ada belanja yang selesai':'Belum ada rencana belanja','Tekan "Rencana baru" untuk menulis daftar belanja ke vendor, pilih tanggal dan harinya, lalu kirim lewat WhatsApp.')}<div style="text-align:center;margin-top:12px"><button class="btn pri" data-act="planNew">${I('plus',16)}Rencana baru</button></div></div>`}`;
+  ${dates.length?`<div class="plans">${dates.map(day).join('')}</div>`:`<div class="card pad">${empty(f==='done'?'Belum ada belanja yang selesai':'Belum ada rencana belanja','Tekan "Rencana baru", pilih tanggal dan harinya, lalu tambahkan satu atau beberapa vendor dengan daftar belanjanya masing-masing.')}<div style="text-align:center;margin-top:12px"><button class="btn pri" data-act="planNew">${I('plus',16)}Rencana baru</button></div></div>`}`;
 };
 
-/* --- form rencana --- */
-function planForm(id,copyFrom){
-  const src=id?S.plans[id]:copyFrom?S.plans[copyFrom]:null;
-  const st={planId:id||null,date:id&&src?src.date:addDays(TODAY,1),vendor:src?src.vendor||'':'',wa:src?src.wa||'':'',note:src?src.note||'':'',
-    items:src?(src.items||[]).map(it=>({id:uid('i'),name:it.name||'',qty:it.qty||'',price:it.price||''})):[],paste:'',showPaste:false};
-  if(!st.items.length)st.items=[{id:uid('i'),name:'',qty:'',price:''}];
-  const vs=planVendors();
-  openM({title:id?'Ubah rencana belanja':copyFrom?'Duplikat rencana belanja':'Rencana belanja baru',wide:true,st,
-    body:()=>{const s=M.st;const est=s.items.reduce((a,it)=>a+(Number(it.price)||0),0);const days=Array.from({length:8},(_,i)=>addDays(TODAY,i));
+/* --- form rencana: satu tanggal, beberapa vendor --- */
+const plBlankItem=()=>({id:uid('i'),name:'',qty:'',price:''});
+const plVend=(p,keepId)=>({pid:keepId&&p?p.id:null,vendor:p?p.vendor||'':'',wa:p?p.wa||'':'',note:p?p.note||'':'',done:!!(keepId&&p&&p.status==='done'),
+  items:p&&(p.items||[]).length?(p.items||[]).map(it=>({...(keepId?it:{}),id:keepId?it.id:uid('i'),name:it.name||'',qty:it.qty||'',price:it.price||''})):[plBlankItem()],paste:'',showPaste:false});
+function planForm(o){o=o||{};let date,vendors,title,focus=null;
+  if(o.date){date=o.date;vendors=planList().filter(p=>p.date===date).sort((a,b)=>String(a.vendor||'').localeCompare(String(b.vendor||''))).map(p=>plVend(p,true));
+    if(o.focus)focus=vendors.findIndex(v=>v.pid===o.focus);if(o.addVendor||!vendors.length){vendors.push(plVend(null));focus=vendors.length-1}title='Belanja '+fmtD(date)}
+  else if(o.copy){date=addDays(TODAY,1);vendors=o.copy.map(p=>plVend(p,false));title='Duplikat rencana belanja'}
+  else{date=addDays(TODAY,1);vendors=[plVend(null)];title='Rencana belanja baru'}
+  openM({title,wide:true,cls:'xl',st:{date,origDate:o.date||null,vendors,removed:[],focus},
+    body:()=>{const s=M.st;const days=Array.from({length:8},(_,i)=>addDays(TODAY,i));const vs=planVendors();
+      const tot=s.vendors.reduce((a,v)=>a+v.items.reduce((b,it)=>b+(Number(it.price)||0),0),0);
       return`<div class="fg">
         <label class="f">Tanggal belanja<input type="date" class="inp" id="plDate" value="${esc(s.date)}" required></label>
         <div class="f"><span>Hari</span><div class="pday">${s.date?`<b>${esc(dowName(s.date))}</b>, ${esc(dateLbl(s.date))}`:'—'}</div></div>
       </div>
       <div class="daychips pdays" role="group" aria-label="Pilih hari">${days.map(d=>`<button type="button" class="${s.date===d?'on':''}" data-act="plDay" data-d="${d}"><small>${d===TODAY?'Hari ini':d===addDays(TODAY,1)?'Besok':DAYN[parseD(d).getDay()]}</small>${shortD(d)}</button>`).join('')}</div>
-      <div class="fg">
-        <label class="f">Nama vendor<input class="inp" id="plVendor" list="plVendors" value="${esc(s.vendor)}" placeholder="mis. Pasar Mayestik – Bu Ani" autocomplete="off" required><datalist id="plVendors">${vs.map(v=>`<option value="${esc(v.name)}">`).join('')}</datalist></label>
-        <label class="f">No. WhatsApp vendor <span class="hint">(opsional)</span><input class="inp" id="plWa" type="tel" inputmode="tel" value="${esc(s.wa)}" placeholder="08xx…"></label>
-      </div>
-      <div class="plhead"><b>Daftar belanja</b><span class="hint">${s.items.filter(it=>it.name.trim()).length} barang${est?' · perkiraan '+rp(est):''}</span><span style="flex:1"></span><button type="button" class="btn sm" data-act="plPasteTog">${s.showPaste?'Tutup':'Tempel banyak sekaligus'}</button></div>
-      ${s.showPaste?`<div class="plpaste"><textarea class="inp" id="plPaste" rows="5" placeholder="Satu barang per baris, mis.&#10;Ayam fillet 5 kg&#10;Beras 10 kg 140000&#10;Telur 3 kg">${esc(s.paste)}</textarea><div class="row" style="justify-content:flex-end;margin-top:8px"><button type="button" class="btn pri sm" data-act="plPasteGo">${I('plus',14)}Masukkan ke daftar</button></div></div>`:''}
-      <div class="plitems">
-        <div class="pli hd"><span>#</span><span>Nama barang</span><span>Jumlah</span><span>Perkiraan harga</span><span></span></div>
-        ${s.items.map((it,i)=>`<div class="pli"><span class="muted num">${i+1}</span>
-          <input class="inp" data-pli="${i}" data-f="name" value="${esc(it.name)}" placeholder="Nama barang" aria-label="Nama barang ${i+1}">
-          <input class="inp" data-pli="${i}" data-f="qty" value="${esc(it.qty)}" placeholder="mis. 5 kg" aria-label="Jumlah barang ${i+1}">
-          <input class="inp num" data-pli="${i}" data-f="price" type="number" inputmode="numeric" min="0" step="500" value="${esc(it.price)}" placeholder="Rp (opsional)" aria-label="Perkiraan harga barang ${i+1}">
-          <button type="button" class="iconbtn" data-act="plDelItem" data-i="${i}" aria-label="Hapus barang ${i+1}">${I('x',16)}</button></div>`).join('')}
-      </div>
-      <button type="button" class="btn" data-act="plAddItem" style="justify-self:start">${I('plus',16)}Tambah barang</button>
-      <label class="f">Catatan untuk vendor <span class="hint">(opsional)</span><textarea class="inp" id="plNote" rows="2" placeholder="mis. Tolong diantar sebelum jam 7 pagi">${esc(s.note)}</textarea></label>`},
+      ${s.origDate&&s.date!==s.origDate?`<div class="banner warn">${I('alert')}Semua vendor di bawah akan dipindah ke ${esc(fmtD(s.date))}.</div>`:''}
+      <datalist id="plVendors">${vs.map(v=>`<option value="${esc(v.name)}">`).join('')}</datalist>
+      <div class="vforms">${s.vendors.map((v,vi)=>{const est=v.items.reduce((a,it)=>a+(Number(it.price)||0),0);const n=v.items.filter(it=>String(it.name).trim()).length;
+        return`<section class="vform" id="vf${vi}">
+        <div class="vfh"><span class="vno">${vi+1}</span><b>${esc(v.vendor||'Vendor '+(vi+1))}</b><span class="hint">${n} barang${est?' · perkiraan '+rp(est):''}${v.done?' · sudah selesai belanja':''}</span><span style="flex:1"></span>${s.vendors.length>1?`<button type="button" class="btn sm danger-ghost" data-act="plDelVendor" data-v="${vi}">${I('trash',14)}Hapus vendor</button>`:''}</div>
+        <div class="fg">
+          <label class="f">Nama vendor<input class="inp" data-pv="${vi}" data-f="vendor" list="plVendors" value="${esc(v.vendor)}" placeholder="mis. Pasar Mayestik – Bu Ani" autocomplete="off"></label>
+          <label class="f">No. WhatsApp vendor <span class="hint">(opsional)</span><input class="inp" data-pv="${vi}" data-f="wa" type="tel" inputmode="tel" value="${esc(v.wa)}" placeholder="08xx…"></label>
+        </div>
+        <div class="plhead"><b>Daftar belanja</b><span style="flex:1"></span><button type="button" class="btn sm" data-act="plPasteTog" data-v="${vi}">${v.showPaste?'Tutup':'Tempel banyak sekaligus'}</button></div>
+        ${v.showPaste?`<div class="plpaste"><textarea class="inp" data-pv="${vi}" data-f="paste" rows="5" placeholder="Satu barang per baris, mis.&#10;Ayam fillet 5 kg&#10;Beras 10 kg 140000&#10;Telur 3 kg">${esc(v.paste)}</textarea><div class="row" style="justify-content:flex-end;margin-top:8px"><button type="button" class="btn pri sm" data-act="plPasteGo" data-v="${vi}">${I('plus',14)}Masukkan ke daftar</button></div></div>`:''}
+        <div class="plitems">
+          <div class="pli hd"><span>#</span><span>Nama barang</span><span>Jumlah</span><span>Perkiraan harga</span><span></span></div>
+          ${v.items.map((it,i)=>`<div class="pli"><span class="muted num">${i+1}</span>
+            <input class="inp" data-pli="${vi}:${i}" data-f="name" value="${esc(it.name)}" placeholder="Nama barang" aria-label="Nama barang ${i+1}">
+            <input class="inp" data-pli="${vi}:${i}" data-f="qty" value="${esc(it.qty)}" placeholder="mis. 5 kg" aria-label="Jumlah barang ${i+1}">
+            <input class="inp num" data-pli="${vi}:${i}" data-f="price" type="number" inputmode="numeric" min="0" step="500" value="${esc(it.price)}" placeholder="Rp (opsional)" aria-label="Perkiraan harga barang ${i+1}">
+            <button type="button" class="iconbtn" data-act="plDelItem" data-v="${vi}" data-i="${i}" aria-label="Hapus barang ${i+1}">${I('x',16)}</button></div>`).join('')}
+        </div>
+        <button type="button" class="btn" data-act="plAddItem" data-v="${vi}" style="justify-self:start">${I('plus',16)}Tambah barang</button>
+        <label class="f">Catatan untuk vendor <span class="hint">(opsional)</span><textarea class="inp" data-pv="${vi}" data-f="note" rows="2" placeholder="mis. Tolong diantar sebelum jam 7 pagi">${esc(v.note)}</textarea></label>
+      </section>`}).join('')}</div>
+      <button type="button" class="btn addv" data-act="plAddVendor">${I('plus',18)}Tambah vendor lain di hari ini</button>
+      <div class="hint" style="text-align:right">${s.vendors.length} vendor${tot?' · total perkiraan <b>'+rp(tot)+'</b>':''}</div>`},
     foot:()=>`<button type="button" class="btn" data-act="closeM">Batal</button><span style="flex:1"></span><button type="button" class="btn" data-act="plSave" data-wa="1">${I('send',16)}Simpan & kirim WA</button><button type="button" class="btn pri" data-act="plSave">Simpan rencana</button>`});
+  if(focus!=null&&focus>0)setTimeout(()=>{const el=document.getElementById('vf'+focus);if(el)el.scrollIntoView({block:'start'})},30);
 }
 function plParseLine(l){l=String(l).replace(/^\s*(\d{1,3}[.)]|[-•*·>])\s*/,'').trim();if(!l)return null;
   let price='';const mon=[...l.matchAll(OCR_MONEY)].map(m=>({s:m[0],v:ocrAmt(m[0])})).filter(x=>!isNaN(x.v)&&x.v>=500);
   if(mon.length){price=mon[mon.length-1].v;l=l.replace(mon[mon.length-1].s,' ').replace(/\b(rp|idr)\.?\s*$/i,'').trim()}
-  const q=/((?:\d+\s*\/\s*\d+|[½¼¾]|\d+(?:[.,]\d+)?)\s*(?:kg|kilo|g|gr|gram|ons|l|lt|liter|ml|pcs|pc|buah|bh|ikat|iket|pack|pak|bks|bungkus|dus|karton|box|krat|sak|karung|butir|ekor|papan|lusin|rim|botol|btl|kaleng|sisir|tray|ikt|potong|ptg)\b\.?|\d+(?:[.,]\d+)?\s*(?:x)\b|\b\d+(?:[.,]\d+)?)\s*$/i.exec(l);
+  const q=/((?:\d+\s*\/\s*\d+|[½¼¾]|\d+(?:[.,]\d+)?)\s*(?:kg|kilo|g|gr|gram|ons|l|lt|liter|ml|pcs|pc|buah|bh|ikat|iket|pack|pak|bks|bungkus|dus|karton|box|krat|sak|karung|butir|ekor|papan|lusin|rim|botol|btl|kaleng|sisir|tray|ikt|potong|ptg|tabung|tbg|galon|kotak|renteng|slop|bal|pouch)\b\.?|\d+(?:[.,]\d+)?\s*(?:x)\b|\b\d+(?:[.,]\d+)?)\s*$/i.exec(l);
   let qty='';if(q&&q.index>0){qty=q[1].trim();l=l.slice(0,q.index).trim()}
   else{const q2=/^((?:\d+\s*\/\s*\d+|[½¼¾]|\d+(?:[.,]\d+)?)\s*(?:kg|kilo|g|gr|gram|ons|l|lt|liter|ml|pcs|buah|ikat|pack|bks|dus|box|sak|butir|ekor|papan|lusin|botol|kaleng)\b\.?)\s+/i.exec(l);if(q2){qty=q2[1].trim();l=l.slice(q2[0].length).trim()}}
   l=l.replace(/[=:;,\-–]+\s*$/,'').trim();return l?{id:uid('i'),name:l,qty,price}:null}
-function plCollect(){const s=M.st;const g=id=>document.getElementById(id);if(g('plDate'))s.date=g('plDate').value||s.date;if(g('plVendor'))s.vendor=g('plVendor').value;if(g('plWa'))s.wa=g('plWa').value;if(g('plNote'))s.note=g('plNote').value;if(g('plPaste'))s.paste=g('plPaste').value;
-  document.querySelectorAll('[data-pli]').forEach(x=>{const it=s.items[Number(x.dataset.pli)];if(it)it[x.dataset.f]=x.value})}
-
+function plCollect(){const s=M.st;const g=document.getElementById('plDate');if(g&&g.value)s.date=g.value;
+  document.querySelectorAll('[data-pv]').forEach(x=>{const v=s.vendors[Number(x.dataset.pv)];if(v)v[x.dataset.f]=x.value});
+  document.querySelectorAll('[data-pli]').forEach(x=>{const[vi,i]=x.dataset.pli.split(':').map(Number);const it=s.vendors[vi]&&s.vendors[vi].items[i];if(it)it[x.dataset.f]=x.value})}
 /* --- teks WhatsApp --- */
 function planText(p,opt){opt=opt||{};const items=(p.items||[]).filter(it=>String(it.name||'').trim());
   let t=`*DAFTAR BELANJA — ${(S.cfg.name||'One Two Kitchen').toUpperCase()}*\n\n`;
@@ -1171,6 +1219,22 @@ function planWA(id){const p=S.plans[id];if(!p)return;const hasP=(p.items||[]).so
     foot:()=>{const wa=waNum(p.wa);return`<button type="button" class="btn" data-act="closeM">Tutup</button><span style="flex:1"></span><button type="button" class="btn" data-act="copyM">${I('copy',16)}Salin</button><a class="btn pri" href="${wa?'https://wa.me/'+wa:'https://wa.me/'}?text=${encodeURIComponent(M.st.txt)}" target="_blank" rel="noopener" id="waLink">${I('send',16)}Buka WhatsApp</a>`}});
 }
 
+function planDayText(dt){const ps=planList().filter(p=>p.date===dt).sort((a,b)=>String(a.vendor||'').localeCompare(String(b.vendor||'')));
+  let t=`*RENCANA BELANJA — ${(S.cfg.name||'One Two Kitchen').toUpperCase()}*\n📅 *${fmtD(dt)}*\n`;
+  ps.forEach(p=>{const its=(p.items||[]).filter(it=>String(it.name||'').trim());t+=`\n🏪 *${p.vendor||'-'}* (${its.length} barang)\n`;its.forEach((it,i)=>{t+=`${i+1}. ${it.name}${it.qty?` — ${it.qty}`:''}\n`});if(p.note)t+=`📝 ${p.note}\n`});
+  const est=ps.reduce((a,p)=>a+planTotal(p),0);if(est)t+=`\nPerkiraan total: *${rp(est)}*`;return t.trim()}
+function planDayWA(dt){const ps=planList().filter(p=>p.date===dt).sort((a,b)=>String(a.vendor||'').localeCompare(String(b.vendor||'')));if(!ps.length)return;
+  openM({title:'Kirim WA · '+fmtD(dt),wide:true,st:{dt},
+    body:()=>`<p class="lead">Setiap vendor menerima daftar belanjanya sendiri. Tekan <b>Buka WhatsApp</b> di tiap vendor satu per satu.</p>
+      <div class="wal">${ps.map(p=>{const wa=waNum(p.wa);const txt=planText(p);return`<div class="wai">
+        <div class="waih"><span class="vic">${I('cart',18)}</span><div style="min-width:0"><b>${esc(p.vendor||'-')}</b><div class="hint">${(p.items||[]).length} barang · ${wa?'WA '+esc(p.wa):'nomor WA belum diisi'}${(UI.waSent||{})[p.id]?' · <span class="okt">sudah dibuka ✓</span>':''}</div></div><span style="flex:1"></span>
+          <button type="button" class="btn" data-act="planCopyTxt" data-p="${p.id}">${I('copy',16)}Salin</button>
+          <a class="btn pri" data-wasent="${p.id}" href="https://wa.me/${wa}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">${I('send',16)}Buka WhatsApp</a></div>
+        <details><summary>Lihat pesan</summary><pre class="wapre">${esc(txt)}</pre></details></div>`}).join('')}</div>
+      <div class="wai sum"><div class="waih"><div><b>Ringkasan semua vendor</b><div class="hint">Untuk dikirim ke staf / driver yang berbelanja</div></div><span style="flex:1"></span><button type="button" class="btn" data-act="planCopyDay2" data-d="${dt}">${I('copy',16)}Salin</button><a class="btn" href="https://wa.me/?text=${encodeURIComponent(planDayText(dt))}" target="_blank" rel="noopener">${I('send',16)}WhatsApp</a></div>
+        <details><summary>Lihat pesan</summary><pre class="wapre">${esc(planDayText(dt))}</pre></details></div>`,
+    foot:()=>`<span style="flex:1"></span><button type="button" class="btn pri" data-act="closeM">Selesai</button>`});
+}
 /* --- selesai belanja → pengeluaran --- */
 function planFinish(id){const p=S.plans[id];if(!p)return;
   const st={id,date:p.paidDate||p.date,mode:p.expMode||'cat',items:(p.items||[]).filter(it=>String(it.name||'').trim()).map(it=>({...it,bought:it.bought!==false,paid:it.paid!=null&&it.paid!==''?it.paid:(it.price||''),cat:it.cat||planGuessCat(it.name)}))};
@@ -1185,12 +1249,13 @@ function planFinish(id){const p=S.plans[id];if(!p)return;
           <div class="pfn"><b>${esc(it.name)}</b>${it.qty?`<span class="muted"> · ${esc(it.qty)}</span>`:''}${Number(it.price)>0?`<div class="hint">perkiraan ${rp(it.price)}</div>`:''}</div>
           <select class="inp" data-pfc="${i}" aria-label="Kategori ${esc(it.name)}"${it.bought?'':' disabled'}>${EXPCAT.map(c=>`<option${c===it.cat?' selected':''}>${esc(c)}</option>`).join('')}</select>
           <label class="pfp"><span>Rp</span><input class="inp num" type="number" inputmode="numeric" min="0" step="500" data-pfp="${i}" value="${esc(it.paid)}" placeholder="dibayar"${it.bought?'':' disabled'} aria-label="Harga dibayar ${esc(it.name)}"></label></div>`).join('')}</div>
-      <div class="pfsum"><div><span class="muted">${nb} dari ${s.items.length} barang dibeli</span>${miss?`<div class="warn-t">${miss} barang belum ada harganya</div>`:''}</div><div class="pft"><small>Total dibayar</small><b class="num">${rp(tot)}</b></div></div>
-      ${Object.keys(groups).length&&s.mode==='cat'?`<div class="hint">Akan tercatat: ${Object.entries(groups).map(([c,v])=>`${esc(c)} <b>${rp(v)}</b>`).join(' · ')}</div>`:''}`},
+      <div id="pfSumW"><div class="pfsum"><div><span class="muted">${nb} dari ${s.items.length} barang dibeli</span>${miss?`<div class="warn-t">${miss} barang belum ada harganya</div>`:''}</div><div class="pft"><small>Total dibayar</small><b class="num">${rp(tot)}</b></div></div>
+      ${Object.keys(groups).length&&s.mode==='cat'?`<div class="hint">Akan tercatat: ${Object.entries(groups).map(([c,v])=>`${esc(c)} <b>${rp(v)}</b>`).join(' · ')}</div>`:''}</div>`},
     foot:()=>`<button type="button" class="btn" data-act="closeM">Batal</button><span style="flex:1"></span><button type="button" class="btn" data-act="pfSave" data-k="only">Tandai selesai saja</button><button type="button" class="btn pri" data-act="pfSave" data-k="exp">${I('money',16)}Tambah ke pengeluaran</button>`});
 }
 function pfCollect(){const s=M.st;const g=id=>document.getElementById(id);if(g('pfDate')&&g('pfDate').value)s.date=g('pfDate').value;if(g('pfMode'))s.mode=g('pfMode').value;
   document.querySelectorAll('[data-pfp]').forEach(x=>{const it=s.items[Number(x.dataset.pfp)];if(it)it.paid=x.value===''?'':Number(x.value)})}
+function pfSoft(){const w=document.getElementById('pfSumW');if(!w||!M)return;const tmp=document.createElement('div');tmp.innerHTML=M.body();const n=tmp.querySelector('#pfSumW');if(n)w.innerHTML=n.innerHTML}
 async function pfSave(kind){pfCollect();const s=M.st;const p=S.plans[s.id];if(!p)return;
   const bought=s.items.filter(it=>it.bought);const withP=bought.filter(it=>Number(it.paid)>0);
   if(kind==='exp'){if(!/^20\d\d-\d\d-\d\d$/.test(s.date||'')){toast('Isi tanggal bayar dulu','err');return}if(!withP.length){toast('Isi harga yang dibayar minimal satu barang','err');return}}
@@ -1452,13 +1517,15 @@ function drawM(first){
 }
 function closeM(){M=null;$('#ov').hidden=true;document.body.classList.remove('modal-open')}
 $('#dlgf').addEventListener('submit',async e=>{e.preventDefault();if(!M||!M.submit)return;const fd=new FormData(e.target);const o={};for(const[k,v]of fd.entries())o[k]=v;const btn=$('#dlg-f [type=submit]');if(btn)btn.disabled=true;let r;try{r=await M.submit(o,fd)}finally{if(btn)btn.disabled=false}if(r!==false)closeM()});
-document.addEventListener('keydown',e=>{const t=e.target;if(t.dataset&&t.dataset.pli!==undefined&&e.key==='Enter'){e.preventDefault();const i=Number(t.dataset.pli);if(i===M.st.items.length-1)ACT.plAddItem();else{plCollect();const n=document.querySelector(`[data-pli="${i+1}"][data-f=name]`);if(n)n.focus()}return}if(t.type!=='date')return;t._kt=Date.now();if(e.key==='Enter'){e.preventDefault();t.blur();return}
+document.addEventListener('keydown',e=>{const t=e.target;if(t.dataset&&t.dataset.pli!==undefined&&e.key==='Enter'){e.preventDefault();const[vi,i]=t.dataset.pli.split(':').map(Number);if(i===M.st.vendors[vi].items.length-1)ACT.plAddItem({v:vi});else{plCollect();const n=document.querySelector(`[data-pli="${vi}:${i+1}"][data-f=name]`);if(n)n.focus()}return}if(t.type!=='date')return;t._kt=Date.now();if(e.key==='Enter'){e.preventDefault();t.blur();return}
   clearTimeout(t._tm);t._tm=setTimeout(()=>{if(t._pend&&t.isConnected&&Date.now()-t._kt>=1700){t._pend=false;t._kt=0;t.dispatchEvent(new Event('change',{bubbles:true}))}},1800)},true);/* selesai mengetik → simpan */
 document.addEventListener('focusout',e=>{const t=e.target;if(t.type!=='date')return;let go=!!t._pend;t._pend=false;t._kt=0;
   if(t.value){const y=Number(t.value.slice(0,4));if(y>0&&y<100){t.value=String(2000+y)+t.value.slice(4);go=true}}
   if(!go)return;const rt=e.relatedTarget;const btn=rt&&rt.closest&&rt.closest('button,a,[data-act],label');
   if(btn){SILENT=true;try{t.dispatchEvent(new Event('change',{bubbles:true}))}finally{SILENT=false}setTimeout(()=>{if(M)drawM();else render()},350)}
   else t.dispatchEvent(new Event('change',{bubbles:true}))},true);
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.pfp!==undefined&&M){pfCollect();pfSoft()}});
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-wasent]');if(a){UI.waSent=UI.waSent||{};UI.waSent[a.dataset.wasent]=1;setTimeout(()=>{if(M)drawM()},300)}});
 document.addEventListener('paste',e=>{if(!M||!M.st||!('fill' in M.st)||M.st.loading||(M.st.step!=='pick'&&!M.st.ocr)||M.st.mode==='xlsx')return;const fs=[...(e.clipboardData&&e.clipboardData.files||[])].filter(f=>/^image\//.test(f.type));if(fs.length){e.preventDefault();ocrFiles(fs)}});
 document.addEventListener('dragover',e=>{const d=e.target.closest&&e.target.closest('[data-impdrop]');if(d){e.preventDefault();d.classList.add('over')}});
 document.addEventListener('dragleave',e=>{const d=e.target.closest&&e.target.closest('[data-impdrop]');if(d)d.classList.remove('over')});
@@ -2128,26 +2195,41 @@ const ACT={
   bTabGo:()=>{UI.bTab='plan';UI.pFilter='done';go('belanja')},
   pFilter:d=>{UI.pFilter=d.v;render()},
   planNew:()=>planForm(),
-  planEdit:d=>planForm(d.p),
-  planCopy:d=>planForm(null,d.p),
+  planEdit:d=>{const p=S.plans[d.p];if(p)planForm({date:p.date,focus:d.p})},
+  planAddVendor:d=>planForm({date:d.d,addVendor:true}),
+  planCopy:d=>{const p=S.plans[d.p];if(p)planForm({copy:[p]})},
+  planCopyDay:d=>planForm({copy:planList().filter(p=>p.date===d.d)}),
+  planDayWA:d=>planDayWA(d.d),
+  planCopyTxt:d=>{copyText(planText(S.plans[d.p]),'Daftar '+(S.plans[d.p].vendor||''))},
+  planCopyDay2:d=>copyText(planDayText(d.d),'Ringkasan belanja'),
   planWA:d=>planWA(d.p),
   planFinish:d=>planFinish(d.p),
   pfSave:d=>pfSave(d.k),
   planDel:d=>{const p=S.plans[d.p];if(!p)return;const ex=(p.expIds||[]).filter(id=>S.exps[id]);const amt=ex.reduce((a,id)=>a+(Number(S.exps[id].amount)||0),0);
     ask('Hapus rencana belanja?',`Rencana belanja <b>${esc(p.vendor||'')}</b> tanggal ${esc(fmtD(p.date))} akan dihapus.${ex.length?` Pengeluaran yang sudah tercatat dari belanja ini (<b>${rp(amt)}</b>) juga ikut dihapus dari laporan.`:''}`,'Hapus',async()=>{for(const id of ex)await del('exps',id);await del('plans',d.p);toast('Rencana dihapus','ok')})},
   plDay:d=>{plCollect();M.st.date=d.d;drawM()},
-  plAddItem:()=>{plCollect();M.st.items.push({id:uid('i'),name:'',qty:'',price:''});drawM();const xs=document.querySelectorAll('[data-pli][data-f=name]');if(xs.length)xs[xs.length-1].focus()},
-  plDelItem:d=>{plCollect();M.st.items.splice(Number(d.i),1);if(!M.st.items.length)M.st.items.push({id:uid('i'),name:'',qty:'',price:''});drawM()},
-  plPasteTog:()=>{plCollect();M.st.showPaste=!M.st.showPaste;drawM();const t=document.getElementById('plPaste');if(t)t.focus()},
-  plPasteGo:()=>{plCollect();const s=M.st;const add=String(s.paste||'').split(/\n+/).map(plParseLine).filter(Boolean);if(!add.length){toast('Tidak ada barang yang terbaca','err');return}
-    s.items=s.items.filter(it=>String(it.name).trim()).concat(add);s.paste='';s.showPaste=false;drawM();toast(add.length+' barang ditambahkan','ok')},
-  plSave:async d=>{plCollect();const s=M.st;const items=s.items.filter(it=>String(it.name).trim()).map(it=>({id:it.id,name:String(it.name).trim(),qty:String(it.qty||'').trim(),price:Number(it.price)||''}));
+  plAddVendor:()=>{plCollect();M.st.vendors.push(plVend(null));drawM();const n=M.st.vendors.length-1;const el=document.getElementById('vf'+n);if(el){el.scrollIntoView({block:'start',behavior:'smooth'});el.querySelector('[data-f=vendor]').focus({preventScroll:true})}},
+  plDelVendor:d=>{plCollect();const s=M.st;const v=s.vendors[Number(d.v)];if(!v)return;
+    if(v.pid&&S.plans[v.pid]&&(S.plans[v.pid].expIds||[]).some(id=>S.exps[id])){toast('Vendor ini sudah dicatat ke pengeluaran. Hapus lewat tombol hapus di kartunya.','err');return}
+    if(v.pid)s.removed.push(v.pid);s.vendors.splice(Number(d.v),1);drawM();toast((v.vendor||'Vendor')+' dihapus dari rencana (belum disimpan)','ok')},
+  plAddItem:d=>{plCollect();const v=M.st.vendors[Number(d.v)];v.items.push(plBlankItem());drawM();const xs=document.querySelectorAll(`[data-pli^="${d.v}:"][data-f=name]`);if(xs.length)xs[xs.length-1].focus()},
+  plDelItem:d=>{plCollect();const v=M.st.vendors[Number(d.v)];v.items.splice(Number(d.i),1);if(!v.items.length)v.items.push(plBlankItem());drawM()},
+  plPasteTog:d=>{plCollect();const v=M.st.vendors[Number(d.v)];v.showPaste=!v.showPaste;drawM();const t=document.querySelector(`[data-pv="${d.v}"][data-f=paste]`);if(t)t.focus()},
+  plPasteGo:d=>{plCollect();const v=M.st.vendors[Number(d.v)];const add=String(v.paste||'').split(/\n+/).map(plParseLine).filter(Boolean);if(!add.length){toast('Tidak ada barang yang terbaca','err');return}
+    v.items=v.items.filter(it=>String(it.name).trim()).concat(add);v.paste='';v.showPaste=false;drawM();toast(add.length+' barang ditambahkan ke '+(v.vendor||'vendor'),'ok')},
+  plSave:async d=>{plCollect();const s=M.st;
     if(!/^20\d\d-\d\d-\d\d$/.test(s.date||'')){toast('Pilih tanggal belanja','err');return}
-    if(!String(s.vendor).trim()){toast('Isi nama vendor','err');document.getElementById('plVendor')?.focus();return}
-    if(!items.length){toast('Tambahkan minimal satu barang','err');return}
-    const id=s.planId||uid('pl');const old=S.plans[id]||{};
-    const doc={...old,date:s.date,vendor:String(s.vendor).trim(),wa:String(s.wa||'').trim(),note:String(s.note||'').trim(),items,status:old.status||'plan',createdAt:old.createdAt||new Date().toISOString()};
-    if(!await put('plans',id,doc))return;closeM();toast(s.planId?'Rencana diperbarui':'Rencana belanja disimpan','ok');if(UI.tab!=='belanja'||UI.bTab!=='plan'){UI.bTab='plan'}if(d.wa)planWA(id)},
+    const vs=s.vendors.map(v=>({...v,items:v.items.filter(it=>String(it.name).trim()).map(it=>({...it,name:String(it.name).trim(),qty:String(it.qty||'').trim(),price:Number(it.price)||''}))}))
+      .filter(v=>v.pid||String(v.vendor).trim()||v.items.length);
+    if(!vs.length){toast('Tambahkan minimal satu vendor dengan daftar belanjanya','err');return}
+    for(let i=0;i<vs.length;i++){const v=vs[i];if(!String(v.vendor).trim()){toast(`Isi nama vendor ke-${s.vendors.indexOf(s.vendors.find(x=>x===s.vendors[i]))+1}`,'err');return}if(!v.items.length){toast(`Daftar belanja ${v.vendor} masih kosong`,'err');return}}
+    const names=vs.map(v=>v.vendor.trim().toLowerCase());const dup=names.find((n,i)=>names.indexOf(n)!==i);if(dup){toast('Vendor "'+vs[names.indexOf(dup)].vendor+'" tercantum dua kali. Gabungkan daftarnya di satu vendor.','err');return}
+    const ops=[],ids=[];const now=new Date().toISOString();
+    vs.forEach(v=>{const id=v.pid||uid('pl');ids.push(id);const old=S.plans[id]||{};
+      ops.push(['plans',id,{...old,date:s.date,vendor:v.vendor.trim(),wa:String(v.wa||'').trim(),note:String(v.note||'').trim(),items:v.items.map(({id,name,qty,price,bought,paid,cat})=>Object.fromEntries(Object.entries({id,name,qty,price,bought,paid,cat}).filter(([,x])=>x!==undefined))),status:old.status||'plan',createdAt:old.createdAt||now}])});
+    if(!await putMany(ops))return;for(const id of s.removed)if(S.plans[id])await del('plans',id);
+    closeM();UI.bTab='plan';if(s.date<TODAY&&UI.pFilter==='up')UI.pFilter='all';toast(`Rencana ${fmtD(s.date)} disimpan · ${vs.length} vendor`,'ok');
+    if(d.wa){if(ids.length===1)planWA(ids[0]);else planDayWA(s.date)}},
 
   shopPrint:()=>shopPrint(),
   jPack:d=>{UI.jPack=UI.jPack===d.v?'':d.v;schedule()},
@@ -2206,11 +2288,11 @@ document.addEventListener('change',e=>{const t=e.target;
   if(t.type==='date'&&t.isConnected&&Date.now()-(t._kt||0)<2500){t._pend=true;return}/* sedang mengetik: simpan saat keluar kolom */
   if(t.dataset.impb&&M){M.st[t.dataset.impb]=t.value;return}
   if(t.id==='plDate'&&M){plCollect();drawM();return}
-  if(t.id==='plVendor'&&M&&!String(M.st.wa||'').trim()){const v=planVendors().find(x=>x.name.toLowerCase()===t.value.trim().toLowerCase());if(v&&v.wa){plCollect();M.st.wa=v.wa;drawM()}return}
+  if(t.dataset.pv!==undefined&&t.dataset.f==='vendor'&&M){plCollect();const vv=M.st.vendors[Number(t.dataset.pv)];const v=planVendors().find(x=>x.name.toLowerCase()===t.value.trim().toLowerCase());if(vv&&v&&v.wa&&!String(vv.wa||'').trim()){vv.wa=v.wa;const w=document.querySelector(`[data-pv="${t.dataset.pv}"][data-f=wa]`);if(w&&!w.value)w.value=v.wa}const h=document.querySelector(`#vf${t.dataset.pv} .vfh b`);if(h)h.textContent=t.value.trim()||('Vendor '+(Number(t.dataset.pv)+1));return}
   if(t.id==='plWaPrice'&&M){M.st.price=t.checked;M.st.txt=planText(S.plans[M.st.id],{price:t.checked});drawM();return}
   if(t.dataset.pfb!==undefined&&M){pfCollect();M.st.items[Number(t.dataset.pfb)].bought=t.checked;drawM();return}
-  if(t.dataset.pfc!==undefined&&M){pfCollect();M.st.items[Number(t.dataset.pfc)].cat=t.value;drawM();return}
-  if((t.id==='pfMode'||t.dataset.pfp!==undefined)&&M){pfCollect();drawM();return}
+  if(t.dataset.pfc!==undefined&&M){pfCollect();M.st.items[Number(t.dataset.pfc)].cat=t.value;pfSoft();return}
+  if((t.id==='pfMode'||t.dataset.pfp!==undefined)&&M){pfCollect();pfSoft();return}
   if(t.dataset.xsel){const S2=UI.xSel||(UI.xSel=new Set());t.checked?S2.add(t.dataset.xsel):S2.delete(t.dataset.xsel);render();return}
   if(t.dataset.xday!==undefined){const S2=UI.xSel||(UI.xSel=new Set());const mo=UI.kMonth;Object.entries(S.exps).filter(([,x])=>x.date===t.dataset.xday).forEach(([id])=>t.checked?S2.add(id):S2.delete(id));render();return}
   if(t.id==='xbDate'){UI.xbDate=t.value;return}
